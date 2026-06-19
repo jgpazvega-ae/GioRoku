@@ -3,7 +3,7 @@ import sqlite3
 from datetime import datetime, timedelta
 from pathlib import Path
 from rich.console import Console
-from ..models.epg import Program
+from models.epg import Program
 
 console = Console()
 

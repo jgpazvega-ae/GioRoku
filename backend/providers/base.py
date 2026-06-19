@@ -1,8 +1,8 @@
 from __future__ import annotations
 import abc
 import time
-from ..models.channel import RawChannel
-from ..models.source import Source, RefreshResult
+from models.channel import RawChannel
+from models.source import Source, RefreshResult
 
 
 class BaseProvider(abc.ABC):

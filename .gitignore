@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+.env
+*.egg-info/
+dist/
+build/
+
+# SQLite database (recreated by pipeline on each run)
+backend/db/iptv.db
+
+# Node
+node_modules/
+admin/node_modules/
+
+# Vite / build output
+admin/dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Roku package
+*.pkg
+out/

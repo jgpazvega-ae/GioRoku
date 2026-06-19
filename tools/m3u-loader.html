@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GioRoku — Cargador M3U</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#0D0D0D;color:#fff;min-height:100vh;padding:28px 16px}
+.wrap{max-width:700px;margin:0 auto}
+h1{font-size:22px;font-weight:700;margin-bottom:3px}
+.sub{color:rgba(255,255,255,.35);font-size:13px;margin-bottom:28px}
+.card{background:#1A1A1A;border:1px solid rgba(255,255,255,.06);border-radius:12px;padding:20px;margin-bottom:14px}
+.card-title{font-size:13px;font-weight:600;color:rgba(255,255,255,.6);margin-bottom:14px}
+label{display:block;font-size:12px;color:rgba(255,255,255,.45);margin-bottom:5px}
+input{width:100%;padding:9px 12px;background:#262626;border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#fff;font-size:13px;outline:none;transition:border-color .15s}
+input:focus{border-color:#E50000}
+.row{display:flex;gap:10px;margin-bottom:10px}
+.row>div{flex:1}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:opacity .15s}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn-red{background:#E50000;color:#fff;width:100%}
+.btn-red:not(:disabled):hover{background:#cc0000}
+.btn-ghost{background:rgba(255,255,255,.07);color:rgba(255,255,255,.65)}
+.btn-ghost:not(:disabled):hover{background:rgba(255,255,255,.12)}
+.tabs{display:flex;gap:2px;background:#262626;border-radius:8px;padding:3px;margin-bottom:14px}
+.tab{flex:1;padding:7px;text-align:center;font-size:13px;cursor:pointer;border-radius:6px;color:rgba(255,255,255,.45);transition:all .15s}
+.tab.on{background:#E50000;color:#fff}
+.drop{border:2px dashed rgba(255,255,255,.12);border-radius:10px;padding:36px;text-align:center;cursor:pointer;color:rgba(255,255,255,.35);transition:border-color .15s}
+.drop.over{border-color:#E50000;background:rgba(229,0,0,.05)}
+.drop input{display:none}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.stat{background:#262626;border-radius:8px;padding:12px;text-align:center}
+.stat-n{font-size:26px;font-weight:700;color:#E50000}
+.stat-l{font-size:11px;color:rgba(255,255,255,.4);margin-top:2px}
+.pbar{height:5px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden;margin:10px 0}
+.pfill{height:100%;background:#E50000;border-radius:4px;transition:width .3s}
+.log{font-size:12px;color:rgba(255,255,255,.4);font-family:monospace;max-height:140px;overflow-y:auto;margin-top:8px}
+.ok{color:#00C851}.err{color:#FF4444}
+.alert{padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:12px}
+.warn{background:rgba(255,187,51,.08);border:1px solid rgba(255,187,51,.25);color:#FFBB33}
+.good{background:rgba(0,200,81,.08);border:1px solid rgba(0,200,81,.25);color:#00C851}
+table{width:100%;font-size:12px;border-collapse:collapse}
+th{text-align:left;padding:6px 8px;color:rgba(255,255,255,.3);font-size:11px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid rgba(255,255,255,.06)}
+td{padding:6px 8px;border-bottom:1px solid rgba(255,255,255,.04);color:rgba(255,255,255,.72);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:220px}
+.badge{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:600;background:rgba(255,255,255,.08);color:rgba(255,255,255,.55)}
+.hidden{display:none}
+#saved{font-size:12px;color:#00C851;margin-left:10px;display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>GioRoku — Cargador M3U</h1>
+  <p class="sub">Importa una lista M3U directamente a tu API de GitHub Pages en ~1 minuto</p>
+
+  <!-- GitHub config -->
+  <div class="card">
+    <div class="card-title">⚙️ Configuración GitHub</div>
+    <div class="row">
+      <div><label>Usuario / Org</label><input id="gh-owner" placeholder="jgpazvega-ae"></div>
+      <div><label>Repositorio</label><input id="gh-repo" placeholder="GioRoku"></div>
+    </div>
+    <div class="row">
+      <div><label>Rama</label><input id="gh-branch" placeholder="main"></div>
+      <div><label>Personal Access Token (PAT)</label><input id="gh-token" type="password" placeholder="ghp_xxxxxxxxxxxx"></div>
+    </div>
+    <div style="margin-top:10px">
+      <button class="btn btn-ghost" onclick="saveConfig()">Guardar</button>
+      <span id="saved">✓ Guardado</span>
+    </div>
+  </div>
+
+  <!-- M3U input -->
+  <div class="card">
+    <div class="card-title">📋 Lista M3U</div>
+    <div class="tabs">
+      <div class="tab on" id="tab-url" onclick="switchTab('url')">URL</div>
+      <div class="tab" id="tab-file" onclick="switchTab('file')">Archivo .m3u</div>
+    </div>
+
+    <div id="panel-url">
+      <label>URL de la lista</label>
+      <div style="display:flex;gap:8px">
+        <input id="m3u-url" type="url" placeholder="https://iptv-org.github.io/iptv/countries/mx.m3u" style="flex:1">
+        <button class="btn btn-ghost" onclick="fetchURL()">Cargar</button>
+      </div>
+      <p style="font-size:11px;color:rgba(255,255,255,.3);margin-top:6px">
+        Si la URL falla por CORS usa la pestaña Archivo (descarga el .m3u primero).
+      </p>
+    </div>
+
+    <div id="panel-file" class="hidden">
+      <div class="drop" id="drop" onclick="document.getElementById('fi').click()"
+           ondragover="ev(event,'over')" ondrop="ev(event,'drop')" ondragleave="ev(event,'leave')">
+        <input type="file" id="fi" accept=".m3u,.m3u8,.txt" onchange="fromFile(event)">
+        <div style="font-size:32px;margin-bottom:8px">📁</div>
+        <div>Arrastra tu archivo .m3u aquí o haz clic</div>
+        <div style="font-size:11px;margin-top:5px">Acepta .m3u .m3u8 .txt</div>
+      </div>
+    </div>
+
+    <div id="loading" class="hidden" style="text-align:center;color:rgba(255,255,255,.4);padding:20px 0">⏳ Procesando lista...</div>
+  </div>
+
+  <!-- Preview + deploy -->
+  <div id="sec-preview" class="hidden">
+    <div class="card">
+      <div class="card-title">📊 Resumen</div>
+      <div class="stats">
+        <div class="stat"><div class="stat-n" id="s-total">0</div><div class="stat-l">Canales</div></div>
+        <div class="stat"><div class="stat-n" id="s-ctrs">0</div><div class="stat-l">Países</div></div>
+        <div class="stat"><div class="stat-n" id="s-cats">0</div><div class="stat-l">Categorías</div></div>
+      </div>
+      <div class="card-title" style="margin-bottom:10px">Vista previa (primeros 20)</div>
+      <div style="overflow-x:auto">
+        <table><thead><tr><th>Canal</th><th>País</th><th>Categoría</th></tr></thead>
+        <tbody id="prev-body"></tbody></table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🚀 Desplegar a GitHub Pages</div>
+      <div id="dep-progress" class="hidden">
+        <div id="dep-txt" style="font-size:12px;color:rgba(255,255,255,.4);margin-bottom:6px"></div>
+        <div class="pbar"><div class="pfill" id="pfill" style="width:0%"></div></div>
+        <div class="log" id="dep-log"></div>
+      </div>
+      <div id="dep-result" class="hidden"></div>
+      <button class="btn btn-red" id="btn-dep" onclick="deploy()" style="margin-top:12px">
+        ⬆️ Subir canales a GitHub Pages
+      </button>
+    </div>
+  </div>
+
+</div>
+<script>
+// ── STATE ──────────────────────────────────────────────────
+let channels = [];
+
+// ── CONFIG ────────────────────────────────────────────────
+function loadConfig() {
+  const c = JSON.parse(localStorage.getItem('gl_cfg') || '{}');
+  if (c.owner)  document.getElementById('gh-owner').value  = c.owner;
+  if (c.repo)   document.getElementById('gh-repo').value   = c.repo;
+  if (c.branch) document.getElementById('gh-branch').value = c.branch;
+  if (c.token)  document.getElementById('gh-token').value  = c.token;
+}
+function saveConfig() {
+  localStorage.setItem('gl_cfg', JSON.stringify({
+    owner:  V('gh-owner'),  repo:  V('gh-repo'),
+    branch: V('gh-branch'), token: V('gh-token'),
+  }));
+  const el = document.getElementById('saved');
+  el.style.display = 'inline';
+  setTimeout(() => el.style.display = 'none', 2000);
+}
+function cfg() {
+  return { owner: V('gh-owner'), repo: V('gh-repo'), branch: V('gh-branch') || 'main', token: V('gh-token') };
+}
+function V(id) { return document.getElementById(id).value.trim(); }
+
+// ── TABS ──────────────────────────────────────────────────
+function switchTab(t) {
+  document.getElementById('tab-url').className  = 'tab' + (t==='url'  ? ' on' : '');
+  document.getElementById('tab-file').className = 'tab' + (t==='file' ? ' on' : '');
+  document.getElementById('panel-url').className  = t==='url'  ? '' : 'hidden';
+  document.getElementById('panel-file').className = t==='file' ? '' : 'hidden';
+}
+
+// ── DRAG & DROP ───────────────────────────────────────────
+function ev(e, kind) {
+  e.preventDefault();
+  const d = document.getElementById('drop');
+  if (kind === 'over')  d.classList.add('over');
+  if (kind === 'leave') d.classList.remove('over');
+  if (kind === 'drop')  { d.classList.remove('over'); readFile(e.dataTransfer.files[0]); }
+}
+
+// ── LOADING ───────────────────────────────────────────────
+async function fetchURL() {
+  const url = V('m3u-url');
+  if (!url) return;
+  show('loading');
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    process(await res.text());
+  } catch (_) {
+    // CORS fallback via proxy
+    try {
+      const res = await fetch('https://corsproxy.io/?' + encodeURIComponent(url));
+      if (!res.ok) throw new Error('proxy ' + res.status);
+      process(await res.text());
+    } catch (e) {
+      hide('loading');
+      alert('No se pudo cargar la URL (' + e.message + ').\nDescarga el archivo .m3u y usa la pestaña "Archivo".');
+    }
+  }
+}
+
+function fromFile(e) { const f = e.target.files[0]; if (f) readFile(f); }
+function readFile(f) {
+  show('loading');
+  const r = new FileReader();
+  r.onload = e => process(e.target.result);
+  r.readAsText(f, 'utf-8');
+}
+function process(text) { hide('loading'); channels = enrich(parseM3U(text)); showPreview(); }
+
+// ── M3U PARSER ────────────────────────────────────────────
+function parseM3U(text) {
+  const lines = text.split(/\r?\n/);
+  const out = [];
+  let a = null;
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (!line) continue;
+    if (line.startsWith('#EXTINF:')) {
+      a = {};
+      const m = /#EXTINF:[^,]*,(.*)$/.exec(line);
+      if (m) { a._n = m[1].trim(); }
+      let am; const re = /([\w-]+)="([^"]*)"/g;
+      while ((am = re.exec(line))) a[am[1].toLowerCase()] = am[2];
+    } else if (!line.startsWith('#') && a !== null) {
+      if (/^https?:|^rtmp:|^rtsp:/i.test(line)) {
+        out.push({
+          name:     a['tvg-name'] || a._n || 'Unknown',
+          logo:     a['tvg-logo'] || '',
+          group:    a['group-title'] || '',
+          tvgId:    a['tvg-id'] || '',
+          language: a['tvg-language'] || a['tvg-lang'] || 'es',
+          url:      line,
+        });
+      }
+      a = null;
+    }
+  }
+  return out;
+}
+
+// ── DETECTION ─────────────────────────────────────────────
+const CPFX = {mx_:'MX',ar_:'AR',co_:'CO',cl_:'CL',pe_:'PE',uy_:'UY',py_:'PY',ec_:'EC',bo_:'BO',ve_:'VE',us_:'US_ES'};
+const CKW  = {
+  MX:['mexico','azteca','televisa','multimedios','canal 5','imagen','milenio','foro tv','tv azteca','once tv','cadenatres'],
+  AR:['argentina','telefe','elnueve','a24','tn noticias','cronica','canal america','c5n'],
+  CO:['colombia','caracol','rcn','canal uno','señal colombia','telecaribe','telepacifico'],
+  CL:['chile','chv','chilevision','t13','tvn','telecanal','uctv','la red','mega chile'],
+  PE:['peru','perú','rpptv','latina tv','panamericana','willax','tv peru','canal n'],
+  UY:['uruguay','canal 10 uy','monte carlo tv','teledoce'],
+  PY:['paraguay','telefuturo','c9n'],
+  EC:['ecuador','teleamazonas','ecuavisa','rts ecuador','tc television','gama tv'],
+  BO:['bolivia','unitel','atb bo'],
+  VE:['venezuela','televen','venevision','globovision'],
+  CA:['costa rica','guatemala','honduras','el salvador','nicaragua','panama','teletica'],
+  US_ES:['univision','telemundo','entravision','estrella tv'],
+};
+const CTLD = {'.mx':'MX','.com.mx':'MX','.ar':'AR','.com.ar':'AR','.co':'CO','.com.co':'CO','.cl':'CL','.pe':'PE','.uy':'UY','.py':'PY','.ec':'EC','.bo':'BO','.ve':'VE','.cr':'CA','.gt':'CA','.hn':'CA','.sv':'CA','.ni':'CA','.pa':'CA'};
+const CLB  = {MX:'México',AR:'Argentina',CO:'Colombia',CL:'Chile',PE:'Perú',UY:'Uruguay',PY:'Paraguay',EC:'Ecuador',BO:'Bolivia',VE:'Venezuela',CA:'Centroamérica',US_ES:'EE.UU. (Español)',INTL:'Internacional'};
+const CATKW = {
+  news:     ['noticia','news','cnn','bbc','informativ','noticiero','canal n','24hora','ntn24'],
+  sports:   ['deport','sport','espn','fox sport','tdn','directv sport','futbol','fútbol','soccer','nba'],
+  movies:   ['cine','movie','pelicul','hbo','paramount','thriller','accion','acción'],
+  kids:     ['infantil','kids','niños','cartoon','disney','nickelodeon','junior','baby'],
+  music:    ['music','musica','música','mtv','vh1','ritmo','salsa','cumbia','regueton','banda'],
+  documentary:['documental','documentary','discovery','nat geo','history','animal'],
+  religious:['religioso','church','cristiano','evangelical','iglesia'],
+  shopping: ['shopping','compras','tienda','teletienda','infomercial'],
+};
+const CATL = {news:'Noticias',sports:'Deportes',movies:'Películas',kids:'Infantil',music:'Música',documentary:'Documentales',religious:'Religioso',shopping:'Compras',entertainment:'Entretenimiento'};
+const CCOLOR = {entertainment:'#E74C3C',news:'#3498DB',sports:'#27AE60',movies:'#9B59B6',kids:'#F39C12',music:'#E91E63',documentary:'#16A085',religious:'#8E44AD',shopping:'#D35400'};
+
+function nn(s){ return (s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase(); }
+
+function detectCountry(ch) {
+  const tid = nn(ch.tvgId);
+  for (const [p, c] of Object.entries(CPFX)) if (tid.startsWith(p)) return c;
+  const n = nn(ch.name), g = nn(ch.group);
+  for (const [code, kws] of Object.entries(CKW))
+    for (const kw of kws) if (g.includes(nn(kw)) || n.includes(nn(kw))) return code;
+  if (ch.url) { const u = ch.url.split('?')[0]; for (const [tld, c] of Object.entries(CTLD)) if (u.endsWith(tld) || u.includes(tld+'/')) return c; }
+  return 'INTL';
+}
+function detectCat(ch) {
+  const n = nn(ch.name), g = nn(ch.group);
+  for (const [cat, kws] of Object.entries(CATKW))
+    for (const kw of kws) if (g.includes(nn(kw)) || n.includes(nn(kw))) return cat;
+  return 'entertainment';
+}
+function svgLogo(name, cat) {
+  const c = CCOLOR[cat] || '#555';
+  const i = (name.split(' ').slice(0,2).map(w=>w[0]||'').join('') || 'TV').toUpperCase();
+  const s = `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="68" viewBox="0 0 120 68"><rect width="120" height="68" rx="8" fill="${c}"/><text x="60" y="44" text-anchor="middle" font-family="Arial" font-size="24" font-weight="bold" fill="white">${i}</text></svg>`;
+  return 'data:image/svg+xml;base64,' + btoa(s);
+}
+
+// ── ENRICH ────────────────────────────────────────────────
+function enrich(raw) {
+  const seen = new Set();
+  const now = new Date().toISOString();
+  return raw.map((ch, i) => {
+    const country = detectCountry(ch), cat = detectCat(ch);
+    let id = (ch.tvgId || ch.name).toLowerCase().replace(/[^a-z0-9]/g,'_').replace(/_+/g,'_').slice(0,60).replace(/^_|_$/g,'') || `ch${i}`;
+    let uid = id, j = 2; while (seen.has(uid)) uid = `${id}_${j++}`; seen.add(uid);
+    return { id: uid, name: ch.name, logo: ch.logo || svgLogo(ch.name, cat),
+      category: cat, categoryLabel: CATL[cat]||'Entretenimiento',
+      country, countryLabel: CLB[country]||'Internacional',
+      language: ch.language||'es', streamUrl: ch.url, backupUrls: [],
+      quality: 'SD', isOnline: true, isEnabled: true, isFeatured: false,
+      epgId: ch.tvgId||null, tags: [], offlineCount: 0,
+      lastCheck: now, lastOnline: now, responseMs: null,
+      sourceId: 'manual_import', sourcePriority: 5 };
+  });
+}
+
+// ── PREVIEW ───────────────────────────────────────────────
+function showPreview() {
+  const byC = {}, byK = {};
+  for (const ch of channels) { byC[ch.country] = (byC[ch.country]||0)+1; byK[ch.category] = (byK[ch.category]||0)+1; }
+  document.getElementById('s-total').textContent = channels.length.toLocaleString();
+  document.getElementById('s-ctrs').textContent  = Object.keys(byC).length;
+  document.getElementById('s-cats').textContent  = Object.keys(byK).length;
+  document.getElementById('prev-body').innerHTML = channels.slice(0,20).map(ch =>
+    `<tr><td title="${esc(ch.name)}">${esc(ch.name)}</td><td><span class="badge">${ch.country}</span></td><td><span class="badge">${esc(ch.categoryLabel)}</span></td></tr>`
+  ).join('');
+  show('sec-preview');
+}
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ── JSON GENERATOR ────────────────────────────────────────
+const PAGE_SIZE = 100;
+const CATS_META = [
+  {id:'entertainment',label:'Entretenimiento',labelEn:'Entertainment',icon:'star',color:'#E74C3C',sortOrder:1,keywords:[]},
+  {id:'news',label:'Noticias',labelEn:'News',icon:'newspaper',color:'#3498DB',sortOrder:2,keywords:[]},
+  {id:'sports',label:'Deportes',labelEn:'Sports',icon:'trophy',color:'#27AE60',sortOrder:3,keywords:[]},
+  {id:'movies',label:'Películas',labelEn:'Movies',icon:'film',color:'#9B59B6',sortOrder:4,keywords:[]},
+  {id:'kids',label:'Infantil',labelEn:'Kids',icon:'baby',color:'#F39C12',sortOrder:5,keywords:[]},
+  {id:'music',label:'Música',labelEn:'Music',icon:'music',color:'#E91E63',sortOrder:6,keywords:[]},
+  {id:'documentary',label:'Documentales',labelEn:'Documentary',icon:'book',color:'#16A085',sortOrder:7,keywords:[]},
+  {id:'religious',label:'Religioso',labelEn:'Religious',icon:'heart',color:'#8E44AD',sortOrder:8,keywords:[]},
+  {id:'shopping',label:'Compras',labelEn:'Shopping',icon:'shopping-cart',color:'#D35400',sortOrder:9,keywords:[]},
+];
+const CTRS_META = [
+  {code:'MX',name:'México',nameEn:'Mexico',flag:'🇲🇽',sortOrder:1},{code:'AR',name:'Argentina',nameEn:'Argentina',flag:'🇦🇷',sortOrder:2},
+  {code:'CO',name:'Colombia',nameEn:'Colombia',flag:'🇨🇴',sortOrder:3},{code:'CL',name:'Chile',nameEn:'Chile',flag:'🇨🇱',sortOrder:4},
+  {code:'PE',name:'Perú',nameEn:'Peru',flag:'🇵🇪',sortOrder:5},{code:'UY',name:'Uruguay',nameEn:'Uruguay',flag:'🇺🇾',sortOrder:6},
+  {code:'PY',name:'Paraguay',nameEn:'Paraguay',flag:'🇵🇾',sortOrder:7},{code:'EC',name:'Ecuador',nameEn:'Ecuador',flag:'🇪🇨',sortOrder:8},
+  {code:'BO',name:'Bolivia',nameEn:'Bolivia',flag:'🇧🇴',sortOrder:9},{code:'VE',name:'Venezuela',nameEn:'Venezuela',flag:'🇻🇪',sortOrder:10},
+  {code:'CA',name:'Centroamérica',nameEn:'Central America',flag:'🌎',sortOrder:11},{code:'US_ES',name:'EE.UU. (Español)',nameEn:'USA (Spanish)',flag:'🇺🇸',sortOrder:12},
+  {code:'INTL',name:'Internacional',nameEn:'International',flag:'🌐',sortOrder:99},
+];
+
+function generateFiles(chs) {
+  const now = new Date().toISOString();
+  const files = {};
+  const byC = {}, byK = {};
+  for (const ch of chs) { (byC[ch.country]||(byC[ch.country]=[])).push(ch); (byK[ch.category]||(byK[ch.category]=[])).push(ch); }
+  const totalPages = Math.max(1, Math.ceil(chs.length / PAGE_SIZE));
+  for (let p = 1; p <= totalPages; p++)
+    files[`api/v1/channels/page/${p}.json`] = {page:p,pageSize:PAGE_SIZE,totalPages,totalChannels:chs.length,channels:chs.slice((p-1)*PAGE_SIZE,p*PAGE_SIZE)};
+  for (const [c, v] of Object.entries(byC)) files[`api/v1/channels/country/${c}.json`] = {country:c,channels:v};
+  for (const [c, v] of Object.entries(byK)) files[`api/v1/channels/category/${c}.json`] = {category:c,channels:v};
+  files['api/v1/categories.json'] = {generatedAt:now,categories:CATS_META.map(c=>({...c,channelCount:(byK[c.id]||[]).length}))};
+  files['api/v1/countries.json']  = {generatedAt:now,countries:CTRS_META.map(c=>({...c,keywords:[],channelCount:(byC[c.code]||[]).length}))};
+  files['api/v1/epg.json']        = {generatedAt:now,programs:{}};
+  files['api/v1/status.json']     = {generatedAt:now,pipelineVersion:'1.0.0',stats:{totalChannels:chs.length,onlineChannels:chs.length,offlineChannels:0,disabledChannels:0,totalSources:1,activeSources:1,totalCountries:Object.keys(byC).length,totalCategories:Object.keys(byK).length,lastValidationRun:now,nextScheduledRun:new Date(Date.now()+86400000).toISOString()},sources:[{id:'manual_import',name:'Importación Manual',channelCount:chs.length,lastRefresh:now,isHealthy:true}]};
+  return files;
+}
+
+// ── GITHUB API ────────────────────────────────────────────
+function b64utf8(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = ''; for (const b of bytes) bin += String.fromCharCode(b);
+  return btoa(bin);
+}
+
+async function getSHAs(o, r, b, t) {
+  const res = await fetch(`https://api.github.com/repos/${o}/${r}/git/trees/${b}?recursive=1`,{headers:{Authorization:`Bearer ${t}`,Accept:'application/vnd.github.v3+json'}});
+  if (!res.ok) throw new Error('No se pudo leer el repo: ' + res.status + '. Verifica owner/repo/branch/token.');
+  const d = await res.json();
+  const m = {};
+  for (const item of d.tree || []) m[item.path] = item.sha;
+  return m;
+}
+
+async function putFile(o, r, b, path, content, sha, t) {
+  const body = { message: `chore: m3u import — ${path.split('/').pop()}`, content: b64utf8(JSON.stringify(content)), branch: b };
+  if (sha) body.sha = sha;
+  const res = await fetch(`https://api.github.com/repos/${o}/${r}/contents/${path}`,
+    {method:'PUT',headers:{Authorization:`Bearer ${t}`,Accept:'application/vnd.github.v3+json','Content-Type':'application/json'},body:JSON.stringify(body)});
+  if (!res.ok) throw new Error(res.status + ': ' + (await res.text()).slice(0,120));
+}
+
+function addLog(msg, cls = '') {
+  const el = document.getElementById('dep-log');
+  const d = document.createElement('div');
+  d.className = cls;
+  d.textContent = msg;
+  el.appendChild(d);
+  el.scrollTop = el.scrollHeight;
+}
+
+// ── DEPLOY ────────────────────────────────────────────────
+async function deploy() {
+  const c = cfg();
+  if (!c.owner || !c.repo || !c.token) { alert('Completa los datos de GitHub primero.'); return; }
+  if (!channels.length) { alert('Carga una lista M3U primero.'); return; }
+
+  const btn = document.getElementById('btn-dep');
+  btn.disabled = true;
+  show('dep-progress');
+  hide('dep-result');
+  document.getElementById('dep-log').innerHTML = '';
+
+  try {
+    addLog(`Generando JSON para ${channels.length.toLocaleString()} canales...`);
+    const files = generateFiles(channels);
+    const paths = Object.keys(files);
+    addLog(`${paths.length} archivos a escribir en ${c.owner}/${c.repo}@${c.branch}`);
+
+    addLog('Leyendo estado del repositorio...');
+    const shas = await getSHAs(c.owner, c.repo, c.branch, c.token);
+
+    let done = 0;
+    const fill = document.getElementById('pfill');
+    const txt  = document.getElementById('dep-txt');
+
+    for (const path of paths) {
+      txt.textContent = `(${done+1}/${paths.length}) ${path}`;
+      try {
+        await putFile(c.owner, c.repo, c.branch, path, files[path], shas[path], c.token);
+        addLog('✓ ' + path, 'ok');
+      } catch (e) {
+        addLog('✗ ' + path + ': ' + e.message, 'err');
+      }
+      done++;
+      fill.style.width = Math.round(done / paths.length * 100) + '%';
+    }
+
+    const resEl = document.getElementById('dep-result');
+    resEl.innerHTML = `<div class="alert good">✅ ¡Listo! ${channels.length.toLocaleString()} canales en GitHub Pages.<br>En el Roku: <b>Settings → Force refresh now</b> para recargar la API.</div>`;
+    show('dep-result');
+    txt.textContent = '✓ Completado';
+  } catch (e) {
+    addLog('Error: ' + e.message, 'err');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ── HELPERS ───────────────────────────────────────────────
+function show(id) { document.getElementById(id).classList.remove('hidden'); }
+function hide(id) { document.getElementById(id).classList.add('hidden'); }
+
+// ── INIT ──────────────────────────────────────────────────
+loadConfig();
+</script>
+</body>
+</html>

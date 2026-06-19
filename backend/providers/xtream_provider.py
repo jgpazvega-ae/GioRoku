@@ -2,8 +2,8 @@ from __future__ import annotations
 import hashlib
 from datetime import datetime
 import httpx
-from ..models.channel import RawChannel
-from ..models.source import Source
+from models.channel import RawChannel
+from models.source import Source
 from .base import BaseProvider
 
 

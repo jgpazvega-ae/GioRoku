@@ -1,0 +1,63 @@
+name: Validate Streams (Manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      country:
+        description: "Filter by country code (e.g. MX, AR). Leave blank for all."
+        required: false
+        default: ""
+      dry_run:
+        description: "Dry run — do not write results to DB"
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  validate:
+    name: Validate streams
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Restore SQLite cache
+        uses: actions/cache@v4
+        with:
+          path: backend/db/iptv.db
+          key: iptv-db-${{ github.run_id }}
+          restore-keys: iptv-db-
+
+      - name: Install dependencies
+        run: pip install -r backend/requirements.txt
+
+      - name: Run validation
+        run: |
+          ARGS="--stage validate"
+          if [ -n "${{ github.event.inputs.country }}" ]; then
+            ARGS="$ARGS --country ${{ github.event.inputs.country }}"
+          fi
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          fi
+          python backend/run_pipeline.py $ARGS
+
+      - name: Regenerate API (if not dry run)
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        run: python backend/run_pipeline.py --stage generate
+
+      - name: Commit and push API files
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        run: |
+          git config user.name "GioRoku Bot"
+          git config user.email "bot@gioroku.local"
+          git add api/
+          git diff --staged --quiet || git commit -m "chore: manual validation update $(date -u '+%Y-%m-%d %H:%M UTC')"
+          git push

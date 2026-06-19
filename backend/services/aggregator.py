@@ -4,9 +4,9 @@ import json
 import sqlite3
 from pathlib import Path
 from rich.console import Console
-from ..models.channel import RawChannel
-from ..models.source import Source
-from ..providers import create_provider
+from models.channel import RawChannel
+from models.source import Source
+from providers import create_provider
 
 console = Console()
 

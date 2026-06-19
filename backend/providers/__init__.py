@@ -2,7 +2,7 @@ from .base import BaseProvider
 from .m3u_provider import M3UProvider
 from .xtream_provider import XtreamProvider
 from .custom_api_provider import CustomAPIProvider
-from ..models.source import SourceType
+from models.source import SourceType
 
 PROVIDER_MAP = {
     SourceType.M3U: M3UProvider,

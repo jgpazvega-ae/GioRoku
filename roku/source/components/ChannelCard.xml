@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="ChannelCard" extends="Group">
+  <interface>
+    <field id="channel"   type="assocarray" />
+    <field id="focused"   type="boolean" value="false" />
+    <field id="cardWidth"  type="float" value="200" />
+    <field id="cardHeight" type="float" value="112" />
+  </interface>
+
+  <script type="text/brightscript" uri="pkg:/source/components/ChannelCard.brs" />
+
+  <children>
+    <!-- Card background -->
+    <Rectangle
+      id="cardBg"
+      width="200"
+      height="112"
+      color="#1A1A1A" />
+
+    <!-- Focus glow border -->
+    <Rectangle
+      id="focusBorder"
+      width="200"
+      height="112"
+      color="#E50000"
+      blendingEnabled="true"
+      visible="false" />
+
+    <!-- Channel logo -->
+    <Poster
+      id="logo"
+      width="200"
+      height="112"
+      loadDisplayMode="scaleToZoom" />
+
+    <!-- Status dot -->
+    <Rectangle
+      id="statusDot"
+      width="10"
+      height="10"
+      color="#00C851"
+      translation="[184, 6]" />
+
+    <!-- Name label (bottom overlay) -->
+    <Rectangle
+      id="nameBg"
+      width="200"
+      height="36"
+      color="#000000AA"
+      translation="[0, 76]" />
+
+    <Label
+      id="nameLabel"
+      font="font:SmallSystemFont"
+      color="#FFFFFF"
+      translation="[6, 80]"
+      width="188"
+      numLines="1" />
+  </children>
+</component>

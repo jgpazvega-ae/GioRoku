@@ -3,8 +3,8 @@ import hashlib
 import re
 from datetime import datetime
 import httpx
-from ..models.channel import RawChannel
-from ..models.source import Source
+from models.channel import RawChannel
+from models.source import Source
 from .base import BaseProvider
 
 EXTINF_RE = re.compile(r'#EXTINF:-?\d+(?:\s+(?P<attrs>[^,]*))?,(?P<name>.*)')

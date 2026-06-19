@@ -1,0 +1,135 @@
+name: Nightly Pipeline
+
+on:
+  schedule:
+    - cron: "0 0 * * *"   # 00:00 UTC every day
+  workflow_dispatch:        # allow manual trigger
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    name: Fetch channels
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Restore SQLite cache
+        uses: actions/cache@v4
+        with:
+          path: backend/db/iptv.db
+          key: iptv-db-${{ github.run_id }}
+          restore-keys: iptv-db-
+
+      - name: Install dependencies
+        run: pip install -r backend/requirements.txt
+
+      - name: Stage — fetch
+        run: python backend/run_pipeline.py --stage fetch
+
+      - name: Save DB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: iptv-db-fetch
+          path: backend/db/iptv.db
+          retention-days: 1
+
+  validate:
+    name: Validate streams
+    needs: fetch
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Download DB
+        uses: actions/download-artifact@v4
+        with:
+          name: iptv-db-fetch
+          path: backend/db/
+
+      - name: Install dependencies
+        run: pip install -r backend/requirements.txt
+
+      - name: Stage — validate
+        run: python backend/run_pipeline.py --stage validate
+
+      - name: Save DB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: iptv-db-validate
+          path: backend/db/iptv.db
+          retention-days: 1
+
+  process:
+    name: Deduplicate, classify, enrich
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Download DB
+        uses: actions/download-artifact@v4
+        with:
+          name: iptv-db-validate
+          path: backend/db/
+
+      - name: Install dependencies
+        run: pip install -r backend/requirements.txt
+
+      - name: Stage — deduplicate, classify, enrich
+        run: python backend/run_pipeline.py --stage deduplicate,classify,enrich
+
+      - name: Save DB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: iptv-db-process
+          path: backend/db/iptv.db
+          retention-days: 1
+
+  generate:
+    name: Generate JSON API
+    needs: process
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Download DB
+        uses: actions/download-artifact@v4
+        with:
+          name: iptv-db-process
+          path: backend/db/
+
+      - name: Install dependencies
+        run: pip install -r backend/requirements.txt
+
+      - name: Stage — generate
+        run: python backend/run_pipeline.py --stage generate
+
+      - name: Commit and push API files
+        run: |
+          git config user.name "GioRoku Bot"
+          git config user.email "bot@gioroku.local"
+          git add api/
+          git diff --staged --quiet || git commit -m "chore: api update $(date -u '+%Y-%m-%d %H:%M UTC')"
+          git push

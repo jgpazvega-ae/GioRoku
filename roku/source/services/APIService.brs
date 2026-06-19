@@ -3,20 +3,19 @@
 function APIService_Init() as object
     svc = {}
     svc.BASE_URL = "https://jgpazvega-ae.github.io/GioRoku/api/v1"
-    svc.fetchStatus   = APIService_fetchStatus
-    svc.fetchPage     = APIService_fetchPage
-    svc.fetchCountry  = APIService_fetchCountry
-    svc.fetchCategory = APIService_fetchCategory
+    svc.fetchStatus     = APIService_fetchStatus
+    svc.fetchPage       = APIService_fetchPage
+    svc.fetchCountry    = APIService_fetchCountry
+    svc.fetchCategory   = APIService_fetchCategory
     svc.fetchCategories = APIService_fetchCategories
     svc.fetchCountries  = APIService_fetchCountries
-    svc.fetchEPG      = APIService_fetchEPG
-    svc._get          = APIService_get
+    svc.fetchEPG        = APIService_fetchEPG
+    svc._get            = APIService_get
     return svc
 end function
 
 function APIService_fetchStatus() as dynamic
-    m._get("/status.json")
-    return invalid
+    return m._get("/status.json")
 end function
 
 function APIService_fetchPage(page as integer) as dynamic
@@ -55,6 +54,5 @@ function APIService_get(path as string) as dynamic
     if response = "" or response = invalid
         return invalid
     end if
-    parsed = parseJSON(response)
-    return parsed
+    return parseJSON(response)
 end function

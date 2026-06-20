@@ -18,8 +18,7 @@
       id="navBar"
       translation="[0, 0]"
       width="1920"
-      height="72"
-      tabs="['Inicio', 'Live TV', 'Guía', 'Favoritos', 'Buscar', 'Ajustes']" />
+      height="72" />
 
     <!-- Scrollable content area -->
     <ZStack id="contentArea" translation="[0, 80]">

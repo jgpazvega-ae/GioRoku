@@ -80,9 +80,9 @@ sub init()
     _highlightTab(0)
     m.top.setFocus(true)
 
-    ' Defer the blocking network load until after first render.
+    ' Small timer so first render completes before task launches.
     m.loadTimer = createObject("roSGNode", "Timer")
-    m.loadTimer.duration = 0.4
+    m.loadTimer.duration = 0.3
     m.loadTimer.repeat = false
     m.loadTimer.observeField("fire", "_load")
     m.loadTimer.control = "start"
@@ -92,45 +92,36 @@ end sub
 
 sub _load()
     m.status.text = "Conectando…"
-    page = _getJSON("/channels/page/1.json")
-    if page = invalid then
+    m.message.visible = false
+    m.loadTask = createObject("roSGNode", "LoadTask")
+    m.loadTask.baseUrl = _baseUrl()
+    m.loadTask.observeField("taskState", "_onLoadState")
+    m.loadTask.control = "RUN"
+end sub
+
+sub _onLoadState()
+    if m.loadTask = invalid then return
+    state = m.loadTask.taskState
+    if state = "error" then
         _showMessage("Sin conexión a internet." + chr(10) + "Verifica tu red e inténtalo de nuevo.")
         m.status.text = "Sin conexión"
-        return
+    else if state = "done" then
+        list = m.loadTask.channels
+        if list = invalid then list = []
+        m.channels = list
+        m.status.text = list.count().toStr() + " canales"
+        if list.count() = 0 then
+            m.message.text = "Aún no hay canales disponibles." + chr(10) + chr(10) + "Importa una lista M3U desde la herramienta web para llenar tu guía."
+            m.message.visible = true
+        else
+            m.message.visible = false
+        end if
+        _populateHome()
+        _populateLive()
+        _populateGuide()
+        ' Refresh the highlight so the message overlay follows the channel count.
+        _highlightTab(m.tab)
     end if
-
-    list = []
-    if page.DoesExist("channels") and page.channels <> invalid then list = page.channels
-
-    ' Load extra pages if present (capped to keep memory sane).
-    totalPages = 1
-    if page.DoesExist("totalPages") then totalPages = page.totalPages
-    if totalPages > 1 then
-        last = totalPages
-        if last > 10 then last = 10
-        for p = 2 to last
-            extra = _getJSON("/channels/page/" + p.toStr() + ".json")
-            if extra <> invalid and extra.DoesExist("channels") and extra.channels <> invalid then
-                for each c in extra.channels
-                    list.push(c)
-                end for
-            end if
-        end for
-    end if
-
-    m.channels = list
-    m.status.text = list.count().toStr() + " canales"
-
-    if list.count() = 0 then
-        m.message.text = "Aún no hay canales disponibles." + chr(10) + chr(10) + "Importa una lista M3U desde la herramienta web para llenar tu guía."
-        m.message.visible = true
-    else
-        m.message.visible = false
-    end if
-
-    _populateHome()
-    _populateLive()
-    _populateGuide()
 end sub
 
 ' ================= VIEW POPULATION =================
@@ -453,7 +444,7 @@ end sub
 
 sub _buildSettingsMenu()
     content = createObject("roSGNode", "ContentNode")
-    titles = ["Tema", "País preferido", "Controles parentales", "Limpiar datos guardados", "Acerca de GioRoku"]
+    titles = ["Tema", "País preferido", "Controles parentales", "Limpiar datos guardados", "Recargar canales", "Acerca de GioRoku"]
     for each t in titles
         n = content.createChild("ContentNode")
         n.title = t
@@ -476,6 +467,8 @@ sub _onSettingsFocused()
     else if idx = 3 then
         m.settingsInfo.text = "Limpiar datos guardados" + chr(10) + chr(10) + "Pulsa OK para borrar favoritos y canales recientes."
     else if idx = 4 then
+        m.settingsInfo.text = "Recargar canales" + chr(10) + chr(10) + "Descarga de nuevo la lista de canales desde la API." + chr(10) + "Útil después de importar una nueva lista M3U."
+    else if idx = 5 then
         m.settingsInfo.text = "GioRoku v1.0" + chr(10) + "Tu televisión latina en Roku." + chr(10) + chr(10) + "Datos: GitHub Pages API" + chr(10) + "Los streams provienen de fuentes públicas de terceros."
     end if
 end sub
@@ -493,6 +486,10 @@ sub _onSettingsSelected()
         _regWrite("favorites", "[]")
         _regWrite("recentChannels", "[]")
         m.settingsInfo.text = "Datos borrados." + chr(10) + "Favoritos y recientes se han limpiado."
+        return
+    else if idx = 4 then
+        m.settingsInfo.text = "Recargando canales…" + chr(10) + "La lista se actualizará en breve."
+        _load()
         return
     end if
     _onSettingsFocused()
@@ -533,10 +530,10 @@ function onKeyEvent(key as string, press as boolean) as boolean
 
     if m.mode = "nav" then
         if key = "left" then
-            if m.tab > 0 then _highlightTab(m.tab - 1)
+            _highlightTab((m.tab + 5) mod 6)
             return true
         else if key = "right" then
-            if m.tab < 5 then _highlightTab(m.tab + 1)
+            _highlightTab((m.tab + 1) mod 6)
             return true
         else if key = "OK" or key = "down" then
             _enterView()

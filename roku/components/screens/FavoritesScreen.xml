@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="FavoritesScreen" extends="Group">
+  <interface>
+    <field id="channels" type="assocarray" />
+    <field id="storage"  type="assocarray" />
+    <field id="api"      type="assocarray" />
+  </interface>
+
+  <script type="text/brightscript" uri="pkg:/source/screens/FavoritesScreen.brs" />
+
+  <children>
+    <Rectangle id="bg" width="1920" height="1080" color="#0D0D0D" />
+
+    <Label
+      text="Favoritos"
+      font="font:LargeBoldSystemFont"
+      color="#FFFFFF"
+      translation="[60, 40]" />
+
+    <PosterGrid
+      id="favGrid"
+      translation="[60, 120]"
+      basePosterSize="[200, 112]"
+      caption1NumLines="1"
+      caption2NumLines="1"
+      numColumns="9"
+      itemSpacing="[16, 16]"
+      focusFootprintBlendColor="#E50000"
+      drawFocusFeedback="true" />
+
+    <Label
+      id="emptyLabel"
+      text="No tienes favoritos aun. Presiona * en cualquier canal para agregarlo."
+      font="font:MediumSystemFont"
+      color="#A0A0A0"
+      horizAlign="center"
+      width="1920"
+      translation="[0, 500]"
+      visible="false" />
+
+    <!-- Context menu -->
+    <Rectangle
+      id="ctxBg"
+      width="320"
+      height="160"
+      color="#1A1A1A"
+      translation="[800, 440]"
+      visible="false" />
+    <LabelList
+      id="ctxMenu"
+      width="320"
+      itemSize="[320, 48]"
+      itemSpacing="[0, 4]"
+      translation="[800, 440]"
+      visible="false"
+      focusBitmapBlendColor="#E50000" />
+  </children>
+</component>

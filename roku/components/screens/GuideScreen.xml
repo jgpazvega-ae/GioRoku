@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="GuideScreen" extends="Group">
+  <interface>
+    <field id="channels" type="assocarray" />
+    <field id="storage"  type="assocarray" />
+    <field id="api"      type="assocarray" />
+  </interface>
+
+  <script type="text/brightscript" uri="pkg:/source/screens/GuideScreen.brs" />
+
+  <children>
+    <Rectangle id="bg" width="1920" height="1080" color="#0D0D0D" />
+
+    <!-- Time header bar -->
+    <Rectangle
+      id="timeBar"
+      width="1920"
+      height="48"
+      color="#1A1A1A"
+      translation="[0, 0]" />
+
+    <Label
+      id="timeNowLabel"
+      text=""
+      font="font:SmallBoldSystemFont"
+      color="#E50000"
+      translation="[296, 14]" />
+
+    <!-- Rewind / Forward labels -->
+    <Label
+      id="rewindLabel"
+      text="&lt;&lt; -1h"
+      font="font:SmallSystemFont"
+      color="#A0A0A0"
+      translation="[60, 14]" />
+
+    <Label
+      id="fwdLabel"
+      text="+1h &gt;&gt;"
+      font="font:SmallSystemFont"
+      color="#A0A0A0"
+      translation="[1820, 14]" />
+
+    <!-- Channel column header -->
+    <Rectangle
+      id="chColHeader"
+      width="280"
+      height="48"
+      color="#262626"
+      translation="[0, 48]" />
+
+    <Label
+      id="chColLabel"
+      text="Canal"
+      font="font:SmallBoldSystemFont"
+      color="#FFFFFF"
+      translation="[12, 62]" />
+
+    <!-- Channel list (left column) -->
+    <LabelList
+      id="channelList"
+      translation="[0, 96]"
+      width="280"
+      itemSize="[280, 72]"
+      itemSpacing="[0, 0]"
+      textHorizAlign="left"
+      numItems="14"
+      color="#FFFFFF"
+      focusBitmapBlendColor="#E50000" />
+
+    <!-- Program grid (right area) -->
+    <Rectangle
+      id="programArea"
+      width="1640"
+      height="984"
+      color="#0D0D0D"
+      translation="[280, 96]" />
+
+    <!-- Current time red bar -->
+    <Rectangle
+      id="nowBar"
+      width="2"
+      height="984"
+      color="#E50000"
+      translation="[280, 96]" />
+
+    <!-- Program detail overlay -->
+    <Rectangle
+      id="detailBg"
+      width="700"
+      height="260"
+      color="#1A1A1A"
+      translation="[610, 410]"
+      visible="false" />
+
+    <Label
+      id="detailTitle"
+      text=""
+      font="font:MediumBoldSystemFont"
+      color="#FFFFFF"
+      translation="[630, 430]"
+      width="660"
+      visible="false" />
+
+    <Label
+      id="detailTime"
+      text=""
+      font="font:SmallSystemFont"
+      color="#A0A0A0"
+      translation="[630, 470]"
+      width="660"
+      visible="false" />
+
+    <Label
+      id="detailDesc"
+      text=""
+      font="font:SmallSystemFont"
+      color="#FFFFFF"
+      translation="[630, 500]"
+      width="660"
+      numLines="3"
+      visible="false" />
+
+    <Label
+      id="detailActions"
+      text="OK — Ver ahora    Back — Cerrar"
+      font="font:SmallSystemFont"
+      color="#A0A0A0"
+      translation="[630, 630]"
+      width="660"
+      visible="false" />
+  </children>
+</component>

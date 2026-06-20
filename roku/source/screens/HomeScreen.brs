@@ -3,6 +3,7 @@ sub init()
     m.rowList = m.top.findNode("rowList")
     m.currentTab = 0
 
+    m.navBar.tabs = ["Inicio", "Live TV", "Guía", "Favoritos", "Buscar", "Ajustes"]
     m.navBar.observeField("selectedTab", "_onTabChange")
     m.rowList.observeField("itemSelected", "_onChannelSelected")
     m.rowList.observeField("rowItemSelected", "_onChannelSelected")

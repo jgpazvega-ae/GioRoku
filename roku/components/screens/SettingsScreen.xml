@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="SettingsScreen" extends="Group">
+  <interface>
+    <field id="channels" type="assocarray" />
+    <field id="storage"  type="assocarray" />
+    <field id="api"      type="assocarray" />
+  </interface>
+
+  <script type="text/brightscript" uri="pkg:/source/screens/SettingsScreen.brs" />
+
+  <children>
+    <Rectangle id="bg" width="1920" height="1080" color="#0D0D0D" />
+
+    <Label
+      text="Ajustes"
+      font="font:LargeBoldSystemFont"
+      color="#FFFFFF"
+      translation="[60, 40]" />
+
+    <!-- Settings list -->
+    <LabelList
+      id="settingsList"
+      translation="[60, 120]"
+      width="600"
+      itemSize="[600, 72]"
+      itemSpacing="[0, 8]"
+      focusBitmapBlendColor="#E50000"
+      textHorizAlign="left" />
+
+    <!-- Value panel (right side) -->
+    <Rectangle
+      id="valuePanelBg"
+      width="1180"
+      height="860"
+      color="#1A1A1A"
+      translation="[700, 110]" />
+
+    <Label
+      id="valuePanelTitle"
+      font="font:MediumBoldSystemFont"
+      color="#FFFFFF"
+      translation="[730, 140]"
+      width="1120" />
+
+    <Label
+      id="valuePanelDesc"
+      font="font:SmallSystemFont"
+      color="#A0A0A0"
+      translation="[730, 190]"
+      width="1120"
+      numLines="3" />
+
+    <!-- Toggle option row -->
+    <LabelList
+      id="optionList"
+      translation="[730, 270]"
+      width="500"
+      itemSize="[500, 56]"
+      itemSpacing="[0, 4]"
+      focusBitmapBlendColor="#E50000"
+      visible="false" />
+
+    <!-- Info block for data section -->
+    <Label
+      id="infoBlock"
+      font="font:SmallSystemFont"
+      color="#A0A0A0"
+      translation="[730, 270]"
+      width="1120"
+      numLines="10"
+      visible="false" />
+
+    <!-- Confirm dialog -->
+    <Rectangle
+      id="confirmBg"
+      width="600"
+      height="220"
+      color="#262626"
+      translation="[660, 430]"
+      visible="false" />
+    <Label
+      id="confirmText"
+      font="font:MediumSystemFont"
+      color="#FFFFFF"
+      horizAlign="center"
+      width="600"
+      translation="[660, 480]"
+      visible="false" />
+    <LabelList
+      id="confirmList"
+      width="600"
+      itemSize="[600, 56]"
+      translation="[660, 550]"
+      focusBitmapBlendColor="#E50000"
+      visible="false" />
+  </children>
+</component>

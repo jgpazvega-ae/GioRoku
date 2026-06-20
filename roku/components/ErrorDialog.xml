@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="ErrorDialog" extends="Group">
+  <interface>
+    <field id="errorType"   type="string" value="network_error" />
+    <field id="message"     type="string" value="" />
+    <field id="actionSelected" type="integer" value="-1" alwaysNotify="true" />
+  </interface>
+
+  <script type="text/brightscript" uri="pkg:/source/components/ErrorDialog.brs" />
+
+  <children>
+    <Rectangle
+      id="dimBg"
+      width="1920"
+      height="1080"
+      color="#00000088" />
+
+    <Rectangle
+      id="dialogBg"
+      width="680"
+      height="280"
+      color="#1A1A1A"
+      translation="[620, 400]" />
+
+    <Label
+      id="iconLabel"
+      font="font:LargeBoldSystemFont"
+      color="#FF4444"
+      horizAlign="center"
+      width="680"
+      translation="[620, 420]" />
+
+    <Label
+      id="titleLabel"
+      font="font:MediumBoldSystemFont"
+      color="#FFFFFF"
+      horizAlign="center"
+      width="680"
+      translation="[620, 470]" />
+
+    <Label
+      id="msgLabel"
+      font="font:SmallSystemFont"
+      color="#A0A0A0"
+      horizAlign="center"
+      width="640"
+      translation="[640, 510]"
+      numLines="2" />
+
+    <LabelList
+      id="actionList"
+      width="400"
+      itemSize="[400, 52]"
+      itemSpacing="[0, 4]"
+      translation="[760, 570]"
+      focusBitmapBlendColor="#E50000"
+      textHorizAlign="center" />
+  </children>
+</component>

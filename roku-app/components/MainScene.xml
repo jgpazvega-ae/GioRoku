@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="MainScene" extends="Scene">
+
+  <script type="text/brightscript" uri="pkg:/source/MainScene.brs" />
+
+  <children>
+    <!-- ===== Background ===== -->
+    <Rectangle id="bg" width="1920" height="1080" color="#0D0D0D" />
+
+    <!-- ===== Header / Nav bar ===== -->
+    <Rectangle id="headerBar" width="1920" height="96" color="#161616" />
+    <Label id="brand" text="GioRoku" font="font:LargeBoldSystemFont" color="#E50000" translation="[60, 24]" />
+
+    <Label id="tab0" text="Inicio"     font="font:MediumBoldSystemFont" color="#FFFFFF" translation="[340, 34]" />
+    <Label id="tab1" text="Live TV"    font="font:MediumSystemFont"     color="#A0A0A0" translation="[500, 34]" />
+    <Label id="tab2" text="Guía"       font="font:MediumSystemFont"     color="#A0A0A0" translation="[660, 34]" />
+    <Label id="tab3" text="Favoritos"  font="font:MediumSystemFont"     color="#A0A0A0" translation="[780, 34]" />
+    <Label id="tab4" text="Buscar"     font="font:MediumSystemFont"     color="#A0A0A0" translation="[980, 34]" />
+    <Label id="tab5" text="Ajustes"    font="font:MediumSystemFont"     color="#A0A0A0" translation="[1140, 34]" />
+    <Rectangle id="navUnderline" width="80" height="4" color="#E50000" translation="[340, 78]" />
+
+    <Label id="status" text="Cargando…" font="font:SmallSystemFont" color="#808080"
+           horizAlign="right" width="1780" translation="[80, 40]" />
+
+    <!-- ===== VIEW: Inicio ===== -->
+    <Group id="viewHome" translation="[0, 128]" visible="true">
+      <Label id="homeHint" text="Destacados" font="font:MediumBoldSystemFont" color="#FFFFFF" translation="[60, 0]" />
+      <PosterGrid id="homeGrid" translation="[60, 44]"
+        basePosterSize="[260, 146]" caption1NumLines="1" caption2NumLines="1"
+        numColumns="6" numRows="4" itemSpacing="[20, 30]"
+        drawFocusFeedback="true" focusFootprintBlendColor="#E50000" />
+    </Group>
+
+    <!-- ===== VIEW: Live TV ===== -->
+    <Group id="viewLive" translation="[0, 128]" visible="false">
+      <Label id="liveFilter" text="Filtro: Todos   (pulsa * para cambiar país)" font="font:SmallSystemFont" color="#A0A0A0" translation="[60, 4]" />
+      <PosterGrid id="liveGrid" translation="[60, 44]"
+        basePosterSize="[260, 146]" caption1NumLines="1" caption2NumLines="1"
+        numColumns="6" numRows="4" itemSpacing="[20, 30]"
+        drawFocusFeedback="true" focusFootprintBlendColor="#E50000" />
+    </Group>
+
+    <!-- ===== VIEW: Guía ===== -->
+    <Group id="viewGuide" translation="[0, 128]" visible="false">
+      <Label id="guideTitle" text="Guía de canales — En vivo" font="font:MediumBoldSystemFont" color="#FFFFFF" translation="[60, 0]" />
+      <LabelList id="guideList" translation="[60, 48]" width="1800"
+        itemSize="[1800, 64]" itemSpacing="[0, 6]" textHorizAlign="left"
+        color="#FFFFFF" focusBitmapBlendColor="#E50000" numRows="12" />
+    </Group>
+
+    <!-- ===== VIEW: Favoritos ===== -->
+    <Group id="viewFav" translation="[0, 128]" visible="false">
+      <Label id="favTitle" text="Tus Favoritos" font="font:MediumBoldSystemFont" color="#FFFFFF" translation="[60, 0]" />
+      <PosterGrid id="favGrid" translation="[60, 44]"
+        basePosterSize="[260, 146]" caption1NumLines="1" caption2NumLines="1"
+        numColumns="6" numRows="4" itemSpacing="[20, 30]"
+        drawFocusFeedback="true" focusFootprintBlendColor="#E50000" />
+      <Label id="favEmpty" text="No tienes favoritos aún.&#10;Pulsa * sobre un canal para agregarlo." font="font:MediumSystemFont"
+        color="#A0A0A0" horizAlign="center" vertAlign="center" width="1800" height="560" translation="[60, 60]" visible="false" />
+    </Group>
+
+    <!-- ===== VIEW: Buscar ===== -->
+    <Group id="viewSearch" translation="[0, 128]" visible="false">
+      <MiniKeyboard id="kbd" translation="[60, 10]" />
+      <Label id="searchHelp" text="Escribe para buscar · Atrás: ver resultados / volver" font="font:SmallSystemFont" color="#808080" translation="[60, 360]" />
+      <PosterGrid id="searchGrid" translation="[60, 400]"
+        basePosterSize="[220, 124]" caption1NumLines="1"
+        numColumns="7" numRows="3" itemSpacing="[18, 26]"
+        drawFocusFeedback="true" focusFootprintBlendColor="#E50000" />
+      <Label id="searchEmpty" text="" font="font:MediumSystemFont" color="#A0A0A0" translation="[60, 420]" width="1800" visible="false" />
+    </Group>
+
+    <!-- ===== VIEW: Ajustes ===== -->
+    <Group id="viewSettings" translation="[0, 128]" visible="false">
+      <LabelList id="settingsList" translation="[60, 20]" width="560"
+        itemSize="[560, 70]" itemSpacing="[0, 8]" textHorizAlign="left"
+        color="#FFFFFF" focusBitmapBlendColor="#E50000" />
+      <Rectangle id="settingsPanel" width="1180" height="780" color="#161616" translation="[680, 20]" />
+      <Label id="settingsInfo" font="font:MediumSystemFont" color="#D0D0D0"
+        translation="[712, 52]" width="1116" height="720" numLines="16" wrap="true" />
+    </Group>
+
+    <!-- ===== OVERLAY: Player ===== -->
+    <Group id="viewPlayer" visible="false">
+      <Video id="video" width="1920" height="1080" translation="[0, 0]" enableUI="false" />
+      <Rectangle id="playerInfoBg" width="760" height="96" color="#000000BB" translation="[40, 40]" visible="false" />
+      <Poster id="playerLogo" width="140" height="80" translation="[48, 48]" visible="false" />
+      <Label id="playerName" font="font:MediumBoldSystemFont" color="#FFFFFF" translation="[200, 52]" width="580" visible="false" />
+      <Label id="playerMeta" font="font:SmallSystemFont" color="#A0A0A0" translation="[200, 92]" width="580" visible="false" />
+      <Label id="playerMsg" text="" font="font:MediumBoldSystemFont" color="#FFFFFF"
+        horizAlign="center" vertAlign="center" width="1920" height="1080" visible="false" />
+    </Group>
+
+    <!-- ===== OVERLAY: Context menu ===== -->
+    <Rectangle id="ctxBg" width="420" height="220" color="#1A1A1A" translation="[750, 430]" visible="false" />
+    <LabelList id="ctxMenu" width="420" itemSize="[420, 56]" itemSpacing="[0, 4]"
+      translation="[750, 430]" textHorizAlign="center" focusBitmapBlendColor="#E50000" visible="false" />
+
+    <!-- ===== Full-view message (loading / empty / errors) ===== -->
+    <Label id="message" text="" font="font:MediumSystemFont" color="#A0A0A0"
+      horizAlign="center" vertAlign="center" width="1920" height="760" translation="[0, 200]" visible="false" />
+  </children>
+</component>

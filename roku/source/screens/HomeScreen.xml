@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="HomeScreen" extends="Group">
+  <interface>
+    <field id="channels"  type="assocarray" />
+    <field id="storage"   type="assocarray" />
+    <field id="api"       type="assocarray" />
+    <field id="deepLink"  type="assocarray" />
+  </interface>
+
+  <script type="text/brightscript" uri="pkg:/source/screens/HomeScreen.brs" />
+  <script type="text/brightscript" uri="pkg:/source/components/NavBar.brs" />
+  <script type="text/brightscript" uri="pkg:/source/components/ChannelRow.brs" />
+
+  <children>
+    <!-- Background -->
+    <Rectangle id="bg" width="1920" height="1080" color="#0D0D0D" />
+
+    <!-- Top NavBar -->
+    <NavBar
+      id="navBar"
+      translation="[0, 0]"
+      width="1920"
+      height="72"
+      tabs="['Inicio', 'Live TV', 'Guía', 'Favoritos', 'Buscar', 'Ajustes']" />
+
+    <!-- Scrollable content area -->
+    <ZStack id="contentArea" translation="[0, 80]">
+      <!-- Row list -->
+      <RowList
+        id="rowList"
+        translation="[60, 20]"
+        itemSize="[200, 112]"
+        itemSpacing="[12, 40]"
+        rowHeights="[112]"
+        rowItemSize="[[200, 112]]"
+        focusXOffset="0"
+        numRows="6"
+        showRowLabel="true"
+        rowLabelOffset="[0, -28]"
+        rowLabelColor="#FFFFFF"
+        rowLabelFont="font:MediumBoldSystemFont" />
+    </ZStack>
+  </children>
+</component>

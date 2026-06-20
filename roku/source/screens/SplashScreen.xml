@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="SplashScreen" extends="Scene">
+  <interface>
+    <function name="setDeepLink" />
+  </interface>
+
+  <script type="text/brightscript" uri="pkg:/source/screens/SplashScreen.brs" />
+  <script type="text/brightscript" uri="pkg:/source/services/APIService.brs" />
+  <script type="text/brightscript" uri="pkg:/source/services/StorageService.brs" />
+  <script type="text/brightscript" uri="pkg:/source/services/ChannelService.brs" />
+
+  <children>
+    <!-- Background -->
+    <Rectangle
+      id="bg"
+      width="1920"
+      height="1080"
+      color="#0D0D0D" />
+
+    <!-- Logo -->
+    <Label
+      id="logoLabel"
+      text="GioRoku"
+      font="font:LargeBoldSystemFont"
+      color="#E50000"
+      horizAlign="center"
+      width="1920"
+      translation="[0, 380]" />
+
+    <Label
+      id="tagline"
+      text="Tu televisión latina, en Roku"
+      font="font:MediumSystemFont"
+      color="#A0A0A0"
+      horizAlign="center"
+      width="1920"
+      translation="[0, 460]" />
+
+    <!-- Loading bar background -->
+    <Rectangle
+      id="barBg"
+      width="600"
+      height="6"
+      color="#262626"
+      translation="[660, 580]" />
+
+    <!-- Loading bar fill -->
+    <Rectangle
+      id="barFill"
+      width="0"
+      height="6"
+      color="#E50000"
+      translation="[660, 580]" />
+
+    <!-- Status text -->
+    <Label
+      id="statusLabel"
+      text="Iniciando…"
+      font="font:SmallSystemFont"
+      color="#A0A0A0"
+      horizAlign="center"
+      width="1920"
+      translation="[0, 610]" />
+
+    <!-- Error dialog (hidden by default) -->
+    <Rectangle
+      id="errorBg"
+      width="600"
+      height="200"
+      color="#1A1A1A"
+      translation="[660, 440]"
+      visible="false" />
+
+    <Label
+      id="errorLabel"
+      text=""
+      font="font:SmallSystemFont"
+      color="#FF4444"
+      horizAlign="center"
+      width="600"
+      translation="[660, 510]"
+      visible="false" />
+
+    <Label
+      id="retryLabel"
+      text="Presiona OK para reintentar  |  Back para salir"
+      font="font:SmallSystemFont"
+      color="#A0A0A0"
+      horizAlign="center"
+      width="1920"
+      translation="[0, 580]"
+      visible="false" />
+  </children>
+</component>

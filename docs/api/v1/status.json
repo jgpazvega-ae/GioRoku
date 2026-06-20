@@ -1,0 +1,17 @@
+{
+  "generatedAt": "2024-01-01T00:00:00Z",
+  "pipelineVersion": "1.0.0",
+  "stats": {
+    "totalChannels": 0,
+    "onlineChannels": 0,
+    "offlineChannels": 0,
+    "disabledChannels": 0,
+    "totalSources": 1,
+    "activeSources": 0,
+    "totalCountries": 0,
+    "totalCategories": 0,
+    "lastValidationRun": null,
+    "nextScheduledRun": "2024-01-16T00:00:00Z"
+  },
+  "sources": []
+}

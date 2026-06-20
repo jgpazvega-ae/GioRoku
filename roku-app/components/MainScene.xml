@@ -35,7 +35,7 @@
 
     <!-- ===== VIEW: PELÍCULAS — IMDb top + search (portrait posters) ===== -->
     <Group id="viewMovies" translation="[0, 124]" visible="false">
-      <Label id="movTitle" text="Películas · IMDb Top 250" font="font:MediumBoldSystemFont"
+      <Label id="movTitle" text="Películas · Clásicos gratis (dominio público)" font="font:MediumBoldSystemFont"
              color="#FFFFFF" translation="[56, 4]" />
       <MiniKeyboard id="movKbd" translation="[56, 44]" />
       <Label id="movHelp" text="Escribe para buscar  ·  Atrás: ver pósters / volver"

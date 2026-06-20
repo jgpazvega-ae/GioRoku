@@ -467,8 +467,7 @@ sub _onVideoState()
         m.playerMsg.visible = true
     else if st = "error" then
         if m.currentMovie <> invalid then
-            playUrl = _toPlayUrl(_str(m.currentMovie, "imdbUrl"))
-            m.playerMsg.text = "Esta película se abre en playimdb:" + chr(10) + playUrl + chr(10) + chr(10) + "Roku no puede abrir páginas web directamente." + chr(10) + "Presiona Atrás para volver."
+            m.playerMsg.text = "No se pudo reproducir esta película." + chr(10) + "Presiona Atrás para volver."
         else
             m.playerMsg.text = "No se pudo reproducir el canal." + chr(10) + "Presiona Atrás para volver."
         end if
@@ -582,9 +581,9 @@ sub _onSearchTextChange()
     end if
 end sub
 
-' ================= MOVIES (IMDb top + playimdb) =================
+' ================= MOVIES (public-domain catalog, direct streams) =================
 
-' Loads the bundled IMDb Top catalog (no network needed).
+' Loads the bundled public-domain movie catalog (no network needed).
 sub _loadMovies()
     m.allMovies = []
     raw = readAsciiFile("pkg:/data/movies.json")
@@ -604,15 +603,7 @@ sub _populateMovies(list as object)
     for each mv in list
         item = content.createChild("ContentNode")
         item.title = _str(mv, "title")
-        meta = ""
-        yr = _str(mv, "year")
-        rt = _str(mv, "rating")
-        if rt <> "" then meta = "★ " + rt
-        if yr <> "" then
-            if meta <> "" then meta = meta + "  ·  "
-            meta = meta + yr
-        end if
-        item.shortDescriptionLine1 = meta
+        item.shortDescriptionLine1 = _str(mv, "year")
         item.shortDescriptionLine2 = _str(mv, "genre")
         item.hdPosterUrl = _str(mv, "poster")
     end for
@@ -653,49 +644,39 @@ sub _onMoviesSelected()
     if idx >= 0 and idx < m.moviesList.count() then _playMovie(m.moviesList[idx])
 end sub
 
-' Transforms an IMDb URL into its playimdb counterpart by inserting "play"
-' right after the "www." prefix:
-'   https://www.imdb.com/title/tt0816692/  ->  https://www.playimdb.com/title/tt0816692/
-function _toPlayUrl(url as string) as string
-    marker = "www."
-    p = instr(1, url, marker)
-    if p = 0 then return url
-    head = left(url, p - 1 + len(marker))   ' up to and including "www."
-    tail = mid(url, p + len(marker))         ' everything after "www."
-    return head + "play" + tail
-end function
-
+' Plays a public-domain movie from its direct stream URL (Roku-native MP4).
 sub _playMovie(mv as object)
     if mv = invalid then return
-    imdbUrl = _str(mv, "imdbUrl")
-    playUrl = _toPlayUrl(imdbUrl)
+    url = _str(mv, "streamUrl")
+    if url = "" then return
 
     m.currentMovie   = mv
     m.currentChannel = invalid
 
     content = createObject("roSGNode", "ContentNode")
-    content.url          = playUrl
+    content.url          = url
     content.title        = _str(mv, "title")
-    content.streamFormat = "hls"
+    content.streamFormat = "mp4"
     m.video.content = content
     m.video.visible = true
     m.video.control = "play"
 
     m.playerName.text = _str(mv, "title")
     meta = ""
-    rt = _str(mv, "rating")
     yr = _str(mv, "year")
     gn = _str(mv, "genre")
-    if rt <> "" then meta = "★ " + rt
-    if yr <> "" then meta = meta + "  ·  " + yr
-    if gn <> "" then meta = meta + "  ·  " + gn
+    if yr <> "" then meta = yr
+    if gn <> "" then
+        if meta <> "" then meta = meta + "  ·  "
+        meta = meta + gn
+    end if
     m.playerMeta.text      = meta
     m.playerLogo.uri       = _str(mv, "poster")
     m.playerInfoBg.visible = true
-    m.playerLogo.visible   = true
+    m.playerLogo.visible   = (_str(mv, "poster") <> "")
     m.playerName.visible   = true
     m.playerMeta.visible   = true
-    m.playerMsg.text       = "Abriendo en playimdb…" + chr(10) + playUrl
+    m.playerMsg.text       = "Cargando " + _str(mv, "title") + "…"
     m.playerMsg.visible    = true
 
     m.viewPlayer.visible = true

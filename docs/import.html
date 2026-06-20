@@ -152,7 +152,7 @@ input[type=file]{display:none}
 <script>
 // ─── helpers ────────────────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
-function show(id) { ['idle','busy','done','err','setup'].forEach(s => $('state-'+s).style.display = s===id ? '' : 'none'); }
+function show(id) { ['idle','busy','done','err','setup'].forEach(s => $('state-'+s).style.display = s===id ? 'block' : 'none'); }
 function cfg() { return JSON.parse(localStorage.getItem('gl_cfg')||'{}'); }
 function hasCfg() { const c=cfg(); return c.owner && c.repo && c.token; }
 

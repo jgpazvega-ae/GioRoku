@@ -628,13 +628,13 @@ function generateFiles(chs) {
   const now = new Date().toISOString(), files = {}, bc = byCountry(chs), bk = byCat(chs);
   const tp = Math.max(1, Math.ceil(chs.length/PAGE_SIZE));
   for (let p=1; p<=tp; p++)
-    files[`api/v1/channels/page/${p}.json`] = {page:p,pageSize:PAGE_SIZE,totalPages:tp,totalChannels:chs.length,channels:chs.slice((p-1)*PAGE_SIZE, p*PAGE_SIZE)};
-  for (const [c,v] of Object.entries(bc)) files[`api/v1/channels/country/${c}.json`] = {country:c,channels:v};
-  for (const [c,v] of Object.entries(bk)) files[`api/v1/channels/category/${c}.json`] = {category:c,channels:v};
-  files['api/v1/categories.json'] = {generatedAt:now,categories:CATS_META.map(c=>({...c,channelCount:(bk[c.id]||[]).length}))};
-  files['api/v1/countries.json']  = {generatedAt:now,countries:CTRS_META.map(c=>({...c,keywords:[],channelCount:(bc[c.code]||[]).length}))};
-  files['api/v1/epg.json']        = {generatedAt:now,programs:{}};
-  files['api/v1/status.json']     = {generatedAt:now,pipelineVersion:'1.0.0',stats:{totalChannels:chs.length,onlineChannels:chs.length,offlineChannels:0,disabledChannels:0,totalSources:1,activeSources:1,totalCountries:Object.keys(bc).length,totalCategories:Object.keys(bk).length,lastValidationRun:now,nextScheduledRun:new Date(Date.now()+86400000).toISOString()},sources:[{id:'manual_import',name:'Importación Manual M3U',channelCount:chs.length,lastRefresh:now,isHealthy:true}]};
+    files[`docs/api/v1/channels/page/${p}.json`] = {page:p,pageSize:PAGE_SIZE,totalPages:tp,totalChannels:chs.length,channels:chs.slice((p-1)*PAGE_SIZE, p*PAGE_SIZE)};
+  for (const [c,v] of Object.entries(bc)) files[`docs/api/v1/channels/country/${c}.json`] = {country:c,channels:v};
+  for (const [c,v] of Object.entries(bk)) files[`docs/api/v1/channels/category/${c}.json`] = {category:c,channels:v};
+  files['docs/api/v1/categories.json'] = {generatedAt:now,categories:CATS_META.map(c=>({...c,channelCount:(bk[c.id]||[]).length}))};
+  files['docs/api/v1/countries.json']  = {generatedAt:now,countries:CTRS_META.map(c=>({...c,keywords:[],channelCount:(bc[c.code]||[]).length}))};
+  files['docs/api/v1/epg.json']        = {generatedAt:now,programs:{}};
+  files['docs/api/v1/status.json']     = {generatedAt:now,pipelineVersion:'1.0.0',stats:{totalChannels:chs.length,onlineChannels:chs.length,offlineChannels:0,disabledChannels:0,totalSources:1,activeSources:1,totalCountries:Object.keys(bc).length,totalCategories:Object.keys(bk).length,lastValidationRun:now,nextScheduledRun:new Date(Date.now()+86400000).toISOString()},sources:[{id:'manual_import',name:'Importación Manual M3U',channelCount:chs.length,lastRefresh:now,isHealthy:true}]};
   return files;
 }
 

@@ -12,7 +12,7 @@ PAGE_SIZE = 100
 class APIGenerator:
     def __init__(self, base_dir: Path, dry_run: bool = False):
         self.db_path = base_dir / "db" / "iptv.db"
-        self.out = base_dir.parent / "api" / "v1"
+        self.out = base_dir.parent / "docs" / "api" / "v1"
         self.cfg = base_dir / "config"
         self.dry_run = dry_run
 

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="ChannelRow" extends="Group">
+  <interface>
+    <field id="title"    type="string" />
+    <field id="channels" type="array" />
+    <field id="selected" type="integer" value="-1" alwaysNotify="true" />
+  </interface>
+
+  <script type="text/brightscript" uri="pkg:/source/components/ChannelRow.brs" />
+
+  <children>
+    <Label
+      id="rowTitle"
+      font="font:MediumBoldSystemFont"
+      color="#FFFFFF"
+      translation="[0, 0]" />
+
+    <!-- Horizontal scroll container -->
+    <Group id="cardContainer" translation="[0, 36]" />
+
+    <!-- Left/right scroll hints -->
+    <Label
+      id="leftHint"
+      text="&lt;"
+      font="font:MediumBoldSystemFont"
+      color="#E50000"
+      translation="[-20, 50]"
+      visible="false" />
+
+    <Label
+      id="rightHint"
+      text="&gt;"
+      font="font:MediumBoldSystemFont"
+      color="#E50000"
+      translation="[1820, 50]"
+      visible="false" />
+  </children>
+</component>

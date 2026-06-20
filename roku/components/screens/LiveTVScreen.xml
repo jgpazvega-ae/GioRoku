@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="LiveTVScreen" extends="Group">
+  <interface>
+    <field id="channels" type="assocarray" />
+    <field id="storage"  type="assocarray" />
+    <field id="api"      type="assocarray" />
+  </interface>
+
+  <script type="text/brightscript" uri="pkg:/source/screens/LiveTVScreen.brs" />
+
+  <children>
+    <Rectangle id="bg" width="1920" height="1080" color="#0D0D0D" />
+
+    <!-- Filter tabs -->
+    <Rectangle
+      id="filterBar"
+      width="1920"
+      height="56"
+      color="#1A1A1A"
+      translation="[0, 0]" />
+
+    <Label
+      id="tabAll"
+      text="Todos"
+      font="font:MediumBoldSystemFont"
+      color="#E50000"
+      translation="[60, 14]" />
+
+    <Label
+      id="tabCountry"
+      text="Por País  ▾"
+      font="font:MediumSystemFont"
+      color="#A0A0A0"
+      translation="[200, 14]" />
+
+    <Label
+      id="tabCategory"
+      text="Por Categoría  ▾"
+      font="font:MediumSystemFont"
+      color="#A0A0A0"
+      translation="[380, 14]" />
+
+    <!-- Channel grid -->
+    <PosterGrid
+      id="channelGrid"
+      translation="[60, 76]"
+      basePosterSize="[200, 112]"
+      caption1NumLines="1"
+      caption2NumLines="1"
+      numColumns="9"
+      itemSpacing="[16, 16]"
+      focusFootprintBlendColor="#E50000"
+      drawFocusFeedback="true" />
+
+    <!-- Context menu (hidden) -->
+    <Rectangle
+      id="contextBg"
+      width="300"
+      height="200"
+      color="#1A1A1A"
+      visible="false" />
+
+    <LabelList
+      id="contextMenu"
+      visible="false"
+      width="300"
+      itemSize="[300, 48]"
+      itemSpacing="[0, 4]"
+      textHorizAlign="left" />
+  </children>
+</component>

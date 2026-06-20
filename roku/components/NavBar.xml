@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="NavBar" extends="Group">
+  <interface>
+    <field id="tabs"        type="stringarray" />
+    <field id="selectedTab" type="integer" value="0" alwaysNotify="true" />
+    <field id="width"       type="float" value="1920" />
+    <field id="height"      type="float" value="72" />
+  </interface>
+
+  <script type="text/brightscript" uri="pkg:/source/components/NavBar.brs" />
+
+  <children>
+    <Rectangle
+      id="navBg"
+      width="1920"
+      height="72"
+      color="#1A1A1A" />
+
+    <!-- Tab items rendered dynamically by NavBar.brs -->
+    <Group id="tabContainer" translation="[40, 0]" />
+
+    <!-- Accent underline on active tab -->
+    <Rectangle
+      id="activeBar"
+      width="80"
+      height="3"
+      color="#E50000"
+      translation="[40, 69]" />
+  </children>
+</component>

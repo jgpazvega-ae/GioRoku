@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GioRoku — Cargador M3U</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0D0D0D;--surface:#1A1A1A;--elevated:#262626;--border:rgba(255,255,255,.07);
+  --red:#E50000;--red-dark:#b30000;--green:#00C851;--yellow:#FFBB33;--blue:#3498DB;
+  --txt:rgba(255,255,255,.87);--txt-muted:rgba(255,255,255,.45);--txt-dim:rgba(255,255,255,.25);
+}
+html{scrollbar-width:thin;scrollbar-color:var(--elevated) var(--bg)}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;line-height:1.5}
+a{color:var(--red);text-decoration:none}
+
+/* ── Layout ── */
+.page{max-width:860px;margin:0 auto;padding:32px 20px 80px}
+.header{margin-bottom:36px}
+.header h1{font-size:26px;font-weight:800;letter-spacing:-.5px;display:flex;align-items:center;gap:10px}
+.header h1 span{color:var(--red)}
+.header p{color:var(--txt-muted);font-size:14px;margin-top:4px}
+
+/* ── Steps ── */
+.steps{display:flex;align-items:center;margin-bottom:36px;gap:0}
+.step{flex:1;display:flex;align-items:center;gap:8px;position:relative}
+.step-num{width:28px;height:28px;border-radius:50%;background:var(--elevated);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--txt-dim);flex-shrink:0;transition:all .25s}
+.step-label{font-size:12px;color:var(--txt-dim);font-weight:500;transition:color .25s}
+.step-line{flex:1;height:2px;background:var(--elevated);margin:0 8px;transition:background .25s}
+.step.done .step-num{background:var(--green);border-color:var(--green);color:#fff}
+.step.done .step-label{color:var(--green)}
+.step.done .step-line{background:var(--green)}
+.step.active .step-num{background:var(--red);border-color:var(--red);color:#fff}
+.step.active .step-label{color:var(--txt)}
+.step.done+.step .step-line{background:var(--green)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;margin-bottom:16px}
+.card-header{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+.card-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.card-icon.red{background:rgba(229,0,0,.12)}
+.card-icon.blue{background:rgba(52,152,219,.12)}
+.card-icon.green{background:rgba(0,200,81,.12)}
+.card-icon.yellow{background:rgba(255,187,51,.12)}
+.card-title{font-size:15px;font-weight:700}
+.card-sub{font-size:12px;color:var(--txt-muted);margin-top:1px}
+
+/* ── Form ── */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:500px){.form-grid{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:5px}
+label{font-size:11px;font-weight:600;color:var(--txt-muted);text-transform:uppercase;letter-spacing:.5px}
+input,select{width:100%;padding:10px 14px;background:var(--elevated);border:1.5px solid var(--border);border-radius:8px;color:var(--txt);font-size:13px;outline:none;transition:border-color .15s,box-shadow .15s}
+input:focus,select:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(229,0,0,.1)}
+input::placeholder{color:var(--txt-dim)}
+input[type=password]{letter-spacing:1px}
+select option{background:var(--elevated)}
+
+/* ── Buttons ── */
+.btn-row{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;border:none;transition:all .15s;white-space:nowrap}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn-primary{background:var(--red);color:#fff}
+.btn-primary:not(:disabled):hover{background:var(--red-dark);transform:translateY(-1px)}
+.btn-secondary{background:var(--elevated);color:var(--txt)}
+.btn-secondary:not(:disabled):hover{background:#303030}
+.btn-success{background:var(--green);color:#000;font-weight:800}
+.btn-success:not(:disabled):hover{opacity:.9}
+.btn-sm{padding:7px 14px;font-size:12px}
+.btn-icon{width:36px;height:36px;padding:0;border-radius:8px}
+
+/* ── Tabs ── */
+.tabs{display:flex;gap:3px;background:var(--elevated);border-radius:10px;padding:4px;margin-bottom:16px}
+.tab{flex:1;padding:8px;text-align:center;font-size:13px;font-weight:600;cursor:pointer;border-radius:7px;color:var(--txt-muted);transition:all .15s}
+.tab.on{background:var(--red);color:#fff}
+.tab:not(.on):hover{color:var(--txt);background:rgba(255,255,255,.05)}
+
+/* ── Drop zone ── */
+.drop{border:2px dashed rgba(255,255,255,.12);border-radius:12px;padding:40px;text-align:center;cursor:pointer;color:var(--txt-muted);transition:all .2s}
+.drop:hover,.drop.over{border-color:var(--red);background:rgba(229,0,0,.04);color:var(--txt)}
+.drop-icon{font-size:40px;margin-bottom:10px;display:block}
+.drop p{font-size:13px}
+.drop small{font-size:11px;color:var(--txt-dim);margin-top:4px;display:block}
+.drop input{display:none}
+
+/* ── Stats grid ── */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:16px 0}
+@media(max-width:500px){.stats{grid-template-columns:repeat(2,1fr)}}
+.stat{background:var(--elevated);border-radius:10px;padding:14px;text-align:center}
+.stat-n{font-size:28px;font-weight:800;color:var(--red);line-height:1}
+.stat-l{font-size:11px;color:var(--txt-muted);margin-top:4px;text-transform:uppercase;letter-spacing:.5px}
+
+/* ── Filter bar ── */
+.filter-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:12px 0;border-top:1px solid var(--border);margin-top:12px}
+.filter-bar label{font-size:12px;white-space:nowrap}
+.filter-bar select{width:auto;padding:6px 10px;font-size:12px}
+.tag{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;background:var(--elevated);color:var(--txt-muted)}
+.tag.red{background:rgba(229,0,0,.12);color:var(--red)}
+
+/* ── Table ── */
+.table-wrap{overflow-x:auto;border-radius:8px;border:1px solid var(--border)}
+table{width:100%;font-size:12px;border-collapse:collapse}
+th{text-align:left;padding:8px 12px;color:var(--txt-dim);font-size:10px;text-transform:uppercase;letter-spacing:.7px;background:var(--elevated);position:sticky;top:0}
+td{padding:7px 12px;border-top:1px solid var(--border);color:rgba(255,255,255,.75);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:240px}
+tr:hover td{background:rgba(255,255,255,.02)}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;background:var(--elevated);color:var(--txt-muted)}
+.badge.mx{background:rgba(0,170,0,.12);color:#00aa00}
+.badge.ar{background:rgba(65,105,225,.12);color:#6495ED}
+.badge.co{background:rgba(255,205,0,.12);color:#ccaa00}
+.badge.intl{background:rgba(150,150,150,.1);color:#aaa}
+
+/* ── Progress ── */
+.prog-wrap{margin:16px 0}
+.prog-label{display:flex;justify-content:space-between;font-size:12px;color:var(--txt-muted);margin-bottom:6px}
+.prog-bar{height:6px;background:var(--elevated);border-radius:6px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--red),#ff6b35);border-radius:6px;transition:width .4s ease;width:0%}
+.prog-fill.done{background:var(--green)}
+.log{max-height:160px;overflow-y:auto;font-size:11px;font-family:monospace;color:var(--txt-muted);margin-top:10px;padding:10px;background:var(--elevated);border-radius:8px;line-height:1.7}
+.log-ok{color:var(--green)}.log-err{color:#FF4444}.log-skip{color:var(--yellow)}
+
+/* ── Alerts ── */
+.alert{display:flex;gap:10px;align-items:flex-start;padding:12px 16px;border-radius:10px;font-size:13px;margin:12px 0}
+.alert-icon{font-size:18px;flex-shrink:0;margin-top:-1px}
+.alert.info{background:rgba(52,152,219,.08);border:1px solid rgba(52,152,219,.2);color:#6ab4e8}
+.alert.warn{background:rgba(255,187,51,.07);border:1px solid rgba(255,187,51,.2);color:var(--yellow)}
+.alert.success{background:rgba(0,200,81,.07);border:1px solid rgba(0,200,81,.2);color:var(--green)}
+.alert.error{background:rgba(255,68,68,.07);border:1px solid rgba(255,68,68,.2);color:#FF4444}
+
+/* ── Connection test ── */
+.conn-status{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:4px 10px;border-radius:20px;background:var(--elevated)}
+.conn-dot{width:8px;height:8px;border-radius:50%;background:var(--txt-dim)}
+.conn-dot.ok{background:var(--green);box-shadow:0 0 6px var(--green)}
+.conn-dot.err{background:#FF4444}
+.conn-dot.testing{background:var(--yellow);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ── Sections shown/hidden ── */
+.hidden{display:none!important}
+.section{margin-bottom:0}
+
+/* ── Footer ── */
+.footer{text-align:center;color:var(--txt-dim);font-size:11px;padding-top:40px;border-top:1px solid var(--border);margin-top:40px}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <h1>Gio<span>Roku</span> <span style="font-weight:300;font-size:18px;color:var(--txt-muted)">— Cargador M3U</span></h1>
+    <p>Importa tu lista M3U y despliégala a GitHub Pages en minutos. Sin comandos, sin instalar nada.</p>
+  </div>
+
+  <!-- Step indicator -->
+  <div class="steps" id="stepBar">
+    <div class="step active" id="s1"><div class="step-num" id="sn1">1</div><div class="step-label">GitHub</div><div class="step-line"></div></div>
+    <div class="step" id="s2"><div class="step-num" id="sn2">2</div><div class="step-label">Lista M3U</div><div class="step-line"></div></div>
+    <div class="step" id="s3"><div class="step-num" id="sn3">3</div><div class="step-label">Filtrar</div><div class="step-line"></div></div>
+    <div class="step" id="s4"><div class="step-num" id="sn4">4</div><div class="step-label">Publicar</div></div>
+  </div>
+
+  <!-- STEP 1: GitHub config -->
+  <div id="step1" class="section">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon red">⚙️</div>
+        <div><div class="card-title">Configuración de GitHub</div><div class="card-sub">Guarda tus credenciales en el navegador (localStorage)</div></div>
+      </div>
+
+      <div class="form-grid">
+        <div class="field"><label>Usuario / Organización</label><input id="gh-owner" placeholder="jgpazvega-ae"></div>
+        <div class="field"><label>Repositorio</label><input id="gh-repo" placeholder="GioRoku"></div>
+        <div class="field"><label>Rama de GitHub Pages</label><input id="gh-branch" placeholder="main"></div>
+        <div class="field"><label>Personal Access Token (PAT)</label><input id="gh-token" type="password" placeholder="ghp_xxxxxxxxxxxx"></div>
+      </div>
+
+      <div class="alert info" style="margin-top:16px">
+        <span class="alert-icon">ℹ️</span>
+        <div>El PAT necesita permiso <strong>Contents: Write</strong>. Créalo en <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a> → Fine-grained → Contents (Read & Write).</div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="saveConfig()">💾 Guardar credenciales</button>
+        <button class="btn btn-secondary" id="btn-test" onclick="testConnection()">🔌 Probar conexión</button>
+        <span id="conn-status" class="conn-status hidden"><span class="conn-dot" id="conn-dot"></span><span id="conn-msg">Probando…</span></span>
+        <button class="btn btn-primary" onclick="goToStep(2)">Siguiente →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2: Load M3U -->
+  <div id="step2" class="section hidden">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon blue">📋</div>
+        <div><div class="card-title">Lista M3U</div><div class="card-sub">Desde una URL pública o un archivo local</div></div>
+      </div>
+
+      <div class="tabs">
+        <div class="tab on" id="tab-url" onclick="switchTab('url')">🔗 URL</div>
+        <div class="tab" id="tab-file" onclick="switchTab('file')">📁 Archivo .m3u</div>
+      </div>
+
+      <div id="panel-url">
+        <div class="field">
+          <label>URL de la lista M3U</label>
+          <div style="display:flex;gap:8px">
+            <input id="m3u-url" type="url" placeholder="https://iptv-org.github.io/iptv/countries/mx.m3u" style="flex:1">
+            <button class="btn btn-primary" id="btn-load-url" onclick="fetchURL()">Cargar</button>
+          </div>
+        </div>
+        <p style="font-size:11px;color:var(--txt-dim);margin-top:6px">
+          ⚠️ Algunas URLs tienen CORS. Si falla, descarga el archivo .m3u y usa la pestaña "Archivo".
+        </p>
+      </div>
+
+      <div id="panel-file" class="hidden">
+        <div class="drop" id="drop"
+             onclick="document.getElementById('fi').click()"
+             ondragover="ev(event,'over')" ondrop="ev(event,'drop')" ondragleave="ev(event,'leave')">
+          <input type="file" id="fi" accept=".m3u,.m3u8,.txt" onchange="fromFile(event)">
+          <span class="drop-icon">📂</span>
+          <p>Arrastra tu archivo .m3u aquí, o haz clic para seleccionar</p>
+          <small>Compatible con .m3u · .m3u8 · .txt</small>
+        </div>
+      </div>
+
+      <div id="loading" class="hidden" style="text-align:center;padding:24px 0;color:var(--txt-muted)">
+        <div style="font-size:32px;margin-bottom:8px">⏳</div>
+        <div>Procesando lista M3U…</div>
+      </div>
+    </div>
+
+    <div class="btn-row" style="justify-content:flex-start">
+      <button class="btn btn-secondary" onclick="goToStep(1)">← Volver</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: Preview + Filter -->
+  <div id="step3" class="section hidden">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon yellow">🔍</div>
+        <div><div class="card-title">Vista previa y filtros</div><div class="card-sub" id="sub-loaded">0 canales cargados</div></div>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><div class="stat-n" id="s-total">0</div><div class="stat-l">Total</div></div>
+        <div class="stat"><div class="stat-n" id="s-ctrs">0</div><div class="stat-l">Países</div></div>
+        <div class="stat"><div class="stat-n" id="s-cats">0</div><div class="stat-l">Categorías</div></div>
+        <div class="stat"><div class="stat-n" id="s-sel">0</div><div class="stat-l">Seleccionados</div></div>
+      </div>
+
+      <div class="filter-bar">
+        <label>Filtrar por país:</label>
+        <select id="filter-country" onchange="applyFilter()"><option value="">Todos los países</option></select>
+        <label style="margin-left:8px">Categoría:</label>
+        <select id="filter-cat" onchange="applyFilter()"><option value="">Todas las categorías</option></select>
+        <button class="btn btn-secondary btn-sm" onclick="clearFilters()">✕ Limpiar</button>
+        <span id="filter-tag" class="tag red hidden">Filtrado activo</span>
+      </div>
+
+      <div class="table-wrap" style="max-height:320px;overflow-y:auto">
+        <table>
+          <thead><tr><th>#</th><th>Canal</th><th>País</th><th>Categoría</th><th>URL</th></tr></thead>
+          <tbody id="prev-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goToStep(2)">← Volver</button>
+      <button class="btn btn-primary" onclick="goToStep(4)" id="btn-to-deploy">Publicar <span id="sel-count">0</span> canales →</button>
+    </div>
+  </div>
+
+  <!-- STEP 4: Deploy -->
+  <div id="step4" class="section hidden">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon green">🚀</div>
+        <div><div class="card-title">Publicar en GitHub Pages</div><div class="card-sub" id="deploy-sub">Listo para publicar</div></div>
+      </div>
+
+      <div id="deploy-ready">
+        <div class="alert warn">
+          <span class="alert-icon">⚠️</span>
+          <div>Esto sobreescribirá los archivos JSON existentes en tu rama. Los cambios estarán en GitHub Pages en ~1 minuto.</div>
+        </div>
+
+        <div style="background:var(--elevated);border-radius:10px;padding:16px;margin:16px 0;font-size:13px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;color:var(--txt-muted)">
+            <div>📦 Repositorio: <strong id="d-repo" style="color:var(--txt)">—</strong></div>
+            <div>🌿 Rama: <strong id="d-branch" style="color:var(--txt)">—</strong></div>
+            <div>📺 Canales: <strong id="d-channels" style="color:var(--red)">—</strong></div>
+            <div>📄 Archivos JSON: <strong id="d-files" style="color:var(--txt)">—</strong></div>
+          </div>
+        </div>
+
+        <button class="btn btn-success" style="width:100%;padding:14px" id="btn-dep" onclick="deploy()">
+          ⬆️ Confirmar y publicar a GitHub Pages
+        </button>
+      </div>
+
+      <div id="deploy-progress" class="hidden">
+        <div class="prog-wrap">
+          <div class="prog-label"><span id="dep-txt">Iniciando…</span><span id="dep-pct">0%</span></div>
+          <div class="prog-bar"><div class="prog-fill" id="pfill"></div></div>
+        </div>
+        <div class="log" id="dep-log"></div>
+      </div>
+
+      <div id="deploy-done" class="hidden">
+        <div class="alert success" style="font-size:14px">
+          <span class="alert-icon">✅</span>
+          <div>
+            <strong>¡Publicado con éxito!</strong> — <span id="final-count">0</span> canales en GitHub Pages.<br>
+            <span style="font-size:12px;margin-top:4px;display:block;opacity:.75">
+              En tu Roku: <kbd style="background:var(--elevated);padding:1px 6px;border-radius:4px">Settings → Developer → Force refresh now</kbd>
+            </span>
+          </div>
+        </div>
+        <div class="btn-row" style="margin-top:12px">
+          <button class="btn btn-secondary" onclick="startOver()">↺ Nueva importación</button>
+        </div>
+      </div>
+
+      <div id="deploy-error" class="hidden">
+        <div class="alert error"><span class="alert-icon">❌</span><div id="err-msg">Error desconocido</div></div>
+        <div class="btn-row" style="margin-top:8px">
+          <button class="btn btn-primary" onclick="retryDeploy()">Reintentar</button>
+          <button class="btn btn-secondary" onclick="goToStep(1)">Verificar credenciales</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row" id="back-from-deploy">
+      <button class="btn btn-secondary" onclick="goToStep(3)">← Volver a filtros</button>
+    </div>
+  </div>
+
+  <div class="footer">GioRoku M3U Loader · Tus datos se guardan solo en tu navegador · <a href="https://github.com/jgpazvega-ae/GioRoku" target="_blank">Ver repositorio</a></div>
+</div>
+
+<script>
+// ── STATE ─────────────────────────────────────────────────────────────────
+let allChannels = [];    // all parsed channels
+let filtered   = [];    // currently shown after filter
+let currentStep = 1;
+
+// ── CONFIG ────────────────────────────────────────────────────────────────
+function loadConfig() {
+  const c = JSON.parse(localStorage.getItem('gl_cfg') || '{}');
+  if (c.owner)  V('gh-owner').value  = c.owner;
+  if (c.repo)   V('gh-repo').value   = c.repo;
+  if (c.branch) V('gh-branch').value = c.branch;
+  if (c.token)  V('gh-token').value  = c.token;
+}
+function saveConfig() {
+  const c = { owner:val('gh-owner'), repo:val('gh-repo'), branch:val('gh-branch'), token:val('gh-token') };
+  localStorage.setItem('gl_cfg', JSON.stringify(c));
+  flash(document.querySelector('#step1 .btn-secondary'), '✓ Guardado', 1800);
+}
+function cfg() { return { owner:val('gh-owner'), repo:val('gh-repo'), branch:val('gh-branch')||'main', token:val('gh-token') }; }
+function V(id) { return document.getElementById(id); }
+function val(id) { return V(id).value.trim(); }
+function flash(el, txt, ms) { const orig=el.textContent; el.textContent=txt; setTimeout(()=>el.textContent=orig, ms); }
+
+// ── STEP NAVIGATION ───────────────────────────────────────────────────────
+function goToStep(n) {
+  if (n === 3 && allChannels.length === 0) { return; }
+  if (n === 4) { prepareDeploy(); }
+  currentStep = n;
+  [1,2,3,4].forEach(i => {
+    V(`step${i}`).classList.toggle('hidden', i !== n);
+    const s = V(`s${i}`);
+    s.className = 'step' + (i < n ? ' done' : i === n ? ' active' : '');
+    if (i < n) V(`sn${i}`).textContent = '✓';
+    else V(`sn${i}`).textContent = i;
+  });
+}
+
+// ── CONNECTION TEST ───────────────────────────────────────────────────────
+async function testConnection() {
+  const c = cfg();
+  if (!c.owner || !c.repo || !c.token) { alert('Completa owner, repo y token primero.'); return; }
+  const el = V('conn-status'), dot = V('conn-dot'), msg = V('conn-msg');
+  el.classList.remove('hidden');
+  dot.className = 'conn-dot testing'; msg.textContent = 'Probando…';
+  V('btn-test').disabled = true;
+  try {
+    const r = await fetch(`https://api.github.com/repos/${c.owner}/${c.repo}`, {
+      headers: { Authorization: `Bearer ${c.token}`, Accept: 'application/vnd.github.v3+json' }
+    });
+    if (r.ok) {
+      const d = await r.json();
+      dot.className = 'conn-dot ok';
+      msg.textContent = `✓ ${d.full_name} (${d.visibility})`;
+    } else {
+      dot.className = 'conn-dot err';
+      msg.textContent = r.status === 401 ? '✗ Token inválido' : r.status === 404 ? '✗ Repo no encontrado' : `✗ Error ${r.status}`;
+    }
+  } catch { dot.className = 'conn-dot err'; msg.textContent = '✗ Sin conexión'; }
+  V('btn-test').disabled = false;
+}
+
+// ── TAB SWITCH ────────────────────────────────────────────────────────────
+function switchTab(t) {
+  V('tab-url').className  = 'tab' + (t==='url'  ? ' on' : '');
+  V('tab-file').className = 'tab' + (t==='file' ? ' on' : '');
+  V('panel-url').classList.toggle('hidden',  t !== 'url');
+  V('panel-file').classList.toggle('hidden', t !== 'file');
+}
+
+// ── DRAG & DROP ───────────────────────────────────────────────────────────
+function ev(e, kind) {
+  e.preventDefault();
+  const d = V('drop');
+  if (kind==='over')  d.classList.add('over');
+  if (kind==='leave') d.classList.remove('over');
+  if (kind==='drop')  { d.classList.remove('over'); readFile(e.dataTransfer.files[0]); }
+}
+
+// ── LOAD M3U ──────────────────────────────────────────────────────────────
+async function fetchURL() {
+  const url = val('m3u-url'); if (!url) return;
+  setLoading(true);
+  try {
+    let res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    processText(await res.text());
+  } catch {
+    try {
+      const res = await fetch('https://corsproxy.io/?' + encodeURIComponent(url));
+      if (!res.ok) throw new Error('proxy ' + res.status);
+      processText(await res.text());
+    } catch(e) {
+      setLoading(false);
+      alert('No se pudo cargar la URL (' + e.message + ').\nIntenta con la pestaña "Archivo": descarga el .m3u y arrástralo aquí.');
+    }
+  }
+}
+function fromFile(e) { const f=e.target.files[0]; if(f) readFile(f); }
+function readFile(f) { setLoading(true); const r=new FileReader(); r.onload=e=>processText(e.target.result); r.readAsText(f,'utf-8'); }
+function setLoading(on) { V('loading').classList.toggle('hidden', !on); V('panel-url').classList.toggle('hidden', on); V('panel-file').classList.toggle('hidden', on); }
+
+function processText(text) {
+  setLoading(false);
+  allChannels = enrich(parseM3U(text));
+  filtered = allChannels.slice();
+  buildPreview();
+  goToStep(3);
+}
+
+// ── M3U PARSER ────────────────────────────────────────────────────────────
+function parseM3U(text) {
+  const lines = text.split(/\r?\n/), out = []; let a = null;
+  for (const raw of lines) {
+    const line = raw.trim(); if (!line) continue;
+    if (line.startsWith('#EXTINF:')) {
+      a = {}; const m = /#EXTINF:[^,]*,(.*)$/.exec(line);
+      if (m) a._n = m[1].trim();
+      let am; const re = /([\w-]+)="([^"]*)"/g;
+      while ((am = re.exec(line))) a[am[1].toLowerCase()] = am[2];
+    } else if (!line.startsWith('#') && a !== null) {
+      if (/^https?:|^rtmp:|^rtsp:/i.test(line))
+        out.push({ name:a['tvg-name']||a._n||'Unknown', logo:a['tvg-logo']||'', group:a['group-title']||'', tvgId:a['tvg-id']||'', language:a['tvg-language']||a['tvg-lang']||'es', url:line });
+      a = null;
+    }
+  }
+  return out;
+}
+
+// ── COUNTRY / CATEGORY DETECTION ──────────────────────────────────────────
+const CPFX = {mx_:'MX',ar_:'AR',co_:'CO',cl_:'CL',pe_:'PE',uy_:'UY',py_:'PY',ec_:'EC',bo_:'BO',ve_:'VE',us_:'US_ES'};
+const CKW = {
+  MX:['mexico','azteca','televisa','multimedios','canal 5','imagen','milenio','foro tv','tv azteca','once tv'],
+  AR:['argentina','telefe','elnueve','a24','tn noticias','cronica','canal america','c5n'],
+  CO:['colombia','caracol','rcn','canal uno','señal colombia','telecaribe'],
+  CL:['chile','chv','chilevision','t13','tvn','telecanal','uctv','la red','mega chile'],
+  PE:['peru','perú','rpptv','latina tv','panamericana','willax','tv peru'],
+  UY:['uruguay','canal 10 uy','monte carlo tv','teledoce'],
+  PY:['paraguay','telefuturo','c9n'],
+  EC:['ecuador','teleamazonas','ecuavisa','rts ecuador','gama tv'],
+  BO:['bolivia','unitel','atb bo'],
+  VE:['venezuela','televen','venevision','globovision'],
+  CA:['costa rica','guatemala','honduras','el salvador','nicaragua','panama','teletica'],
+  US_ES:['univision','telemundo','entravision','estrella tv']
+};
+const CTLD = {'.mx':'MX','.com.mx':'MX','.ar':'AR','.com.ar':'AR','.co':'CO','.com.co':'CO','.cl':'CL','.pe':'PE','.uy':'UY','.py':'PY','.ec':'EC','.bo':'BO','.ve':'VE','.cr':'CA','.gt':'CA','.hn':'CA','.sv':'CA','.ni':'CA','.pa':'CA'};
+const CLB = {MX:'México',AR:'Argentina',CO:'Colombia',CL:'Chile',PE:'Perú',UY:'Uruguay',PY:'Paraguay',EC:'Ecuador',BO:'Bolivia',VE:'Venezuela',CA:'Centroamérica',US_ES:'EE.UU. (Esp.)',INTL:'Internacional'};
+const CATKW = {
+  news:['noticia','news','cnn','bbc','informativ','noticiero','canal n','24hora','ntn24'],
+  sports:['deport','sport','espn','fox sport','tdn','directv sport','futbol','fútbol','soccer','nba'],
+  movies:['cine','movie','pelicul','hbo','paramount','thriller','accion','acción'],
+  kids:['infantil','kids','niños','cartoon','disney','nickelodeon','junior','baby'],
+  music:['music','musica','música','mtv','vh1','ritmo','salsa','cumbia','regueton','banda'],
+  documentary:['documental','documentary','discovery','nat geo','history','animal'],
+  religious:['religioso','church','cristiano','evangelical','iglesia'],
+  shopping:['shopping','compras','tienda','teletienda','infomercial']
+};
+const CATL = {news:'Noticias',sports:'Deportes',movies:'Películas',kids:'Infantil',music:'Música',documentary:'Documentales',religious:'Religioso',shopping:'Compras',entertainment:'Entretenimiento'};
+const CCOLOR = {entertainment:'#E74C3C',news:'#3498DB',sports:'#27AE60',movies:'#9B59B6',kids:'#F39C12',music:'#E91E63',documentary:'#16A085',religious:'#8E44AD',shopping:'#D35400'};
+
+function nn(s){ return (s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase(); }
+function detectCountry(ch) {
+  const tid = nn(ch.tvgId);
+  for (const [p,c] of Object.entries(CPFX)) if (tid.startsWith(p)) return c;
+  const n = nn(ch.name), g = nn(ch.group);
+  for (const [code,kws] of Object.entries(CKW)) for (const kw of kws) if (g.includes(nn(kw))||n.includes(nn(kw))) return code;
+  if (ch.url) { const u=ch.url.split('?')[0]; for (const [tld,c] of Object.entries(CTLD)) if (u.endsWith(tld)||u.includes(tld+'/')) return c; }
+  return 'INTL';
+}
+function detectCat(ch) {
+  const n = nn(ch.name), g = nn(ch.group);
+  for (const [cat,kws] of Object.entries(CATKW)) for (const kw of kws) if (g.includes(nn(kw))||n.includes(nn(kw))) return cat;
+  return 'entertainment';
+}
+function svgLogo(name, cat) {
+  const c = CCOLOR[cat]||'#555';
+  const i = (name.split(' ').slice(0,2).map(w=>w[0]||'').join('')||'TV').toUpperCase();
+  return 'data:image/svg+xml;base64,' + btoa(`<svg xmlns="http://www.w3.org/2000/svg" width="120" height="68" viewBox="0 0 120 68"><rect width="120" height="68" rx="8" fill="${c}"/><text x="60" y="44" text-anchor="middle" font-family="Arial" font-size="24" font-weight="bold" fill="white">${i}</text></svg>`);
+}
+
+function enrich(raw) {
+  const seen = new Set(), now = new Date().toISOString();
+  return raw.map((ch, i) => {
+    const country = detectCountry(ch), cat = detectCat(ch);
+    let id = (ch.tvgId||ch.name).toLowerCase().replace(/[^a-z0-9]/g,'_').replace(/_+/g,'_').slice(0,60).replace(/^_|_$/g,'')||`ch${i}`;
+    let uid = id, j = 2; while (seen.has(uid)) uid=`${id}_${j++}`; seen.add(uid);
+    return { id:uid, name:ch.name, logo:ch.logo||svgLogo(ch.name,cat), category:cat, categoryLabel:CATL[cat]||'Entretenimiento', country, countryLabel:CLB[country]||'Internacional', language:ch.language||'es', streamUrl:ch.url, backupUrls:[], quality:'SD', isOnline:true, isEnabled:true, isFeatured:false, epgId:ch.tvgId||null, tags:[], offlineCount:0, lastCheck:now, lastOnline:now, responseMs:null, sourceId:'manual_import', sourcePriority:5 };
+  });
+}
+
+// ── PREVIEW / FILTER ──────────────────────────────────────────────────────
+function buildPreview() {
+  const byC = {}, byK = {};
+  for (const ch of allChannels) {
+    byC[ch.country] = (byC[ch.country]||0)+1;
+    byK[ch.category] = (byK[ch.category]||0)+1;
+  }
+  // Populate filter selects
+  const selC = V('filter-country'), selK = V('filter-cat');
+  selC.innerHTML = '<option value="">Todos los países</option>';
+  selK.innerHTML = '<option value="">Todas las categorías</option>';
+  Object.entries(byC).sort((a,b)=>b[1]-a[1]).forEach(([c,n]) => {
+    selC.innerHTML += `<option value="${c}">${CLB[c]||c} (${n})</option>`;
+  });
+  Object.entries(byK).sort((a,b)=>b[1]-a[1]).forEach(([c,n]) => {
+    selK.innerHTML += `<option value="${c}">${CATL[c]||c} (${n})</option>`;
+  });
+  renderTable();
+}
+
+function applyFilter() {
+  const fc = V('filter-country').value, fk = V('filter-cat').value;
+  filtered = allChannels.filter(ch => (!fc || ch.country===fc) && (!fk || ch.category===fk));
+  V('filter-tag').classList.toggle('hidden', !fc && !fk);
+  renderTable();
+}
+function clearFilters() { V('filter-country').value=''; V('filter-cat').value=''; applyFilter(); }
+
+function renderTable() {
+  V('s-total').textContent = allChannels.length.toLocaleString();
+  const byC = new Set(allChannels.map(c=>c.country)).size;
+  const byK = new Set(allChannels.map(c=>c.category)).size;
+  V('s-ctrs').textContent = byC;
+  V('s-cats').textContent = byK;
+  V('s-sel').textContent = filtered.length.toLocaleString();
+  V('sel-count').textContent = filtered.length.toLocaleString();
+  V('sub-loaded').textContent = `${allChannels.length.toLocaleString()} canales cargados · ${filtered.length.toLocaleString()} seleccionados`;
+
+  const rows = filtered.slice(0, 50).map((ch, i) =>
+    `<tr><td style="color:var(--txt-dim)">${i+1}</td><td title="${esc(ch.name)}" style="max-width:200px">${esc(ch.name)}</td><td><span class="badge">${ch.country}</span></td><td><span class="badge" style="color:${CCOLOR[ch.category]||'#aaa'}">${esc(ch.categoryLabel)}</span></td><td style="max-width:200px;color:var(--txt-dim);font-size:10px">${esc(ch.streamUrl.slice(0,60))}…</td></tr>`
+  ).join('');
+  V('prev-body').innerHTML = rows + (filtered.length > 50 ? `<tr><td colspan="5" style="color:var(--txt-dim);text-align:center;padding:10px">… y ${filtered.length-50} más</td></tr>` : '');
+}
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ── DEPLOY PREP ───────────────────────────────────────────────────────────
+function prepareDeploy() {
+  const c = cfg();
+  V('d-repo').textContent = `${c.owner}/${c.repo}`;
+  V('d-branch').textContent = c.branch || 'main';
+  V('d-channels').textContent = filtered.length.toLocaleString();
+  const fileCount = Math.ceil(filtered.length/100) + Object.keys(byCountry(filtered)).length + Object.keys(byCat(filtered)).length + 4;
+  V('d-files').textContent = fileCount + ' archivos';
+  // Reset state
+  ['deploy-progress','deploy-done','deploy-error'].forEach(id => V(id).classList.add('hidden'));
+  V('deploy-ready').classList.remove('hidden');
+  V('back-from-deploy').classList.remove('hidden');
+  V('deploy-sub').textContent = `Listo para publicar ${filtered.length.toLocaleString()} canales`;
+}
+
+function byCountry(chs) { const m={}; for(const c of chs)(m[c.country]||(m[c.country]=[])).push(c); return m; }
+function byCat(chs)     { const m={}; for(const c of chs)(m[c.category]||(m[c.category]=[])).push(c); return m; }
+
+// ── JSON FILE GENERATION ──────────────────────────────────────────────────
+const PAGE_SIZE = 100;
+const CATS_META = [
+  {id:'entertainment',label:'Entretenimiento',labelEn:'Entertainment',icon:'star',color:'#E74C3C',sortOrder:1,keywords:[]},
+  {id:'news',label:'Noticias',labelEn:'News',icon:'newspaper',color:'#3498DB',sortOrder:2,keywords:[]},
+  {id:'sports',label:'Deportes',labelEn:'Sports',icon:'trophy',color:'#27AE60',sortOrder:3,keywords:[]},
+  {id:'movies',label:'Películas',labelEn:'Movies',icon:'film',color:'#9B59B6',sortOrder:4,keywords:[]},
+  {id:'kids',label:'Infantil',labelEn:'Kids',icon:'baby',color:'#F39C12',sortOrder:5,keywords:[]},
+  {id:'music',label:'Música',labelEn:'Music',icon:'music',color:'#E91E63',sortOrder:6,keywords:[]},
+  {id:'documentary',label:'Documentales',labelEn:'Documentary',icon:'book',color:'#16A085',sortOrder:7,keywords:[]},
+  {id:'religious',label:'Religioso',labelEn:'Religious',icon:'heart',color:'#8E44AD',sortOrder:8,keywords:[]},
+  {id:'shopping',label:'Compras',labelEn:'Shopping',icon:'shopping-cart',color:'#D35400',sortOrder:9,keywords:[]}
+];
+const CTRS_META = [
+  {code:'MX',name:'México',nameEn:'Mexico',flag:'🇲🇽',sortOrder:1},
+  {code:'AR',name:'Argentina',nameEn:'Argentina',flag:'🇦🇷',sortOrder:2},
+  {code:'CO',name:'Colombia',nameEn:'Colombia',flag:'🇨🇴',sortOrder:3},
+  {code:'CL',name:'Chile',nameEn:'Chile',flag:'🇨🇱',sortOrder:4},
+  {code:'PE',name:'Perú',nameEn:'Peru',flag:'🇵🇪',sortOrder:5},
+  {code:'UY',name:'Uruguay',nameEn:'Uruguay',flag:'🇺🇾',sortOrder:6},
+  {code:'PY',name:'Paraguay',nameEn:'Paraguay',flag:'🇵🇾',sortOrder:7},
+  {code:'EC',name:'Ecuador',nameEn:'Ecuador',flag:'🇪🇨',sortOrder:8},
+  {code:'BO',name:'Bolivia',nameEn:'Bolivia',flag:'🇧🇴',sortOrder:9},
+  {code:'VE',name:'Venezuela',nameEn:'Venezuela',flag:'🇻🇪',sortOrder:10},
+  {code:'CA',name:'Centroamérica',nameEn:'Central America',flag:'🌎',sortOrder:11},
+  {code:'US_ES',name:'EE.UU. (Español)',nameEn:'USA (Spanish)',flag:'🇺🇸',sortOrder:12},
+  {code:'INTL',name:'Internacional',nameEn:'International',flag:'🌐',sortOrder:99}
+];
+
+function generateFiles(chs) {
+  const now = new Date().toISOString(), files = {}, bc = byCountry(chs), bk = byCat(chs);
+  const tp = Math.max(1, Math.ceil(chs.length/PAGE_SIZE));
+  for (let p=1; p<=tp; p++)
+    files[`docs/api/v1/channels/page/${p}.json`] = {page:p,pageSize:PAGE_SIZE,totalPages:tp,totalChannels:chs.length,channels:chs.slice((p-1)*PAGE_SIZE, p*PAGE_SIZE)};
+  for (const [c,v] of Object.entries(bc)) files[`docs/api/v1/channels/country/${c}.json`] = {country:c,channels:v};
+  for (const [c,v] of Object.entries(bk)) files[`docs/api/v1/channels/category/${c}.json`] = {category:c,channels:v};
+  files['docs/api/v1/categories.json'] = {generatedAt:now,categories:CATS_META.map(c=>({...c,channelCount:(bk[c.id]||[]).length}))};
+  files['docs/api/v1/countries.json']  = {generatedAt:now,countries:CTRS_META.map(c=>({...c,keywords:[],channelCount:(bc[c.code]||[]).length}))};
+  files['docs/api/v1/epg.json']        = {generatedAt:now,programs:{}};
+  files['docs/api/v1/status.json']     = {generatedAt:now,pipelineVersion:'1.0.0',stats:{totalChannels:chs.length,onlineChannels:chs.length,offlineChannels:0,disabledChannels:0,totalSources:1,activeSources:1,totalCountries:Object.keys(bc).length,totalCategories:Object.keys(bk).length,lastValidationRun:now,nextScheduledRun:new Date(Date.now()+86400000).toISOString()},sources:[{id:'manual_import',name:'Importación Manual M3U',channelCount:chs.length,lastRefresh:now,isHealthy:true}]};
+  return files;
+}
+
+// ── GITHUB WRITE ──────────────────────────────────────────────────────────
+function b64utf8(str) {
+  const b = new TextEncoder().encode(str); let s='';
+  for (const x of b) s += String.fromCharCode(x);
+  return btoa(s);
+}
+async function getSHAs(o,r,b,t) {
+  const res = await fetch(`https://api.github.com/repos/${o}/${r}/git/trees/${b}?recursive=1`,
+    { headers:{Authorization:`Bearer ${t}`,Accept:'application/vnd.github.v3+json'} });
+  if (!res.ok) throw new Error(`No se pudo leer el repositorio (${res.status}). Verifica owner/repo/branch/token.`);
+  const d = await res.json(), m = {};
+  for (const item of d.tree||[]) m[item.path] = item.sha;
+  return m;
+}
+async function putFile(o,r,b,path,content,sha,t) {
+  const body = { message:`chore: m3u import — ${path.split('/').pop()}`, content:b64utf8(JSON.stringify(content,null,2)), branch:b };
+  if (sha) body.sha = sha;
+  const res = await fetch(`https://api.github.com/repos/${o}/${r}/contents/${path}`, {
+    method:'PUT',
+    headers:{Authorization:`Bearer ${t}`,Accept:'application/vnd.github.v3+json','Content-Type':'application/json'},
+    body:JSON.stringify(body)
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(()=>({}));
+    throw new Error(`${res.status}: ${err.message||'error desconocido'}`);
+  }
+}
+
+function addLog(msg, cls='') {
+  const el = V('dep-log');
+  const d = document.createElement('div');
+  d.className = cls ? 'log-'+cls : '';
+  d.textContent = msg;
+  el.appendChild(d);
+  el.scrollTop = el.scrollHeight;
+}
+function setProgress(done, total, msg) {
+  const pct = total ? Math.round(done/total*100) : 0;
+  V('pfill').style.width = pct+'%';
+  if (done >= total) V('pfill').classList.add('done'); else V('pfill').classList.remove('done');
+  V('dep-txt').textContent = msg;
+  V('dep-pct').textContent = pct+'%';
+}
+
+async function deploy() {
+  const c = cfg();
+  if (!c.owner||!c.repo||!c.token) { alert('Completa los datos de GitHub primero.'); goToStep(1); return; }
+  if (!filtered.length) { alert('No hay canales seleccionados.'); return; }
+
+  V('deploy-ready').classList.add('hidden');
+  V('deploy-progress').classList.remove('hidden');
+  V('deploy-done').classList.add('hidden');
+  V('deploy-error').classList.add('hidden');
+  V('back-from-deploy').classList.add('hidden');
+  V('dep-log').innerHTML = '';
+  V('btn-dep').disabled = true;
+
+  try {
+    addLog(`Generando JSON para ${filtered.length.toLocaleString()} canales…`);
+    const files = generateFiles(filtered), paths = Object.keys(files);
+    addLog(`${paths.length} archivos a publicar en ${c.owner}/${c.repo}@${c.branch}`);
+
+    setProgress(0, paths.length, 'Leyendo estado del repositorio…');
+    const shas = await getSHAs(c.owner, c.repo, c.branch, c.token);
+    addLog(`Repositorio leído · ${Object.keys(shas).length} archivos existentes`);
+
+    let done = 0, skipped = 0, errors = 0;
+    for (const path of paths) {
+      setProgress(done, paths.length, `(${done+1}/${paths.length}) ${path.split('/').pop()}`);
+      try {
+        await putFile(c.owner, c.repo, c.branch, path, files[path], shas[path], c.token);
+        addLog('✓ ' + path, 'ok');
+      } catch(e) {
+        addLog('✗ ' + path + ': ' + e.message, 'err');
+        errors++;
+      }
+      done++;
+    }
+
+    setProgress(done, paths.length, '¡Completado!');
+    if (errors === 0) {
+      V('final-count').textContent = filtered.length.toLocaleString();
+      V('deploy-done').classList.remove('hidden');
+      V('deploy-sub').textContent = '¡Publicado con éxito!';
+    } else {
+      addLog(`⚠ ${errors} archivos fallaron. Revisa el log.`, 'err');
+    }
+  } catch(e) {
+    V('err-msg').textContent = e.message;
+    V('deploy-error').classList.remove('hidden');
+    V('deploy-progress').classList.add('hidden');
+  } finally {
+    V('btn-dep').disabled = false;
+    V('back-from-deploy').classList.remove('hidden');
+  }
+}
+
+function retryDeploy() {
+  V('deploy-error').classList.add('hidden');
+  V('deploy-ready').classList.remove('hidden');
+}
+
+function startOver() {
+  allChannels = []; filtered = [];
+  V('m3u-url').value = '';
+  V('fi').value = '';
+  goToStep(2);
+}
+
+loadConfig();
+</script>
+</body>
+</html>

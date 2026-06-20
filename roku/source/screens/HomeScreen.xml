@@ -8,8 +8,6 @@
   </interface>
 
   <script type="text/brightscript" uri="pkg:/source/screens/HomeScreen.brs" />
-  <script type="text/brightscript" uri="pkg:/source/components/NavBar.brs" />
-  <script type="text/brightscript" uri="pkg:/source/components/ChannelRow.brs" />
 
   <children>
     <!-- Background -->

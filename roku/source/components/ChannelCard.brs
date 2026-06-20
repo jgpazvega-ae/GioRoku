@@ -30,26 +30,6 @@ end sub
 
 sub _onFocusChange()
     isFocused = m.top.focused
-    if isFocused then
-        m.focusBorder.visible = true
-        m.cardBg.color = "#262626"
-        ' Scale up slightly via translation offset (SceneGraph animation alternative)
-        m.top.translation = [m.top.translation[0] - 3, m.top.translation[1] - 3]
-        m.cardBg.width = 206
-        m.cardBg.height = 118
-        m.logo.width = 206
-        m.logo.height = 118
-        m.focusBorder.width = 206
-        m.focusBorder.height = 118
-    else
-        m.focusBorder.visible = false
-        m.cardBg.color = "#1A1A1A"
-        m.top.translation = [m.top.translation[0] + 3, m.top.translation[1] + 3]
-        m.cardBg.width = 200
-        m.cardBg.height = 112
-        m.logo.width = 200
-        m.logo.height = 112
-        m.focusBorder.width = 200
-        m.focusBorder.height = 112
-    end if
+    m.focusBorder.visible = isFocused
+    m.cardBg.color = iif(isFocused, "#262626", "#1A1A1A")
 end sub

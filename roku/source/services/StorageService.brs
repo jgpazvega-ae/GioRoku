@@ -8,8 +8,10 @@ function StorageService_Init() as object
     svc.addFavorite     = StorageService_addFavorite
     svc.removeFavorite  = StorageService_removeFavorite
     svc.isFavorite      = StorageService_isFavorite
-    svc.getRecent       = StorageService_getRecent
-    svc.addRecent       = StorageService_addRecent
+    svc.getRecent          = StorageService_getRecent
+    svc.getRecentChannels  = StorageService_getRecent
+    svc.addRecent          = StorageService_addRecent
+    svc.addRecentChannel   = StorageService_addRecent
     svc.getSettings     = StorageService_getSettings
     svc.setSetting      = StorageService_setSetting
     svc.clearAll        = StorageService_clearAll

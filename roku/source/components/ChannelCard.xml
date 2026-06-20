@@ -10,21 +10,21 @@
   <script type="text/brightscript" uri="pkg:/source/components/ChannelCard.brs" />
 
   <children>
+    <!-- Focus border drawn first (behind card) so it peeks as an outline -->
+    <Rectangle
+      id="focusBorder"
+      width="206"
+      height="118"
+      color="#E50000"
+      translation="[-3, -3]"
+      visible="false" />
+
     <!-- Card background -->
     <Rectangle
       id="cardBg"
       width="200"
       height="112"
       color="#1A1A1A" />
-
-    <!-- Focus glow border -->
-    <Rectangle
-      id="focusBorder"
-      width="200"
-      height="112"
-      color="#E50000"
-      blendingEnabled="true"
-      visible="false" />
 
     <!-- Channel logo -->
     <Poster

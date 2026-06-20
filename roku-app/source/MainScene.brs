@@ -1,21 +1,23 @@
-' MainScene.brs — GioRoku full single-scene app (nav + views + player).
+' MainScene.brs — GioRoku single-scene app.
 
 function _baseUrl() as string
     return "https://jgpazvega-ae.github.io/GioRoku/api/v1"
 end function
 
+' ================= INIT =================
+
 sub init()
-    ' Node refs
-    m.status   = m.top.findNode("status")
-    m.message  = m.top.findNode("message")
+    m.status    = m.top.findNode("status")
+    m.message   = m.top.findNode("message")
     m.underline = m.top.findNode("navUnderline")
 
     m.tabsNodes = []
     for i = 0 to 5
         m.tabsNodes.push(m.top.findNode("tab" + i.toStr()))
     end for
-    m.tabX = [340, 500, 660, 780, 980, 1140]
-    m.tabW = [110, 120, 70, 150, 110, 120]
+    ' X positions for each tab label; widths for the underline indicator.
+    m.tabX = [248, 422, 630, 734, 950, 1074]
+    m.tabW = [120, 162, 58, 140, 90, 110]
 
     m.views = {
         home:     m.top.findNode("viewHome"),
@@ -26,72 +28,67 @@ sub init()
         settings: m.top.findNode("viewSettings")
     }
 
-    m.homeGrid   = m.top.findNode("homeGrid")
-    m.liveGrid   = m.top.findNode("liveGrid")
-    m.favGrid    = m.top.findNode("favGrid")
-    m.favEmpty   = m.top.findNode("favEmpty")
-    m.guideList  = m.top.findNode("guideList")
-    m.searchGrid = m.top.findNode("searchGrid")
+    m.browseList  = m.top.findNode("browseList")
+    m.catBrowse   = m.top.findNode("catBrowse")
+    m.favGrid     = m.top.findNode("favGrid")
+    m.favEmpty    = m.top.findNode("favEmpty")
+    m.guideList   = m.top.findNode("guideList")
+    m.searchGrid  = m.top.findNode("searchGrid")
     m.searchEmpty = m.top.findNode("searchEmpty")
-    m.kbd        = m.top.findNode("kbd")
-    m.settingsList = m.top.findNode("settingsList")
-    m.settingsInfo = m.top.findNode("settingsInfo")
-    m.liveFilter = m.top.findNode("liveFilter")
+    m.kbd         = m.top.findNode("kbd")
+    m.settingsList  = m.top.findNode("settingsList")
+    m.settingsInfo  = m.top.findNode("settingsInfo")
 
-    ' Player nodes
-    m.viewPlayer = m.top.findNode("viewPlayer")
-    m.video      = m.top.findNode("video")
-    m.playerMsg  = m.top.findNode("playerMsg")
+    m.viewPlayer  = m.top.findNode("viewPlayer")
+    m.video       = m.top.findNode("video")
+    m.playerMsg   = m.top.findNode("playerMsg")
     m.playerInfoBg = m.top.findNode("playerInfoBg")
-    m.playerLogo = m.top.findNode("playerLogo")
-    m.playerName = m.top.findNode("playerName")
-    m.playerMeta = m.top.findNode("playerMeta")
+    m.playerLogo  = m.top.findNode("playerLogo")
+    m.playerName  = m.top.findNode("playerName")
+    m.playerMeta  = m.top.findNode("playerMeta")
 
-    ' Context menu
     m.ctxBg   = m.top.findNode("ctxBg")
     m.ctxMenu = m.top.findNode("ctxMenu")
 
-    ' State
-    m.channels = []
-    m.homeList = []
-    m.liveList = []
-    m.favList = []
-    m.searchList = []
-    m.tab = 0
-    m.mode = "nav"
-    m.searchFocus = "kbd"
-    m.ctxChannel = invalid
-    m.activeGrid = m.homeGrid
-    m.countries = ["ALL", "MX", "AR", "CO", "CL", "PE", "UY", "VE", "EC", "BO"]
-    m.countryIdx = 0
+    ' Runtime state
+    m.channels     = []
+    m.browseFlat   = []
+    m.catFlat      = []
+    m.favList      = []
+    m.searchList   = []
+    m.tab          = 0
+    m.mode         = "nav"
+    m.searchFocus  = "kbd"
+    m.ctxChannel   = invalid
+    m.activeGrid      = m.browseList
+    m.activeFlatList  = m.browseFlat
+    m.currentChannel  = invalid
 
-    ' Observers
-    m.homeGrid.observeField("itemSelected", "_onHomeSelected")
-    m.liveGrid.observeField("itemSelected", "_onLiveSelected")
-    m.favGrid.observeField("itemSelected", "_onFavSelected")
-    m.searchGrid.observeField("itemSelected", "_onSearchSelected")
-    m.guideList.observeField("itemSelected", "_onGuideSelected")
+    m.browseList.observeField("itemSelected",  "_onBrowseSelected")
+    m.catBrowse.observeField("itemSelected",   "_onCatSelected")
+    m.favGrid.observeField("itemSelected",     "_onFavSelected")
+    m.searchGrid.observeField("itemSelected",  "_onSearchSelected")
+    m.guideList.observeField("itemSelected",   "_onGuideSelected")
     m.settingsList.observeField("itemFocused", "_onSettingsFocused")
-    m.settingsList.observeField("itemSelected", "_onSettingsSelected")
-    m.kbd.observeField("text", "_onSearchTextChange")
-    m.video.observeField("state", "_onVideoState")
+    m.settingsList.observeField("itemSelected","_onSettingsSelected")
+    m.kbd.observeField("text",   "_onSearchTextChange")
+    m.video.observeField("state","_onVideoState")
 
     _buildSettingsMenu()
     _highlightTab(0)
     m.top.setFocus(true)
 
-    ' Small timer so first render completes before task launches.
     m.loadTimer = createObject("roSGNode", "Timer")
     m.loadTimer.duration = 0.3
-    m.loadTimer.repeat = false
+    m.loadTimer.repeat   = false
     m.loadTimer.observeField("fire", "_load")
-    m.loadTimer.control = "start"
+    m.loadTimer.control  = "start"
 end sub
 
 ' ================= DATA LOAD =================
 
 sub _load()
-    m.status.text = "Conectando…"
+    m.status.text    = "Conectando…"
     m.message.visible = false
     m.loadTask = createObject("roSGNode", "LoadTask")
     m.loadTask.baseUrl = _baseUrl()
@@ -106,67 +103,112 @@ sub _onLoadState()
         _showMessage("Sin conexión a internet." + chr(10) + "Verifica tu red e inténtalo de nuevo.")
         m.status.text = "Sin conexión"
     else if state = "done" then
-        res = m.loadTask.result
+        res  = m.loadTask.result
         list = []
         if res <> invalid and res.DoesExist("channels") and res.channels <> invalid then
             list = res.channels
         end if
-        m.channels = list
+        m.channels    = list
         m.status.text = list.count().toStr() + " canales"
         if list.count() = 0 then
-            m.message.text = "Aún no hay canales disponibles." + chr(10) + chr(10) + "Importa una lista M3U desde la herramienta web para llenar tu guía."
+            m.message.text = "Aún no hay canales." + chr(10) + chr(10) + "Importa una lista M3U desde la herramienta web."
             m.message.visible = true
         else
             m.message.visible = false
         end if
         _populateHome()
-        _populateLive()
+        _populateCat()
         _populateGuide()
-        ' Refresh the highlight so the message overlay follows the channel count.
         _highlightTab(m.tab)
     end if
 end sub
 
 ' ================= VIEW POPULATION =================
 
+' CANALES tab: one row per country, México first.
 sub _populateHome()
-    featured = []
+    m.browseFlat = []
+    content = createObject("roSGNode", "ContentNode")
+
+    order  = ["MX","AR","CO","CL","PE","UY","VE","EC","BO","CA","US_ES","INTL"]
+    labels = {MX:"México", AR:"Argentina", CO:"Colombia", CL:"Chile", PE:"Perú",
+              UY:"Uruguay", VE:"Venezuela", EC:"Ecuador", BO:"Bolivia",
+              CA:"Centroamérica", US_ES:"EE.UU. Español", INTL:"Internacional"}
+
+    grouped = {}
     for each ch in m.channels
-        if _bool(ch, "isFeatured") then featured.push(ch)
+        code = _str(ch, "country")
+        if code = "" then code = "INTL"
+        if not grouped.DoesExist(code) then grouped[code] = []
+        grouped[code].push(ch)
     end for
-    if featured.count() = 0 then featured = m.channels
-    m.homeList = featured
-    m.homeGrid.content = _buildPosterContent(featured)
+
+    for each code in order
+        if grouped.DoesExist(code) and grouped[code].count() > 0 then
+            row = content.createChild("ContentNode")
+            row.title = labels[code]
+            for each ch in grouped[code]
+                item = row.createChild("ContentNode")
+                item.title = _str(ch, "name")
+                item.shortDescriptionLine1 = _str(ch, "categoryLabel")
+                item.hdPosterUrl = _str(ch, "logo")
+                m.browseFlat.push(ch)
+            end for
+        end if
+    end for
+
+    m.browseList.content = content
 end sub
 
-sub _populateLive()
-    code = m.countries[m.countryIdx]
-    if code = "ALL" then
-        m.liveList = m.channels
-        m.liveFilter.text = "Filtro: Todos   (pulsa * para cambiar país)"
-    else
-        filtered = []
-        for each ch in m.channels
-            if _str(ch, "country") = code then filtered.push(ch)
-        end for
-        m.liveList = filtered
-        m.liveFilter.text = "Filtro: " + code + "   (pulsa * para cambiar país)"
-    end if
-    m.liveGrid.content = _buildPosterContent(m.liveList)
+' CATEGORÍAS tab: one row per content category.
+sub _populateCat()
+    m.catFlat = []
+    content = createObject("roSGNode", "ContentNode")
+
+    order  = ["entertainment","news","sports","movies","kids","music","documentary","religious","shopping"]
+    labels = {entertainment:"Entretenimiento", news:"Noticias", sports:"Deportes",
+              movies:"Películas", kids:"Infantil", music:"Música",
+              documentary:"Documentales", religious:"Religioso", shopping:"Compras"}
+
+    grouped = {}
+    for each ch in m.channels
+        cat = _str(ch, "category")
+        if cat = "" then cat = "entertainment"
+        if not grouped.DoesExist(cat) then grouped[cat] = []
+        grouped[cat].push(ch)
+    end for
+
+    for each cat in order
+        if grouped.DoesExist(cat) and grouped[cat].count() > 0 then
+            row = content.createChild("ContentNode")
+            row.title = labels[cat]
+            for each ch in grouped[cat]
+                item = row.createChild("ContentNode")
+                item.title = _str(ch, "name")
+                item.shortDescriptionLine1 = _str(ch, "countryLabel")
+                item.hdPosterUrl = _str(ch, "logo")
+                m.catFlat.push(ch)
+            end for
+        end if
+    end for
+
+    m.catBrowse.content = content
 end sub
 
+' GUÍA tab: flat channel list.
 sub _populateGuide()
     content = createObject("roSGNode", "ContentNode")
     for each ch in m.channels
         item = content.createChild("ContentNode")
         meta = _str(ch, "countryLabel")
-        cat = _str(ch, "categoryLabel")
+        cat  = _str(ch, "categoryLabel")
         if cat <> "" then meta = meta + " · " + cat
-        item.title = _str(ch, "name") + "    —    En vivo   " + meta
+        item.title = _str(ch, "name") + "    —    " + meta
     end for
     m.guideList.content = content
 end sub
 
+' FAVORITOS tab: grid of saved channels.
 sub _populateFav()
     favs = _getFavorites()
     m.favList = []
@@ -179,7 +221,7 @@ sub _populateFav()
         m.favEmpty.visible = true
     else
         m.favEmpty.visible = false
-        m.favGrid.content = _buildPosterContent(m.favList)
+        m.favGrid.content  = _buildPosterContent(m.favList)
     end if
 end sub
 
@@ -190,7 +232,7 @@ function _buildPosterContent(list as object) as object
         item.title = _str(ch, "name")
         item.shortDescriptionLine1 = _str(ch, "name")
         meta = _str(ch, "countryLabel")
-        cat = _str(ch, "categoryLabel")
+        cat  = _str(ch, "categoryLabel")
         if cat <> "" then
             if meta <> "" then meta = meta + " · "
             meta = meta + cat
@@ -205,57 +247,62 @@ end function
 
 sub _highlightTab(i as integer)
     m.tab = i
-    keys = ["home", "live", "guide", "fav", "search", "settings"]
     for k = 0 to 5
         if k = i then
             m.tabsNodes[k].color = "#FFFFFF"
-            m.tabsNodes[k].font = "font:MediumBoldSystemFont"
+            m.tabsNodes[k].font  = "font:MediumBoldSystemFont"
         else
-            m.tabsNodes[k].color = "#A0A0A0"
-            m.tabsNodes[k].font = "font:MediumSystemFont"
+            m.tabsNodes[k].color = "#787878"
+            m.tabsNodes[k].font  = "font:MediumSystemFont"
         end if
     end for
-    m.underline.translation = [m.tabX[i], 78]
-    m.underline.width = m.tabW[i]
+    m.underline.translation = [m.tabX[i], 108]
+    m.underline.width       = m.tabW[i]
 
+    keys = ["home","live","guide","fav","search","settings"]
     for each name in keys
         m.views[name].visible = false
     end for
     m.views[keys[i]].visible = true
 
-    ' Hide the global message unless Home with no channels.
     if i = 0 and m.channels.count() = 0 and m.message.text <> "" then
         m.message.visible = true
     else
         m.message.visible = false
     end if
 
-    ' Refresh dynamic views on entry.
     if i = 3 then _populateFav()
 end sub
 
 sub _enterView()
     if m.tab = 0 then
-        m.activeGrid = m.homeGrid
-        m.mode = "view"
-        m.homeGrid.setFocus(true)
+        m.activeGrid     = m.browseList
+        m.activeFlatList = m.browseFlat
+        m.mode           = "view"
+        m.browseList.setFocus(true)
     else if m.tab = 1 then
-        m.activeGrid = m.liveGrid
-        m.mode = "view"
-        m.liveGrid.setFocus(true)
+        m.activeGrid     = m.catBrowse
+        m.activeFlatList = m.catFlat
+        m.mode           = "view"
+        m.catBrowse.setFocus(true)
     else if m.tab = 2 then
-        m.mode = "view"
+        m.activeGrid     = invalid
+        m.activeFlatList = invalid
+        m.mode           = "view"
         m.guideList.setFocus(true)
     else if m.tab = 3 then
-        m.activeGrid = m.favGrid
-        m.mode = "view"
+        m.activeGrid     = m.favGrid
+        m.activeFlatList = m.favList
+        m.mode           = "view"
         m.favGrid.setFocus(true)
     else if m.tab = 4 then
-        m.mode = "search"
+        m.mode        = "search"
         m.searchFocus = "kbd"
         m.kbd.setFocus(true)
     else if m.tab = 5 then
-        m.mode = "view"
+        m.activeGrid     = invalid
+        m.activeFlatList = invalid
+        m.mode           = "view"
         m.settingsList.setFocus(true)
     end if
 end sub
@@ -267,57 +314,62 @@ end sub
 
 ' ================= SELECTION HANDLERS =================
 
-sub _onHomeSelected()
-    _chooseFromList(m.homeList, m.homeGrid.itemSelected)
-end sub
-sub _onLiveSelected()
-    _chooseFromList(m.liveList, m.liveGrid.itemSelected)
-end sub
-sub _onFavSelected()
-    _chooseFromList(m.favList, m.favGrid.itemSelected)
-end sub
-sub _onSearchSelected()
-    _chooseFromList(m.searchList, m.searchGrid.itemSelected)
-end sub
-sub _onGuideSelected()
-    _chooseFromList(m.channels, m.guideList.itemSelected)
+sub _onBrowseSelected()
+    idx = m.browseList.itemSelected
+    if idx >= 0 and idx < m.browseFlat.count() then _play(m.browseFlat[idx])
 end sub
 
-sub _chooseFromList(list as object, idx as integer)
-    if idx < 0 or idx >= list.count() then return
-    _play(list[idx])
+sub _onCatSelected()
+    idx = m.catBrowse.itemSelected
+    if idx >= 0 and idx < m.catFlat.count() then _play(m.catFlat[idx])
+end sub
+
+sub _onFavSelected()
+    idx = m.favGrid.itemSelected
+    if idx >= 0 and idx < m.favList.count() then _play(m.favList[idx])
+end sub
+
+sub _onSearchSelected()
+    idx = m.searchGrid.itemSelected
+    if idx >= 0 and idx < m.searchList.count() then _play(m.searchList[idx])
+end sub
+
+sub _onGuideSelected()
+    idx = m.guideList.itemSelected
+    if idx >= 0 and idx < m.channels.count() then _play(m.channels[idx])
 end sub
 
 ' ================= PLAYER =================
 
 sub _play(ch as object)
+    if ch = invalid then return
     url = _str(ch, "streamUrl")
     if url = "" then url = _str(ch, "url")
     if url = "" then return
 
     m.currentChannel = ch
     content = createObject("roSGNode", "ContentNode")
-    content.url = url
-    content.title = _str(ch, "name")
+    content.url          = url
+    content.title        = _str(ch, "name")
     content.streamFormat = "hls"
-    content.live = true
-    m.video.content = content
-    m.video.visible = true
-    m.video.control = "play"
+    content.live         = true
+    m.video.content  = content
+    m.video.visible  = true
+    m.video.control  = "play"
 
     m.playerName.text = _str(ch, "name")
     meta = _str(ch, "countryLabel")
-    cat = _str(ch, "categoryLabel")
+    cat  = _str(ch, "categoryLabel")
     if cat <> "" then meta = meta + " · " + cat
-    m.playerMeta.text = meta
+    m.playerMeta.text      = meta
     logo = _str(ch, "logo")
-    m.playerLogo.uri = logo
+    m.playerLogo.uri       = logo
     m.playerInfoBg.visible = true
-    m.playerLogo.visible = (logo <> "")
-    m.playerName.visible = true
-    m.playerMeta.visible = true
-    m.playerMsg.text = "Cargando " + _str(ch, "name") + "…"
-    m.playerMsg.visible = true
+    m.playerLogo.visible   = (logo <> "")
+    m.playerName.visible   = true
+    m.playerMeta.visible   = true
+    m.playerMsg.text       = "Cargando " + _str(ch, "name") + "…"
+    m.playerMsg.visible    = true
 
     m.viewPlayer.visible = true
     m.mode = "player"
@@ -326,16 +378,15 @@ sub _play(ch as object)
 end sub
 
 sub _stopPlayer()
-    m.video.control = "stop"
-    m.video.visible = false
+    m.video.control      = "stop"
+    m.video.visible      = false
     m.viewPlayer.visible = false
-    m.playerMsg.visible = false
+    m.playerMsg.visible  = false
     m.mode = "view"
     if m.activeGrid <> invalid then
         m.activeGrid.setFocus(true)
     else
-        m.top.setFocus(true)
-        m.mode = "nav"
+        _backToNav()
     end if
 end sub
 
@@ -344,10 +395,10 @@ sub _onVideoState()
     if st = "playing" then
         m.playerMsg.visible = false
     else if st = "buffering" then
-        m.playerMsg.text = "Cargando…"
+        m.playerMsg.text    = "Cargando…"
         m.playerMsg.visible = true
     else if st = "error" then
-        m.playerMsg.text = "No se pudo reproducir el canal." + chr(10) + "Presiona Atrás para volver."
+        m.playerMsg.text    = "No se pudo reproducir el canal." + chr(10) + "Presiona Atrás para volver."
         m.playerMsg.visible = true
     end if
 end sub
@@ -379,9 +430,9 @@ sub _openContext(ch as object)
     b.title = "Reproducir"
     c = content.createChild("ContentNode")
     c.title = "Cerrar"
-    m.ctxMenu.content = content
-    m.ctxBg.visible = true
-    m.ctxMenu.visible = true
+    m.ctxMenu.content  = content
+    m.ctxBg.visible    = true
+    m.ctxMenu.visible  = true
     m.ctxMenu.jumpToItem = 0
     m.prevMode = m.mode
     m.mode = "ctx"
@@ -389,7 +440,7 @@ sub _openContext(ch as object)
 end sub
 
 sub _closeContext()
-    m.ctxBg.visible = false
+    m.ctxBg.visible   = false
     m.ctxMenu.visible = false
     m.mode = "view"
     if m.activeGrid <> invalid then m.activeGrid.setFocus(true)
@@ -397,14 +448,10 @@ end sub
 
 sub _ctxActivate()
     idx = m.ctxMenu.itemFocused
-    ch = m.ctxChannel
+    ch  = m.ctxChannel
     if idx = 0 then
         id = _str(ch, "id")
-        if _isFav(id) then
-            _removeFav(id)
-        else
-            _addFav(id)
-        end if
+        if _isFav(id) then _removeFav(id) else _addFav(id)
         if m.tab = 3 then _populateFav()
     else if idx = 1 then
         _closeContext()
@@ -412,6 +459,19 @@ sub _ctxActivate()
         return
     end if
     _closeContext()
+end sub
+
+sub _openContextForActiveGrid()
+    if m.tab = 2 then
+        idx = m.guideList.itemFocused
+        if idx >= 0 and idx < m.channels.count() then _openContext(m.channels[idx])
+        return
+    end if
+    if m.activeGrid = invalid or m.activeFlatList = invalid then return
+    idx = m.activeGrid.itemFocused
+    if idx >= 0 and idx < m.activeFlatList.count() then
+        _openContext(m.activeFlatList[idx])
+    end if
 end sub
 
 ' ================= SEARCH =================
@@ -434,12 +494,12 @@ sub _onSearchTextChange()
     end for
     m.searchList = results
     if results.count() = 0 then
-        m.searchGrid.content = createObject("roSGNode", "ContentNode")
-        m.searchEmpty.text = "Sin resultados para """ + q + """"
+        m.searchGrid.content  = createObject("roSGNode", "ContentNode")
+        m.searchEmpty.text    = "Sin resultados para """ + q + """"
         m.searchEmpty.visible = true
     else
         m.searchEmpty.visible = false
-        m.searchGrid.content = _buildPosterContent(results)
+        m.searchGrid.content  = _buildPosterContent(results)
     end if
 end sub
 
@@ -447,50 +507,43 @@ end sub
 
 sub _buildSettingsMenu()
     content = createObject("roSGNode", "ContentNode")
-    titles = ["Tema", "País preferido", "Controles parentales", "Limpiar datos guardados", "Recargar canales", "Acerca de GioRoku"]
+    titles = ["Tema", "Controles parentales", "Limpiar datos", "Recargar canales", "Acerca de GioRoku"]
     for each t in titles
         n = content.createChild("ContentNode")
         n.title = t
     end for
     m.settingsList.content = content
-    m.settingsInfo.text = "Selecciona una opción a la izquierda."
+    m.settingsInfo.text = "Selecciona una opción."
 end sub
 
 sub _onSettingsFocused()
     idx = m.settingsList.itemFocused
-    s = _getSettings()
+    s   = _getSettings()
     if idx = 0 then
         m.settingsInfo.text = "Tema: Oscuro" + chr(10) + chr(10) + "GioRoku usa un tema oscuro optimizado para televisores."
     else if idx = 1 then
-        m.settingsInfo.text = "País preferido: " + s.countryPref + chr(10) + chr(10) + "Pulsa OK para cambiar el país que se prioriza en Live TV."
-    else if idx = 2 then
-        st = "Desactivado"
-        if s.parentalEnabled then st = "Activado"
+        st = iif(s.parentalEnabled, "Activado", "Desactivado")
         m.settingsInfo.text = "Controles parentales: " + st + chr(10) + chr(10) + "Pulsa OK para activar o desactivar."
+    else if idx = 2 then
+        m.settingsInfo.text = "Limpiar datos" + chr(10) + chr(10) + "Borra favoritos y canales recientes almacenados en el Roku."
     else if idx = 3 then
-        m.settingsInfo.text = "Limpiar datos guardados" + chr(10) + chr(10) + "Pulsa OK para borrar favoritos y canales recientes."
-    else if idx = 4 then
         m.settingsInfo.text = "Recargar canales" + chr(10) + chr(10) + "Descarga de nuevo la lista de canales desde la API." + chr(10) + "Útil después de importar una nueva lista M3U."
-    else if idx = 5 then
-        m.settingsInfo.text = "GioRoku v1.0" + chr(10) + "Tu televisión latina en Roku." + chr(10) + chr(10) + "Datos: GitHub Pages API" + chr(10) + "Los streams provienen de fuentes públicas de terceros."
+    else if idx = 4 then
+        m.settingsInfo.text = "GioRoku v1.0" + chr(10) + "Tu televisión latina en Roku." + chr(10) + chr(10) + "Canales servidos desde GitHub Pages." + chr(10) + "Los streams provienen de fuentes públicas."
     end if
 end sub
 
 sub _onSettingsSelected()
     idx = m.settingsList.itemSelected
-    s = _getSettings()
+    s   = _getSettings()
     if idx = 1 then
-        m.countryIdx = (m.countryIdx + 1) mod m.countries.count()
-        _setSetting("countryPref", m.countries[m.countryIdx])
-        _populateLive()
-    else if idx = 2 then
         _setSetting("parentalEnabled", not s.parentalEnabled)
-    else if idx = 3 then
+    else if idx = 2 then
         _regWrite("favorites", "[]")
         _regWrite("recentChannels", "[]")
         m.settingsInfo.text = "Datos borrados." + chr(10) + "Favoritos y recientes se han limpiado."
         return
-    else if idx = 4 then
+    else if idx = 3 then
         m.settingsInfo.text = "Recargando canales…" + chr(10) + "La lista se actualizará en breve."
         _load()
         return
@@ -506,16 +559,12 @@ function onKeyEvent(key as string, press as boolean) as boolean
     if m.mode = "player" then
         if key = "back" then
             _stopPlayer()
-            return true
         else if key = "up" then
             _channelStep(1)
-            return true
         else if key = "down" then
             _channelStep(-1)
-            return true
         else if key = "options" then
             _openContext(m.currentChannel)
-            return true
         end if
         return true
     end if
@@ -550,11 +599,10 @@ function onKeyEvent(key as string, press as boolean) as boolean
             if m.searchFocus = "kbd" and m.searchList.count() > 0 then
                 m.searchFocus = "grid"
                 m.searchGrid.setFocus(true)
-                return true
             else
                 _backToNav()
-                return true
             end if
+            return true
         else if key = "up" and m.searchFocus = "grid" then
             m.searchFocus = "kbd"
             m.kbd.setFocus(true)
@@ -563,10 +611,34 @@ function onKeyEvent(key as string, press as boolean) as boolean
         return false
     end if
 
-    ' mode = "view"
+    ' mode = "view" — Up from the first row/item returns to the tab bar.
     if key = "back" then
         _backToNav()
         return true
+    else if key = "up" then
+        atTop = false
+        if m.tab = 0 then
+            rif = m.browseList.rowItemFocused
+            if type(rif) = "roArray" and rif.count() > 0 then
+                if rif[0] = 0 then atTop = true
+            end if
+        else if m.tab = 1 then
+            rif = m.catBrowse.rowItemFocused
+            if type(rif) = "roArray" and rif.count() > 0 then
+                if rif[0] = 0 then atTop = true
+            end if
+        else if m.tab = 2 then
+            if m.guideList.itemFocused = 0 then atTop = true
+        else if m.tab = 3 then
+            if m.favGrid.itemFocused < 6 then atTop = true
+        else if m.tab = 5 then
+            if m.settingsList.itemFocused = 0 then atTop = true
+        end if
+        if atTop then
+            _backToNav()
+            return true
+        end if
+        return false
     else if key = "options" then
         _openContextForActiveGrid()
         return true
@@ -574,27 +646,7 @@ function onKeyEvent(key as string, press as boolean) as boolean
     return false
 end function
 
-sub _openContextForActiveGrid()
-    list = invalid
-    grid = invalid
-    if m.tab = 0 then
-        list = m.homeList : grid = m.homeGrid
-    else if m.tab = 1 then
-        list = m.liveList : grid = m.liveGrid
-    else if m.tab = 3 then
-        list = m.favList : grid = m.favGrid
-    else if m.tab = 2 then
-        idx = m.guideList.itemFocused
-        if idx >= 0 and idx < m.channels.count() then _openContext(m.channels[idx])
-        return
-    end if
-    if grid <> invalid and list <> invalid then
-        idx = grid.itemFocused
-        if idx >= 0 and idx < list.count() then _openContext(list[idx])
-    end if
-end sub
-
-' ================= STORAGE (registry) =================
+' ================= STORAGE =================
 
 function _regRead(key as string) as dynamic
     reg = createObject("roRegistrySection", "GioRoku")
@@ -655,8 +707,8 @@ sub _addRecent(id as string)
 end sub
 
 function _getSettings() as object
-    raw = _regRead("settings")
-    defaults = { countryPref: "ALL", parentalEnabled: false }
+    raw      = _regRead("settings")
+    defaults = {parentalEnabled: false}
     if raw = invalid or raw = "" then return defaults
     p = parseJSON(raw)
     if type(p) <> "roAssociativeArray" then return defaults
@@ -667,7 +719,7 @@ function _getSettings() as object
 end function
 
 sub _setSetting(key as string, value as dynamic)
-    s = _getSettings()
+    s      = _getSettings()
     s[key] = value
     _regWrite("settings", formatJSON(s))
 end sub
@@ -675,21 +727,9 @@ end sub
 ' ================= HELPERS =================
 
 sub _showMessage(text as string)
-    m.message.text = text
+    m.message.text    = text
     m.message.visible = true
 end sub
-
-function _getJSON(path as string) as dynamic
-    req = createObject("roUrlTransfer")
-    req.setUrl(_baseUrl() + path)
-    req.enableHostVerification(false)
-    req.enablePeerVerification(false)
-    req.addHeader("Accept", "application/json")
-    req.addHeader("User-Agent", "GioRoku/1.0")
-    resp = req.getToString()
-    if resp = invalid or resp = "" then return invalid
-    return parseJSON(resp)
-end function
 
 function _findChannel(id as string) as dynamic
     for each ch in m.channels

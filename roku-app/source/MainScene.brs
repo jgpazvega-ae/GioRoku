@@ -12,14 +12,15 @@ sub init()
     m.underline = m.top.findNode("navUnderline")
 
     m.tabsNodes = []
-    for i = 0 to 5
+    for i = 0 to 6
         m.tabsNodes.push(m.top.findNode("tab" + i.toStr()))
     end for
-    m.tabX = [248, 422, 630, 734, 950, 1074]
-    m.tabW = [120, 162, 58, 140, 90, 110]
+    m.tabX = [248, 404, 595, 796, 892, 1068, 1199]
+    m.tabW = [120, 155, 165,  60, 140,   95,  110]
 
     m.views = {
         home:     m.top.findNode("viewHome"),
+        movies:   m.top.findNode("viewMovies"),
         live:     m.top.findNode("viewLive"),
         guide:    m.top.findNode("viewGuide"),
         fav:      m.top.findNode("viewFav"),
@@ -30,6 +31,9 @@ sub init()
     ' Grid / list widgets
     m.homeGrid    = m.top.findNode("homeGrid")
     m.catGrid     = m.top.findNode("catGrid")
+    m.moviesGrid  = m.top.findNode("moviesGrid")
+    m.movKbd      = m.top.findNode("movKbd")
+    m.movEmpty    = m.top.findNode("movEmpty")
     m.favGrid     = m.top.findNode("favGrid")
     m.favEmpty    = m.top.findNode("favEmpty")
     m.guideList   = m.top.findNode("guideList")
@@ -65,13 +69,17 @@ sub init()
     m.catFlat        = []
     m.favList        = []
     m.searchList     = []
+    m.allMovies      = []
+    m.moviesList     = []
     m.tab            = 0
     m.mode           = "nav"
     m.searchFocus    = "kbd"
+    m.movFocus       = "kbd"
     m.ctxChannel     = invalid
     m.activeGrid     = m.homeGrid
     m.activeFlatList = m.homeFlat
     m.currentChannel = invalid
+    m.currentMovie   = invalid
 
     ' Observers
     m.homeGrid.observeField("itemSelected",   "_onHomeSelected")
@@ -85,9 +93,12 @@ sub init()
     m.settingsList.observeField("itemFocused",  "_onSettingsFocused")
     m.settingsList.observeField("itemSelected", "_onSettingsSelected")
     m.kbd.observeField("text",   "_onSearchTextChange")
+    m.moviesGrid.observeField("itemSelected", "_onMoviesSelected")
+    m.movKbd.observeField("text", "_onMoviesTextChange")
     m.video.observeField("state","_onVideoState")
 
     _buildSettingsMenu()
+    _loadMovies()
     _highlightTab(0)
     m.top.setFocus(true)
 
@@ -287,7 +298,7 @@ end sub
 
 sub _highlightTab(i as integer)
     m.tab = i
-    for k = 0 to 5
+    for k = 0 to 6
         if k = i then
             m.tabsNodes[k].color = "#FFFFFF"
             m.tabsNodes[k].font  = "font:MediumBoldSystemFont"
@@ -299,14 +310,14 @@ sub _highlightTab(i as integer)
     m.underline.translation = [m.tabX[i], 108]
     m.underline.width       = m.tabW[i]
 
-    keys = ["home","live","guide","fav","search","settings"]
+    keys = ["home","movies","live","guide","fav","search","settings"]
     for each name in keys
         m.views[name].visible = false
     end for
     m.views[keys[i]].visible = true
 
-    ' Info panel: show for CANALES, CATEGORÍAS, GUÍA; hide for the rest.
-    m.infoPanel.visible = (i = 0 or i = 1 or i = 2)
+    ' Info panel: show for CANALES(0), CATEGORÍAS(2), GUÍA(3); hide for the rest.
+    m.infoPanel.visible = (i = 0 or i = 2 or i = 3)
 
     if i = 0 and m.channels.count() = 0 and m.message.text <> "" then
         m.message.visible = true
@@ -314,7 +325,7 @@ sub _highlightTab(i as integer)
         m.message.visible = false
     end if
 
-    if i = 3 then _populateFav()
+    if i = 4 then _populateFav()
 end sub
 
 sub _enterView()
@@ -324,25 +335,29 @@ sub _enterView()
         m.mode           = "view"
         m.homeGrid.setFocus(true)
     else if m.tab = 1 then
+        m.mode        = "movsearch"
+        m.movFocus    = "kbd"
+        m.movKbd.setFocus(true)
+    else if m.tab = 2 then
         m.activeGrid     = m.catGrid
         m.activeFlatList = m.catFlat
         m.mode           = "view"
         m.catGrid.setFocus(true)
-    else if m.tab = 2 then
+    else if m.tab = 3 then
         m.activeGrid     = invalid
         m.activeFlatList = invalid
         m.mode           = "view"
         m.guideList.setFocus(true)
-    else if m.tab = 3 then
+    else if m.tab = 4 then
         m.activeGrid     = m.favGrid
         m.activeFlatList = m.favList
         m.mode           = "view"
         m.favGrid.setFocus(true)
-    else if m.tab = 4 then
+    else if m.tab = 5 then
         m.mode        = "search"
         m.searchFocus = "kbd"
         m.kbd.setFocus(true)
-    else if m.tab = 5 then
+    else if m.tab = 6 then
         m.activeGrid     = invalid
         m.activeFlatList = invalid
         m.mode           = "view"
@@ -391,6 +406,7 @@ sub _play(ch as object)
     if url = "" then return
 
     m.currentChannel = ch
+    m.currentMovie   = invalid
     content = createObject("roSGNode", "ContentNode")
     content.url          = url
     content.title        = _str(ch, "name")
@@ -427,6 +443,13 @@ sub _stopPlayer()
     m.video.visible      = false
     m.viewPlayer.visible = false
     m.playerMsg.visible  = false
+    if m.currentMovie <> invalid then
+        m.currentMovie = invalid
+        m.mode      = "movsearch"
+        m.movFocus  = "grid"
+        m.moviesGrid.setFocus(true)
+        return
+    end if
     m.mode = "view"
     if m.activeGrid <> invalid then
         m.activeGrid.setFocus(true)
@@ -443,7 +466,12 @@ sub _onVideoState()
         m.playerMsg.text    = "Cargando…"
         m.playerMsg.visible = true
     else if st = "error" then
-        m.playerMsg.text    = "No se pudo reproducir el canal." + chr(10) + "Presiona Atrás para volver."
+        if m.currentMovie <> invalid then
+            playUrl = _toPlayUrl(_str(m.currentMovie, "imdbUrl"))
+            m.playerMsg.text = "Esta película se abre en playimdb:" + chr(10) + playUrl + chr(10) + chr(10) + "Roku no puede abrir páginas web directamente." + chr(10) + "Presiona Atrás para volver."
+        else
+            m.playerMsg.text = "No se pudo reproducir el canal." + chr(10) + "Presiona Atrás para volver."
+        end if
         m.playerMsg.visible = true
     end if
 end sub
@@ -554,6 +582,127 @@ sub _onSearchTextChange()
     end if
 end sub
 
+' ================= MOVIES (IMDb top + playimdb) =================
+
+' Loads the bundled IMDb Top catalog (no network needed).
+sub _loadMovies()
+    m.allMovies = []
+    raw = readAsciiFile("pkg:/data/movies.json")
+    if raw <> invalid and raw <> "" then
+        d = parseJSON(raw)
+        if d <> invalid and type(d) = "roAssociativeArray" and d.DoesExist("movies") and d.movies <> invalid then
+            m.allMovies = d.movies
+        end if
+    end if
+    _populateMovies(m.allMovies)
+end sub
+
+' Builds the portrait poster grid for the given movie list.
+sub _populateMovies(list as object)
+    m.moviesList = list
+    content = createObject("roSGNode", "ContentNode")
+    for each mv in list
+        item = content.createChild("ContentNode")
+        item.title = _str(mv, "title")
+        meta = ""
+        yr = _str(mv, "year")
+        rt = _str(mv, "rating")
+        if rt <> "" then meta = "★ " + rt
+        if yr <> "" then
+            if meta <> "" then meta = meta + "  ·  "
+            meta = meta + yr
+        end if
+        item.shortDescriptionLine1 = meta
+        item.shortDescriptionLine2 = _str(mv, "genre")
+        item.hdPosterUrl = _str(mv, "poster")
+    end for
+    m.moviesGrid.content = content
+    if list.count() = 0 then
+        m.movEmpty.visible = true
+    else
+        m.movEmpty.visible = false
+    end if
+end sub
+
+' Filters the catalog by title/genre as the user types.
+sub _onMoviesTextChange()
+    q = m.movKbd.text
+    if q = invalid then q = ""
+    q = lcase(q.trim())
+    if q = "" then
+        _populateMovies(m.allMovies)
+        return
+    end if
+    results = []
+    for each mv in m.allMovies
+        hay = lcase(_str(mv, "title") + " " + _str(mv, "genre"))
+        if instr(1, hay, q) > 0 then results.push(mv)
+    end for
+    if results.count() = 0 then
+        m.moviesList = []
+        m.moviesGrid.content = createObject("roSGNode", "ContentNode")
+        m.movEmpty.text    = "Sin resultados para """ + q + """"
+        m.movEmpty.visible = true
+    else
+        _populateMovies(results)
+    end if
+end sub
+
+sub _onMoviesSelected()
+    idx = m.moviesGrid.itemSelected
+    if idx >= 0 and idx < m.moviesList.count() then _playMovie(m.moviesList[idx])
+end sub
+
+' Transforms an IMDb URL into its playimdb counterpart by inserting "play"
+' right after the "www." prefix:
+'   https://www.imdb.com/title/tt0816692/  ->  https://www.playimdb.com/title/tt0816692/
+function _toPlayUrl(url as string) as string
+    marker = "www."
+    p = instr(1, url, marker)
+    if p = 0 then return url
+    head = left(url, p - 1 + len(marker))   ' up to and including "www."
+    tail = mid(url, p + len(marker))         ' everything after "www."
+    return head + "play" + tail
+end function
+
+sub _playMovie(mv as object)
+    if mv = invalid then return
+    imdbUrl = _str(mv, "imdbUrl")
+    playUrl = _toPlayUrl(imdbUrl)
+
+    m.currentMovie   = mv
+    m.currentChannel = invalid
+
+    content = createObject("roSGNode", "ContentNode")
+    content.url          = playUrl
+    content.title        = _str(mv, "title")
+    content.streamFormat = "hls"
+    m.video.content = content
+    m.video.visible = true
+    m.video.control = "play"
+
+    m.playerName.text = _str(mv, "title")
+    meta = ""
+    rt = _str(mv, "rating")
+    yr = _str(mv, "year")
+    gn = _str(mv, "genre")
+    if rt <> "" then meta = "★ " + rt
+    if yr <> "" then meta = meta + "  ·  " + yr
+    if gn <> "" then meta = meta + "  ·  " + gn
+    m.playerMeta.text      = meta
+    m.playerLogo.uri       = _str(mv, "poster")
+    m.playerInfoBg.visible = true
+    m.playerLogo.visible   = true
+    m.playerName.visible   = true
+    m.playerMeta.visible   = true
+    m.playerMsg.text       = "Abriendo en playimdb…" + chr(10) + playUrl
+    m.playerMsg.visible    = true
+
+    m.viewPlayer.visible = true
+    m.mode = "player"
+    m.top.setFocus(true)
+end sub
+
 ' ================= SETTINGS =================
 
 sub _buildSettingsMenu()
@@ -636,10 +785,10 @@ function onKeyEvent(key as string, press as boolean) as boolean
     ' Nav mode — left/right cycles tabs, OK/down enters the view.
     if m.mode = "nav" then
         if key = "left" then
-            _highlightTab((m.tab + 5) mod 6)
+            _highlightTab((m.tab + 6) mod 7)
             return true
         else if key = "right" then
-            _highlightTab((m.tab + 1) mod 6)
+            _highlightTab((m.tab + 1) mod 7)
             return true
         else if key = "OK" or key = "down" then
             _enterView()
@@ -666,6 +815,24 @@ function onKeyEvent(key as string, press as boolean) as boolean
         return false
     end if
 
+    ' Movies search mode.
+    if m.mode = "movsearch" then
+        if key = "back" then
+            if m.movFocus = "kbd" and m.moviesList.count() > 0 then
+                m.movFocus = "grid"
+                m.moviesGrid.setFocus(true)
+            else
+                _backToNav()
+            end if
+            return true
+        else if key = "up" and m.movFocus = "grid" then
+            m.movFocus = "kbd"
+            m.movKbd.setFocus(true)
+            return true
+        end if
+        return false
+    end if
+
     ' View mode.
     if key = "back" then
         _backToNav()
@@ -675,13 +842,13 @@ function onKeyEvent(key as string, press as boolean) as boolean
         atTop = false
         if m.tab = 0 then
             if m.homeGrid.itemFocused < 4 then atTop = true
-        else if m.tab = 1 then
-            if m.catGrid.itemFocused < 4 then atTop = true
         else if m.tab = 2 then
-            if m.guideList.itemFocused = 0 then atTop = true
+            if m.catGrid.itemFocused < 4 then atTop = true
         else if m.tab = 3 then
+            if m.guideList.itemFocused = 0 then atTop = true
+        else if m.tab = 4 then
             if m.favGrid.itemFocused < 6 then atTop = true
-        else if m.tab = 5 then
+        else if m.tab = 6 then
             if m.settingsList.itemFocused = 0 then atTop = true
         end if
         if atTop then

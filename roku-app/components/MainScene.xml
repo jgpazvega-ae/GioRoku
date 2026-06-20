@@ -15,11 +15,12 @@
            color="#E50000" translation="[56, 28]" />
     <Rectangle id="brandDiv" width="2" height="44" color="#2D2D2D" translation="[220, 22]" />
     <Label id="tab0" text="CANALES"    font="font:MediumBoldSystemFont" color="#FFFFFF" translation="[248, 34]" />
-    <Label id="tab1" text="CATEGORÍAS" font="font:MediumSystemFont"     color="#787878" translation="[422, 34]" />
-    <Label id="tab2" text="GUÍA"       font="font:MediumSystemFont"     color="#787878" translation="[630, 34]" />
-    <Label id="tab3" text="FAVORITOS"  font="font:MediumSystemFont"     color="#787878" translation="[734, 34]" />
-    <Label id="tab4" text="BUSCAR"     font="font:MediumSystemFont"     color="#787878" translation="[950, 34]" />
-    <Label id="tab5" text="AJUSTES"    font="font:MediumSystemFont"     color="#787878" translation="[1074, 34]" />
+    <Label id="tab1" text="PELÍCULAS"  font="font:MediumSystemFont"     color="#787878" translation="[404, 34]" />
+    <Label id="tab2" text="CATEGORÍAS" font="font:MediumSystemFont"     color="#787878" translation="[595, 34]" />
+    <Label id="tab3" text="GUÍA"       font="font:MediumSystemFont"     color="#787878" translation="[796, 34]" />
+    <Label id="tab4" text="FAVORITOS"  font="font:MediumSystemFont"     color="#787878" translation="[892, 34]" />
+    <Label id="tab5" text="BUSCAR"     font="font:MediumSystemFont"     color="#787878" translation="[1068, 34]" />
+    <Label id="tab6" text="AJUSTES"    font="font:MediumSystemFont"     color="#787878" translation="[1199, 34]" />
     <Rectangle id="navUnderline" width="120" height="4" color="#E50000" translation="[248, 108]" />
     <Label id="status" text="Cargando…" font="font:SmallSystemFont" color="#505050"
            horizAlign="right" width="1860" translation="[60, 82]" />
@@ -30,6 +31,21 @@
         basePosterSize="[276, 155]" caption1NumLines="1" caption2NumLines="0"
         numColumns="4" numRows="4" itemSpacing="[18, 24]"
         drawFocusFeedback="true" focusFootprintBlendColor="#E50000" />
+    </Group>
+
+    <!-- ===== VIEW: PELÍCULAS — IMDb top + search (portrait posters) ===== -->
+    <Group id="viewMovies" translation="[0, 124]" visible="false">
+      <Label id="movTitle" text="Películas · IMDb Top 250" font="font:MediumBoldSystemFont"
+             color="#FFFFFF" translation="[56, 4]" />
+      <MiniKeyboard id="movKbd" translation="[56, 44]" />
+      <Label id="movHelp" text="Escribe para buscar  ·  Atrás: ver pósters / volver"
+             font="font:SmallSystemFont" color="#505050" translation="[56, 392]" />
+      <PosterGrid id="moviesGrid" translation="[470, 8]"
+        basePosterSize="[196, 290]" caption1NumLines="1" caption2NumLines="1"
+        numColumns="6" numRows="2" itemSpacing="[18, 30]"
+        drawFocusFeedback="true" focusFootprintBlendColor="#E50000" />
+      <Label id="movEmpty" text="" font="font:MediumSystemFont" color="#505050"
+             translation="[470, 40]" width="1394" visible="false" />
     </Group>
 
     <!-- ===== VIEW: CATEGORÍAS — same grid layout ===== -->

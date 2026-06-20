@@ -154,7 +154,7 @@ sub _populateHome()
         if grouped.DoesExist(code) then
             for each ch in grouped[code]
                 item = content.createChild("ContentNode")
-                item.title = _str(ch, "name")
+                item.title = _displayName(ch)
                 item.shortDescriptionLine1 = _str(ch, "countryLabel")
                 item.hdPosterUrl = _str(ch, "logo")
                 m.homeFlat.push(ch)
@@ -181,7 +181,7 @@ sub _populateCat()
         if grouped.DoesExist(cat) then
             for each ch in grouped[cat]
                 item = content.createChild("ContentNode")
-                item.title = _str(ch, "name")
+                item.title = _displayName(ch)
                 item.shortDescriptionLine1 = _str(ch, "categoryLabel")
                 item.hdPosterUrl = _str(ch, "logo")
                 m.catFlat.push(ch)
@@ -194,15 +194,27 @@ end sub
 
 sub _populateGuide()
     content = createObject("roSGNode", "ContentNode")
+    n = 0
     for each ch in m.channels
+        n = n + 1
         item = content.createChild("ContentNode")
         meta = _str(ch, "countryLabel")
         cat  = _str(ch, "categoryLabel")
         if cat <> "" then meta = meta + " · " + cat
-        item.title = _str(ch, "name") + "    —    " + meta
+        num = _pad3(n)
+        item.title = num + "    " + _displayName(ch) + "    —    " + meta
     end for
     m.guideList.content = content
 end sub
+
+' Zero-pads a channel number to three digits, e.g. 7 -> "007".
+function _pad3(n as integer) as string
+    s = n.toStr()
+    while len(s) < 3
+        s = "0" + s
+    end while
+    return s
+end function
 
 sub _populateFav()
     favs = _getFavorites()
@@ -219,7 +231,7 @@ sub _populateFav()
         content = createObject("roSGNode", "ContentNode")
         for each ch in m.favList
             item = content.createChild("ContentNode")
-            item.title = _str(ch, "name")
+            item.title = _displayName(ch)
             item.shortDescriptionLine1 = _str(ch, "countryLabel")
             item.hdPosterUrl = _str(ch, "logo")
         end for
@@ -232,12 +244,14 @@ end sub
 ' Updates the right-side info panel with channel details.
 sub _updateInfoPanel(ch as object)
     if ch = invalid then
-        m.infoName.text = "Selecciona un canal"
-        m.infoMeta.text = ""
-        m.infoLogo.uri  = ""
+        m.infoName.text  = "Selecciona un canal"
+        m.infoMeta.text  = ""
+        m.infoBadge.text = ""
+        m.infoLogo.uri   = ""
         return
     end if
-    m.infoName.text = _str(ch, "name")
+    m.infoName.text  = _displayName(ch)
+    m.infoBadge.text = _badgeText(ch)
     country = _str(ch, "countryLabel")
     cat     = _str(ch, "categoryLabel")
     if country <> "" and cat <> "" then
@@ -386,10 +400,12 @@ sub _play(ch as object)
     m.video.visible  = true
     m.video.control  = "play"
 
-    m.playerName.text      = _str(ch, "name")
+    m.playerName.text      = _displayName(ch)
     meta = _str(ch, "countryLabel")
     cat  = _str(ch, "categoryLabel")
     if cat <> "" then meta = meta + " · " + cat
+    q = ucase(_str(ch, "quality"))
+    if q <> "" then meta = meta + " · " + q
     m.playerMeta.text      = meta
     logo = _str(ch, "logo")
     m.playerLogo.uri       = logo
@@ -397,7 +413,7 @@ sub _play(ch as object)
     m.playerLogo.visible   = (logo <> "")
     m.playerName.visible   = true
     m.playerMeta.visible   = true
-    m.playerMsg.text       = "Cargando " + _str(ch, "name") + "…"
+    m.playerMsg.text       = "Cargando " + _displayName(ch) + "…"
     m.playerMsg.visible    = true
 
     m.viewPlayer.visible = true
@@ -530,7 +546,7 @@ sub _onSearchTextChange()
         content = createObject("roSGNode", "ContentNode")
         for each ch in results
             item = content.createChild("ContentNode")
-            item.title = _str(ch, "name")
+            item.title = _displayName(ch)
             item.shortDescriptionLine1 = _str(ch, "countryLabel")
             item.hdPosterUrl = _str(ch, "logo")
         end for
@@ -780,6 +796,59 @@ function _str(aa as object, key as string) as string
     if v = invalid then return ""
     if type(v) = "String" or type(v) = "roString" then return v
     return v.toStr()
+end function
+
+' Returns the channel name without inline quality/status annotations such as
+' "(1080p)", "[Geo-blocked]" or "[Not 24/7]" so the grid looks clean and premium.
+function _displayName(ch as object) as string
+    name = _str(ch, "name")
+    out  = ""
+    depth = 0
+    for i = 0 to len(name) - 1
+        c = mid(name, i + 1, 1)
+        if c = "(" or c = "[" then
+            depth = depth + 1
+        else if c = ")" or c = "]" then
+            if depth > 0 then depth = depth - 1
+        else if depth = 0 then
+            out = out + c
+        end if
+    end for
+    out = out.trim()
+    ' Collapse any double spaces left behind.
+    while instr(1, out, "  ") > 0
+        out = _replaceAll(out, "  ", " ")
+    end while
+    if out = "" then return name
+    return out
+end function
+
+function _replaceAll(s as string, find as string, repl as string) as string
+    out = ""
+    rest = s
+    at  = instr(1, rest, find)
+    while at > 0
+        out  = out + left(rest, at - 1) + repl
+        rest = mid(rest, at + len(find))
+        at   = instr(1, rest, find)
+    end while
+    return out + rest
+end function
+
+' Builds the badge text shown in the info panel: live indicator + quality.
+function _badgeText(ch as object) as string
+    online = true
+    if ch <> invalid and type(ch) = "roAssociativeArray" and ch.DoesExist("isOnline") then
+        online = (ch.isOnline = true)
+    end if
+    if online then
+        txt = "● EN VIVO"
+    else
+        txt = "● FUERA DE LÍNEA"
+    end if
+    q = ucase(_str(ch, "quality"))
+    if q <> "" then txt = txt + "  ·  " + q
+    return txt
 end function
 
 function iif(cond as boolean, a as dynamic, b as dynamic) as dynamic

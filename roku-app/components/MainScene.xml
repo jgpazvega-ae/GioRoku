@@ -22,8 +22,11 @@
     <Label id="tab5" text="BUSCAR"     font="font:MediumSystemFont"     color="#787878" translation="[1068, 34]" />
     <Label id="tab6" text="AJUSTES"    font="font:MediumSystemFont"     color="#787878" translation="[1199, 34]" />
     <Rectangle id="navUnderline" width="120" height="4" color="#E50000" translation="[248, 108]" />
-    <Label id="status" text="Cargando…" font="font:SmallSystemFont" color="#505050"
-           horizAlign="right" width="1860" translation="[60, 82]" />
+    <!-- Live clock + date, like a cable set-top box -->
+    <Label id="clock" text="" font="font:LargeBoldSystemFont" color="#FFFFFF"
+           horizAlign="right" width="1872" translation="[0, 18]" />
+    <Label id="status" text="Cargando…" font="font:SmallSystemFont" color="#787878"
+           horizAlign="right" width="1872" translation="[0, 84]" />
 
     <!-- ===== VIEW: CANALES — thumbnail grid (left) ===== -->
     <Group id="viewHome" translation="[0, 124]" visible="true">
@@ -110,6 +113,10 @@
       <!-- Logo area -->
       <Rectangle id="infoLogoBg"   width="580" height="326" color="#1C1C1C" />
       <Poster    id="infoLogo"     width="520" height="293" translation="[30, 16]" />
+      <!-- Channel-number bug, top-left corner of the logo area -->
+      <Rectangle id="infoNumBg"    width="104" height="42" color="#E50000" translation="[30, 16]" />
+      <Label     id="infoNum"      text="" font="font:SmallBoldSystemFont" color="#FFFFFF"
+                 horizAlign="center" vertAlign="center" width="104" height="42" translation="[30, 16]" />
       <!-- Divider below logo -->
       <Rectangle id="infoDivider"  width="520" height="2"   color="#2D2D2D" translation="[30, 340]" />
       <!-- Channel info text -->
@@ -131,14 +138,29 @@
     <!-- ===== OVERLAY: Player ===== -->
     <Group id="viewPlayer" visible="false">
       <Video id="video" width="1920" height="1080" enableUI="false" />
-      <Rectangle id="playerInfoBg" width="820" height="100" color="#000000CC"
-                 translation="[40, 40]" visible="false" />
-      <Poster id="playerLogo" width="140" height="80"
-              translation="[48, 50]" visible="false" />
-      <Label id="playerName" font="font:MediumBoldSystemFont" color="#FFFFFF"
-             translation="[204, 52]" width="628" visible="false" />
-      <Label id="playerMeta" font="font:SmallSystemFont" color="#A0A0A0"
-             translation="[204, 96]" width="628" visible="false" />
+
+      <!-- Cable set-top style zap banner (bottom of screen, auto-hides) -->
+      <Group id="zapBanner" visible="false">
+        <Rectangle id="zapBg"    width="1920" height="200" color="#0A0A0AF2" translation="[0, 852]" />
+        <Rectangle id="zapTop"   width="1920" height="4"   color="#E50000"   translation="[0, 852]" />
+        <!-- Channel-number dial block -->
+        <Rectangle id="zapNumBg" width="210" height="120" color="#E50000" translation="[56, 892]" />
+        <Label id="zapNum" text="" font="font:LargeBoldSystemFont" color="#FFFFFF"
+               horizAlign="center" vertAlign="center" width="210" height="120" translation="[56, 892]" />
+        <!-- Logo -->
+        <Poster id="zapLogo" width="158" height="90" translation="[300, 907]" />
+        <!-- Name + meta -->
+        <Label id="zapName" text="" font="font:LargeBoldSystemFont" color="#FFFFFF"
+               translation="[484, 894]" width="1100" />
+        <Label id="zapMeta" text="" font="font:MediumSystemFont" color="#B0B0B0"
+               translation="[486, 958]" width="1100" />
+        <!-- Clock + hint, right side -->
+        <Label id="zapClock" text="" font="font:LargeBoldSystemFont" color="#FFFFFF"
+               horizAlign="right" width="1824" translation="[0, 900]" />
+        <Label id="zapHint" text="" font="font:SmallSystemFont" color="#707070"
+               horizAlign="right" width="1824" translation="[0, 1004]" />
+      </Group>
+
       <Label id="playerMsg" text="" font="font:MediumBoldSystemFont" color="#FFFFFF"
         horizAlign="center" vertAlign="center" width="1920" height="1080" visible="false" />
     </Group>

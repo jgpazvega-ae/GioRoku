@@ -43,21 +43,30 @@ sub init()
     m.settingsList  = m.top.findNode("settingsList")
     m.settingsInfo  = m.top.findNode("settingsInfo")
 
+    ' Header clock
+    m.clock = m.top.findNode("clock")
+
     ' Info panel (right side, shown for tabs 0-2)
     m.infoPanel  = m.top.findNode("infoPanel")
     m.infoName   = m.top.findNode("infoName")
     m.infoMeta   = m.top.findNode("infoMeta")
     m.infoLogo   = m.top.findNode("infoLogo")
     m.infoBadge  = m.top.findNode("infoBadge")
+    m.infoNum    = m.top.findNode("infoNum")
+    m.infoNumBg  = m.top.findNode("infoNumBg")
 
-    ' Player
-    m.viewPlayer   = m.top.findNode("viewPlayer")
-    m.video        = m.top.findNode("video")
-    m.playerMsg    = m.top.findNode("playerMsg")
-    m.playerInfoBg = m.top.findNode("playerInfoBg")
-    m.playerLogo   = m.top.findNode("playerLogo")
-    m.playerName   = m.top.findNode("playerName")
-    m.playerMeta   = m.top.findNode("playerMeta")
+    ' Player + cable zap banner
+    m.viewPlayer = m.top.findNode("viewPlayer")
+    m.video      = m.top.findNode("video")
+    m.playerMsg  = m.top.findNode("playerMsg")
+    m.zapBanner  = m.top.findNode("zapBanner")
+    m.zapNum     = m.top.findNode("zapNum")
+    m.zapNumBg   = m.top.findNode("zapNumBg")
+    m.zapLogo    = m.top.findNode("zapLogo")
+    m.zapName    = m.top.findNode("zapName")
+    m.zapMeta    = m.top.findNode("zapMeta")
+    m.zapClock   = m.top.findNode("zapClock")
+    m.zapHint    = m.top.findNode("zapHint")
 
     ' Context menu
     m.ctxBg   = m.top.findNode("ctxBg")
@@ -65,6 +74,8 @@ sub init()
 
     ' State
     m.channels       = []
+    m.chNum          = {}
+    m.countText      = ""
     m.homeFlat       = []
     m.catFlat        = []
     m.favList        = []
@@ -102,6 +113,20 @@ sub init()
     _highlightTab(0)
     m.top.setFocus(true)
 
+    ' Live clock — ticks every second.
+    m.clockTimer = createObject("roSGNode", "Timer")
+    m.clockTimer.duration = 1
+    m.clockTimer.repeat   = true
+    m.clockTimer.observeField("fire", "_tick")
+    m.clockTimer.control  = "start"
+    _tick()
+
+    ' Auto-hide timer for the zap banner.
+    m.zapTimer = createObject("roSGNode", "Timer")
+    m.zapTimer.duration = 5
+    m.zapTimer.repeat   = false
+    m.zapTimer.observeField("fire", "_hideZap")
+
     m.loadTimer = createObject("roSGNode", "Timer")
     m.loadTimer.duration = 0.3
     m.loadTimer.repeat   = false
@@ -133,7 +158,16 @@ sub _onLoadState()
             list = res.channels
         end if
         m.channels    = list
-        m.status.text = list.count().toStr() + " canales"
+        ' Assign stable cable-style channel numbers (1-based, master order).
+        m.chNum = {}
+        n = 0
+        for each ch in list
+            n = n + 1
+            id = _str(ch, "id")
+            if id <> "" then m.chNum[id] = n
+        end for
+        m.countText   = list.count().toStr() + " canales"
+        _tick()
         if list.count() = 0 then
             m.message.text = "Aún no hay canales." + chr(10) + chr(10) + "Importa una lista M3U desde la herramienta web."
             m.message.visible = true
@@ -255,14 +289,24 @@ end sub
 ' Updates the right-side info panel with channel details.
 sub _updateInfoPanel(ch as object)
     if ch = invalid then
-        m.infoName.text  = "Selecciona un canal"
-        m.infoMeta.text  = ""
-        m.infoBadge.text = ""
-        m.infoLogo.uri   = ""
+        m.infoName.text     = "Selecciona un canal"
+        m.infoMeta.text     = ""
+        m.infoBadge.text    = ""
+        m.infoLogo.uri      = ""
+        m.infoNum.text      = ""
+        m.infoNumBg.visible = false
         return
     end if
     m.infoName.text  = _displayName(ch)
     m.infoBadge.text = _badgeText(ch)
+    num = _chNumStr(ch)
+    if num <> "" then
+        m.infoNum.text      = num
+        m.infoNumBg.visible = true
+    else
+        m.infoNum.text      = ""
+        m.infoNumBg.visible = false
+    end if
     country = _str(ch, "countryLabel")
     cat     = _str(ch, "categoryLabel")
     if country <> "" and cat <> "" then
@@ -272,6 +316,13 @@ sub _updateInfoPanel(ch as object)
     end if
     m.infoLogo.uri = _str(ch, "logo")
 end sub
+
+' Returns the zero-padded cable channel number for a channel, or "".
+function _chNumStr(ch as object) as string
+    id = _str(ch, "id")
+    if id <> "" and m.chNum.DoesExist(id) then return _pad3(m.chNum[id])
+    return ""
+end function
 
 sub _onHomeFocused()
     idx = m.homeGrid.itemFocused
@@ -416,24 +467,19 @@ sub _play(ch as object)
     m.video.visible  = true
     m.video.control  = "play"
 
-    m.playerName.text      = _displayName(ch)
     meta = _str(ch, "countryLabel")
     cat  = _str(ch, "categoryLabel")
-    if cat <> "" then meta = meta + " · " + cat
+    if cat <> "" then meta = meta + "  ·  " + cat
     q = ucase(_str(ch, "quality"))
-    if q <> "" then meta = meta + " · " + q
-    m.playerMeta.text      = meta
-    logo = _str(ch, "logo")
-    m.playerLogo.uri       = logo
-    m.playerInfoBg.visible = true
-    m.playerLogo.visible   = (logo <> "")
-    m.playerName.visible   = true
-    m.playerMeta.visible   = true
-    m.playerMsg.text       = "Cargando " + _displayName(ch) + "…"
-    m.playerMsg.visible    = true
+    if q <> "" then meta = meta + "  ·  " + q
+
+    _setZap(_chNumStr(ch), _displayName(ch), meta, _str(ch, "logo"), "▲▼ Cambiar canal     Atrás Salir")
+    m.playerMsg.text    = "Cargando " + _displayName(ch) + "…"
+    m.playerMsg.visible = true
 
     m.viewPlayer.visible = true
     m.mode = "player"
+    _showZap()
     _addRecent(_str(ch, "id"))
     m.top.setFocus(true)
 end sub
@@ -443,6 +489,7 @@ sub _stopPlayer()
     m.video.visible      = false
     m.viewPlayer.visible = false
     m.playerMsg.visible  = false
+    _hideZap()
     if m.currentMovie <> invalid then
         m.currentMovie = invalid
         m.mode      = "movsearch"
@@ -661,7 +708,6 @@ sub _playMovie(mv as object)
     m.video.visible = true
     m.video.control = "play"
 
-    m.playerName.text = _str(mv, "title")
     meta = ""
     yr = _str(mv, "year")
     gn = _str(mv, "genre")
@@ -670,17 +716,14 @@ sub _playMovie(mv as object)
         if meta <> "" then meta = meta + "  ·  "
         meta = meta + gn
     end if
-    m.playerMeta.text      = meta
-    m.playerLogo.uri       = _str(mv, "poster")
-    m.playerInfoBg.visible = true
-    m.playerLogo.visible   = (_str(mv, "poster") <> "")
-    m.playerName.visible   = true
-    m.playerMeta.visible   = true
-    m.playerMsg.text       = "Cargando " + _str(mv, "title") + "…"
-    m.playerMsg.visible    = true
+
+    _setZap("", _str(mv, "title"), meta, _str(mv, "poster"), "Atrás Salir")
+    m.playerMsg.text    = "Cargando " + _str(mv, "title") + "…"
+    m.playerMsg.visible = true
 
     m.viewPlayer.visible = true
     m.mode = "player"
+    _showZap()
     m.top.setFocus(true)
 end sub
 
@@ -737,7 +780,7 @@ end sub
 function onKeyEvent(key as string, press as boolean) as boolean
     if not press then return false
 
-    ' Player mode — Back exits, Up/Down changes channel.
+    ' Player mode — Back exits, Up/Down zaps channels, OK toggles the banner.
     if m.mode = "player" then
         if key = "back" then
             _stopPlayer()
@@ -745,6 +788,12 @@ function onKeyEvent(key as string, press as boolean) as boolean
             _channelStep(1)
         else if key = "down" then
             _channelStep(-1)
+        else if key = "OK" then
+            if m.zapBanner.visible then
+                _hideZap()
+            else
+                _showZap()
+            end if
         else if key = "options" then
             _openContext(m.currentChannel)
         end if
@@ -843,6 +892,84 @@ function onKeyEvent(key as string, press as boolean) as boolean
     end if
     return false
 end function
+
+' ================= CLOCK + ZAP BANNER =================
+
+' Ticks once per second: refreshes the header clock, the date/count line and,
+' while the player banner is visible, the banner clock.
+sub _tick()
+    t = _clockStr()
+    if m.clock <> invalid then m.clock.text = t
+    if m.status <> invalid then
+        line = _dateStr()
+        if m.countText <> "" then line = line + "   ·   " + m.countText
+        m.status.text = line
+    end if
+    if m.zapBanner <> invalid and m.zapBanner.visible and m.zapClock <> invalid then
+        m.zapClock.text = t
+    end if
+end sub
+
+function _clockStr() as string
+    dt = createObject("roDateTime")
+    dt.toLocalTime()
+    h = dt.getHours()
+    mi = dt.getMinutes()
+    ampm = "a.m."
+    h12 = h
+    if h >= 12 then ampm = "p.m."
+    if h12 = 0 then h12 = 12
+    if h12 > 12 then h12 = h12 - 12
+    mm = mi.toStr()
+    if len(mm) < 2 then mm = "0" + mm
+    return h12.toStr() + ":" + mm + " " + ampm
+end function
+
+function _dateStr() as string
+    dt = createObject("roDateTime")
+    dt.toLocalTime()
+    days   = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"]
+    months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
+    dn = dt.getDayOfWeek()
+    mo = dt.getMonth()
+    day = days[0]
+    if dn >= 0 and dn <= 6 then day = days[dn]
+    mon = months[0]
+    if mo >= 1 and mo <= 12 then mon = months[mo - 1]
+    return day + " " + dt.getDayOfMonth().toStr() + " " + mon
+end function
+
+' Fills the zap banner fields. An empty number hides the red dial block (movies).
+sub _setZap(num as string, name as string, meta as string, logo as string, hint as string)
+    if num <> "" then
+        m.zapNum.text      = num
+        m.zapNumBg.visible = true
+        m.zapName.translation = [484, 894]
+        m.zapMeta.translation = [486, 958]
+    else
+        m.zapNum.text      = ""
+        m.zapNumBg.visible = false
+        m.zapName.translation = [300, 894]
+        m.zapMeta.translation = [302, 958]
+    end if
+    m.zapName.text   = name
+    m.zapMeta.text   = meta
+    m.zapLogo.uri    = logo
+    m.zapLogo.visible = (logo <> "")
+    m.zapHint.text   = hint
+end sub
+
+sub _showZap()
+    m.zapClock.text     = _clockStr()
+    m.zapBanner.visible = true
+    m.zapTimer.control  = "stop"
+    m.zapTimer.control  = "start"
+end sub
+
+sub _hideZap()
+    if m.zapBanner <> invalid then m.zapBanner.visible = false
+    if m.zapTimer <> invalid then m.zapTimer.control = "stop"
+end sub
 
 ' ================= STORAGE =================
 

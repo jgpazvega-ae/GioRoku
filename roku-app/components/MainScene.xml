@@ -11,105 +11,105 @@
     <!-- ===== Header ===== -->
     <Rectangle id="headerBar"    width="1920" height="120" color="#111111" />
     <Rectangle id="headerAccent" width="1920" height="4"   color="#E50000" />
-
-    <!-- Logo -->
     <Label id="brand" text="GioRoku" font="font:LargeBoldSystemFont"
            color="#E50000" translation="[56, 28]" />
     <Rectangle id="brandDiv" width="2" height="44" color="#2D2D2D" translation="[220, 22]" />
-
-    <!-- Tabs -->
-    <Label id="tab0" text="CANALES"    font="font:MediumBoldSystemFont" color="#FFFFFF"  translation="[248, 34]" />
-    <Label id="tab1" text="CATEGORÍAS" font="font:MediumSystemFont"     color="#787878"  translation="[422, 34]" />
-    <Label id="tab2" text="GUÍA"       font="font:MediumSystemFont"     color="#787878"  translation="[630, 34]" />
-    <Label id="tab3" text="FAVORITOS"  font="font:MediumSystemFont"     color="#787878"  translation="[734, 34]" />
-    <Label id="tab4" text="BUSCAR"     font="font:MediumSystemFont"     color="#787878"  translation="[950, 34]" />
-    <Label id="tab5" text="AJUSTES"    font="font:MediumSystemFont"     color="#787878"  translation="[1074, 34]" />
-
-    <!-- Active underline -->
+    <Label id="tab0" text="CANALES"    font="font:MediumBoldSystemFont" color="#FFFFFF" translation="[248, 34]" />
+    <Label id="tab1" text="CATEGORÍAS" font="font:MediumSystemFont"     color="#787878" translation="[422, 34]" />
+    <Label id="tab2" text="GUÍA"       font="font:MediumSystemFont"     color="#787878" translation="[630, 34]" />
+    <Label id="tab3" text="FAVORITOS"  font="font:MediumSystemFont"     color="#787878" translation="[734, 34]" />
+    <Label id="tab4" text="BUSCAR"     font="font:MediumSystemFont"     color="#787878" translation="[950, 34]" />
+    <Label id="tab5" text="AJUSTES"    font="font:MediumSystemFont"     color="#787878" translation="[1074, 34]" />
     <Rectangle id="navUnderline" width="120" height="4" color="#E50000" translation="[248, 108]" />
-
-    <!-- Status (right-aligned: channel count / loading state) -->
     <Label id="status" text="Cargando…" font="font:SmallSystemFont" color="#505050"
            horizAlign="right" width="1860" translation="[60, 82]" />
 
-    <!-- ===== VIEW: CANALES — RowList by country, MX first ===== -->
+    <!-- ===== VIEW: CANALES — thumbnail grid (left) ===== -->
     <Group id="viewHome" translation="[0, 124]" visible="true">
-      <RowList id="browseList"
-        itemSize="[1920, 210]"
-        itemSpacing="[0, 2]"
-        rowLabelOffset="[56, 8]"
-        rowItemSize="[260, 162]"
-        rowItemSpacing="[16, 0]"
-        rowItemStartOffset="56"
-        numRows="4"
-        focusBitmapBlendColor="#E50000"
-        drawFocusFeedback="true"
-        rowLabelColor="#C8C8C8"
-        rowFocusAnimationStyle="fixedFocusWrap" />
+      <PosterGrid id="homeGrid" translation="[56, 16]"
+        basePosterSize="[276, 155]" caption1NumLines="1" caption2NumLines="0"
+        numColumns="4" numRows="4" itemSpacing="[18, 24]"
+        drawFocusFeedback="true" focusFootprintBlendColor="#E50000" />
     </Group>
 
-    <!-- ===== VIEW: CATEGORÍAS — RowList by category ===== -->
+    <!-- ===== VIEW: CATEGORÍAS — same grid layout ===== -->
     <Group id="viewLive" translation="[0, 124]" visible="false">
-      <RowList id="catBrowse"
-        itemSize="[1920, 210]"
-        itemSpacing="[0, 2]"
-        rowLabelOffset="[56, 8]"
-        rowItemSize="[260, 162]"
-        rowItemSpacing="[16, 0]"
-        rowItemStartOffset="56"
-        numRows="4"
-        focusBitmapBlendColor="#E50000"
-        drawFocusFeedback="true"
-        rowLabelColor="#C8C8C8"
-        rowFocusAnimationStyle="fixedFocusWrap" />
+      <PosterGrid id="catGrid" translation="[56, 16]"
+        basePosterSize="[276, 155]" caption1NumLines="1" caption2NumLines="0"
+        numColumns="4" numRows="4" itemSpacing="[18, 24]"
+        drawFocusFeedback="true" focusFootprintBlendColor="#E50000" />
     </Group>
 
-    <!-- ===== VIEW: GUÍA — full channel list ===== -->
+    <!-- ===== VIEW: GUÍA — channel list (left portion) ===== -->
     <Group id="viewGuide" translation="[0, 124]" visible="false">
       <Label id="guideTitle" text="Guía de canales" font="font:MediumBoldSystemFont"
              color="#FFFFFF" translation="[56, 4]" />
-      <LabelList id="guideList" translation="[56, 48]" width="1808"
-        itemSize="[1808, 60]" itemSpacing="[0, 4]" textHorizAlign="left"
+      <LabelList id="guideList" translation="[56, 52]" width="1200"
+        itemSize="[1200, 60]" itemSpacing="[0, 4]" textHorizAlign="left"
         color="#FFFFFF" focusBitmapBlendColor="#E50000" numRows="14" />
     </Group>
 
-    <!-- ===== VIEW: FAVORITOS ===== -->
+    <!-- ===== VIEW: FAVORITOS — full width grid ===== -->
     <Group id="viewFav" translation="[0, 124]" visible="false">
       <Label id="favTitle" text="Mis Favoritos" font="font:MediumBoldSystemFont"
              color="#FFFFFF" translation="[56, 4]" />
-      <PosterGrid id="favGrid" translation="[56, 48]"
-        basePosterSize="[260, 162]" caption1NumLines="1" caption2NumLines="1"
-        numColumns="6" numRows="4" itemSpacing="[16, 24]"
+      <PosterGrid id="favGrid" translation="[56, 52]"
+        basePosterSize="[260, 146]" caption1NumLines="1" caption2NumLines="0"
+        numColumns="6" numRows="4" itemSpacing="[16, 22]"
         drawFocusFeedback="true" focusFootprintBlendColor="#E50000" />
       <Label id="favEmpty"
         text="No tienes favoritos aún.&#10;Presiona * sobre un canal para agregarlo."
         font="font:MediumSystemFont" color="#505050"
         horizAlign="center" vertAlign="center"
-        width="1808" height="560" translation="[56, 64]" visible="false" />
+        width="1808" height="560" translation="[56, 68]" visible="false" />
     </Group>
 
     <!-- ===== VIEW: BUSCAR ===== -->
     <Group id="viewSearch" translation="[0, 124]" visible="false">
       <MiniKeyboard id="kbd" translation="[56, 8]" />
       <Label id="searchHelp" text="Escribe para buscar  ·  Atrás: ver resultados / volver"
-             font="font:SmallSystemFont" color="#505050" translation="[56, 360]" />
-      <PosterGrid id="searchGrid" translation="[56, 396]"
+             font="font:SmallSystemFont" color="#505050" translation="[56, 356]" />
+      <PosterGrid id="searchGrid" translation="[56, 390]"
         basePosterSize="[220, 124]" caption1NumLines="1"
-        numColumns="7" numRows="3" itemSpacing="[16, 24]"
+        numColumns="7" numRows="3" itemSpacing="[16, 22]"
         drawFocusFeedback="true" focusFootprintBlendColor="#E50000" />
       <Label id="searchEmpty" text="" font="font:MediumSystemFont" color="#505050"
-             translation="[56, 420]" width="1808" visible="false" />
+             translation="[56, 416]" width="1808" visible="false" />
     </Group>
 
     <!-- ===== VIEW: AJUSTES ===== -->
     <Group id="viewSettings" translation="[0, 124]" visible="false">
-      <LabelList id="settingsList" translation="[56, 16]" width="540"
-        itemSize="[540, 68]" itemSpacing="[0, 6]" textHorizAlign="left"
+      <LabelList id="settingsList" translation="[56, 16]" width="520"
+        itemSize="[520, 68]" itemSpacing="[0, 6]" textHorizAlign="left"
         color="#FFFFFF" focusBitmapBlendColor="#E50000" />
-      <Rectangle id="settingsPanel" width="1180" height="820"
-                 color="#181818" translation="[656, 0]" />
+      <Rectangle id="settingsPanel" width="1200" height="820" color="#181818" translation="[636, 0]" />
       <Label id="settingsInfo" font="font:MediumSystemFont" color="#C0C0C0"
-        translation="[688, 32]" width="1116" height="780" numLines="18" wrap="true" />
+        translation="[668, 32]" width="1136" height="780" numLines="18" wrap="true" />
+    </Group>
+
+    <!-- ===== Persistent channel info panel (right side, shown for tabs 0-2) ===== -->
+    <!-- Sits to the right of the grid/list at x=1300, below the header. -->
+    <Group id="infoPanel" translation="[1300, 124]" visible="false">
+      <Rectangle id="infoPanelBg"  width="580" height="956" color="#141414" />
+      <!-- Logo area -->
+      <Rectangle id="infoLogoBg"   width="580" height="326" color="#1C1C1C" />
+      <Poster    id="infoLogo"     width="520" height="293" translation="[30, 16]" />
+      <!-- Divider below logo -->
+      <Rectangle id="infoDivider"  width="520" height="2"   color="#2D2D2D" translation="[30, 340]" />
+      <!-- Channel info text -->
+      <Label id="infoName"  text="Selecciona un canal"
+             font="font:LargeBoldSystemFont" color="#FFFFFF"
+             translation="[30, 358]" width="520" numLines="2" wrap="true" />
+      <Label id="infoBadge" text="● EN VIVO"
+             font="font:SmallBoldSystemFont" color="#E50000"
+             translation="[30, 432]" />
+      <Label id="infoMeta"  text=""
+             font="font:SmallSystemFont" color="#909090"
+             translation="[30, 462]" width="520" numLines="2" wrap="true" />
+      <!-- Bottom hint -->
+      <Label id="infoHint"  text="OK: Ver canal   *: Favoritos"
+             font="font:SmallSystemFont" color="#383838"
+             translation="[30, 900]" />
     </Group>
 
     <!-- ===== OVERLAY: Player ===== -->
@@ -134,7 +134,7 @@
       translation="[740, 420]" textHorizAlign="center"
       focusBitmapBlendColor="#E50000" visible="false" />
 
-    <!-- ===== Full-screen status message (empty / error) ===== -->
+    <!-- ===== Full-screen status message ===== -->
     <Label id="message" text="" font="font:MediumSystemFont" color="#505050"
       horizAlign="center" vertAlign="center"
       width="1920" height="820" translation="[0, 130]" visible="false" />

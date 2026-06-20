@@ -15,7 +15,6 @@ sub init()
     for i = 0 to 5
         m.tabsNodes.push(m.top.findNode("tab" + i.toStr()))
     end for
-    ' X positions for each tab label; widths for the underline indicator.
     m.tabX = [248, 422, 630, 734, 950, 1074]
     m.tabW = [120, 162, 58, 140, 90, 110]
 
@@ -28,8 +27,9 @@ sub init()
         settings: m.top.findNode("viewSettings")
     }
 
-    m.browseList  = m.top.findNode("browseList")
-    m.catBrowse   = m.top.findNode("catBrowse")
+    ' Grid / list widgets
+    m.homeGrid    = m.top.findNode("homeGrid")
+    m.catGrid     = m.top.findNode("catGrid")
     m.favGrid     = m.top.findNode("favGrid")
     m.favEmpty    = m.top.findNode("favEmpty")
     m.guideList   = m.top.findNode("guideList")
@@ -39,38 +39,51 @@ sub init()
     m.settingsList  = m.top.findNode("settingsList")
     m.settingsInfo  = m.top.findNode("settingsInfo")
 
-    m.viewPlayer  = m.top.findNode("viewPlayer")
-    m.video       = m.top.findNode("video")
-    m.playerMsg   = m.top.findNode("playerMsg")
-    m.playerInfoBg = m.top.findNode("playerInfoBg")
-    m.playerLogo  = m.top.findNode("playerLogo")
-    m.playerName  = m.top.findNode("playerName")
-    m.playerMeta  = m.top.findNode("playerMeta")
+    ' Info panel (right side, shown for tabs 0-2)
+    m.infoPanel  = m.top.findNode("infoPanel")
+    m.infoName   = m.top.findNode("infoName")
+    m.infoMeta   = m.top.findNode("infoMeta")
+    m.infoLogo   = m.top.findNode("infoLogo")
+    m.infoBadge  = m.top.findNode("infoBadge")
 
+    ' Player
+    m.viewPlayer   = m.top.findNode("viewPlayer")
+    m.video        = m.top.findNode("video")
+    m.playerMsg    = m.top.findNode("playerMsg")
+    m.playerInfoBg = m.top.findNode("playerInfoBg")
+    m.playerLogo   = m.top.findNode("playerLogo")
+    m.playerName   = m.top.findNode("playerName")
+    m.playerMeta   = m.top.findNode("playerMeta")
+
+    ' Context menu
     m.ctxBg   = m.top.findNode("ctxBg")
     m.ctxMenu = m.top.findNode("ctxMenu")
 
-    ' Runtime state
-    m.channels     = []
-    m.browseFlat   = []
-    m.catFlat      = []
-    m.favList      = []
-    m.searchList   = []
-    m.tab          = 0
-    m.mode         = "nav"
-    m.searchFocus  = "kbd"
-    m.ctxChannel   = invalid
-    m.activeGrid      = m.browseList
-    m.activeFlatList  = m.browseFlat
-    m.currentChannel  = invalid
+    ' State
+    m.channels       = []
+    m.homeFlat       = []
+    m.catFlat        = []
+    m.favList        = []
+    m.searchList     = []
+    m.tab            = 0
+    m.mode           = "nav"
+    m.searchFocus    = "kbd"
+    m.ctxChannel     = invalid
+    m.activeGrid     = m.homeGrid
+    m.activeFlatList = m.homeFlat
+    m.currentChannel = invalid
 
-    m.browseList.observeField("itemSelected",  "_onBrowseSelected")
-    m.catBrowse.observeField("itemSelected",   "_onCatSelected")
-    m.favGrid.observeField("itemSelected",     "_onFavSelected")
-    m.searchGrid.observeField("itemSelected",  "_onSearchSelected")
-    m.guideList.observeField("itemSelected",   "_onGuideSelected")
-    m.settingsList.observeField("itemFocused", "_onSettingsFocused")
-    m.settingsList.observeField("itemSelected","_onSettingsSelected")
+    ' Observers
+    m.homeGrid.observeField("itemSelected",   "_onHomeSelected")
+    m.homeGrid.observeField("itemFocused",    "_onHomeFocused")
+    m.catGrid.observeField("itemSelected",    "_onCatSelected")
+    m.catGrid.observeField("itemFocused",     "_onCatFocused")
+    m.favGrid.observeField("itemSelected",    "_onFavSelected")
+    m.searchGrid.observeField("itemSelected", "_onSearchSelected")
+    m.guideList.observeField("itemSelected",  "_onGuideSelected")
+    m.guideList.observeField("itemFocused",   "_onGuideFocused")
+    m.settingsList.observeField("itemFocused",  "_onSettingsFocused")
+    m.settingsList.observeField("itemSelected", "_onSettingsSelected")
     m.kbd.observeField("text",   "_onSearchTextChange")
     m.video.observeField("state","_onVideoState")
 
@@ -88,7 +101,7 @@ end sub
 ' ================= DATA LOAD =================
 
 sub _load()
-    m.status.text    = "Conectando…"
+    m.status.text     = "Conectando…"
     m.message.visible = false
     m.loadTask = createObject("roSGNode", "LoadTask")
     m.loadTask.baseUrl = _baseUrl()
@@ -125,16 +138,11 @@ end sub
 
 ' ================= VIEW POPULATION =================
 
-' CANALES tab: one row per country, México first.
+' CANALES: flat grid, México first, then remaining countries in order.
 sub _populateHome()
-    m.browseFlat = []
+    m.homeFlat = []
     content = createObject("roSGNode", "ContentNode")
-
-    order  = ["MX","AR","CO","CL","PE","UY","VE","EC","BO","CA","US_ES","INTL"]
-    labels = {MX:"México", AR:"Argentina", CO:"Colombia", CL:"Chile", PE:"Perú",
-              UY:"Uruguay", VE:"Venezuela", EC:"Ecuador", BO:"Bolivia",
-              CA:"Centroamérica", US_ES:"EE.UU. Español", INTL:"Internacional"}
-
+    order   = ["MX","AR","CO","CL","PE","UY","VE","EC","BO","CA","US_ES","INTL"]
     grouped = {}
     for each ch in m.channels
         code = _str(ch, "country")
@@ -142,34 +150,26 @@ sub _populateHome()
         if not grouped.DoesExist(code) then grouped[code] = []
         grouped[code].push(ch)
     end for
-
     for each code in order
-        if grouped.DoesExist(code) and grouped[code].count() > 0 then
-            row = content.createChild("ContentNode")
-            row.title = labels[code]
+        if grouped.DoesExist(code) then
             for each ch in grouped[code]
-                item = row.createChild("ContentNode")
+                item = content.createChild("ContentNode")
                 item.title = _str(ch, "name")
-                item.shortDescriptionLine1 = _str(ch, "categoryLabel")
+                item.shortDescriptionLine1 = _str(ch, "countryLabel")
                 item.hdPosterUrl = _str(ch, "logo")
-                m.browseFlat.push(ch)
+                m.homeFlat.push(ch)
             end for
         end if
     end for
-
-    m.browseList.content = content
+    m.homeGrid.content = content
+    if m.homeFlat.count() > 0 then _updateInfoPanel(m.homeFlat[0])
 end sub
 
-' CATEGORÍAS tab: one row per content category.
+' CATEGORÍAS: flat grid organized by category.
 sub _populateCat()
     m.catFlat = []
     content = createObject("roSGNode", "ContentNode")
-
-    order  = ["entertainment","news","sports","movies","kids","music","documentary","religious","shopping"]
-    labels = {entertainment:"Entretenimiento", news:"Noticias", sports:"Deportes",
-              movies:"Películas", kids:"Infantil", music:"Música",
-              documentary:"Documentales", religious:"Religioso", shopping:"Compras"}
-
+    order   = ["entertainment","news","sports","movies","kids","music","documentary","religious","shopping"]
     grouped = {}
     for each ch in m.channels
         cat = _str(ch, "category")
@@ -177,25 +177,21 @@ sub _populateCat()
         if not grouped.DoesExist(cat) then grouped[cat] = []
         grouped[cat].push(ch)
     end for
-
     for each cat in order
-        if grouped.DoesExist(cat) and grouped[cat].count() > 0 then
-            row = content.createChild("ContentNode")
-            row.title = labels[cat]
+        if grouped.DoesExist(cat) then
             for each ch in grouped[cat]
-                item = row.createChild("ContentNode")
+                item = content.createChild("ContentNode")
                 item.title = _str(ch, "name")
-                item.shortDescriptionLine1 = _str(ch, "countryLabel")
+                item.shortDescriptionLine1 = _str(ch, "categoryLabel")
                 item.hdPosterUrl = _str(ch, "logo")
                 m.catFlat.push(ch)
             end for
         end if
     end for
-
-    m.catBrowse.content = content
+    m.catGrid.content = content
+    if m.catFlat.count() > 0 then _updateInfoPanel(m.catFlat[0])
 end sub
 
-' GUÍA tab: flat channel list.
 sub _populateGuide()
     content = createObject("roSGNode", "ContentNode")
     for each ch in m.channels
@@ -208,7 +204,6 @@ sub _populateGuide()
     m.guideList.content = content
 end sub
 
-' FAVORITOS tab: grid of saved channels.
 sub _populateFav()
     favs = _getFavorites()
     m.favList = []
@@ -221,27 +216,58 @@ sub _populateFav()
         m.favEmpty.visible = true
     else
         m.favEmpty.visible = false
-        m.favGrid.content  = _buildPosterContent(m.favList)
+        content = createObject("roSGNode", "ContentNode")
+        for each ch in m.favList
+            item = content.createChild("ContentNode")
+            item.title = _str(ch, "name")
+            item.shortDescriptionLine1 = _str(ch, "countryLabel")
+            item.hdPosterUrl = _str(ch, "logo")
+        end for
+        m.favGrid.content = content
     end if
 end sub
 
-function _buildPosterContent(list as object) as object
-    content = createObject("roSGNode", "ContentNode")
-    for each ch in list
-        item = content.createChild("ContentNode")
-        item.title = _str(ch, "name")
-        item.shortDescriptionLine1 = _str(ch, "name")
-        meta = _str(ch, "countryLabel")
-        cat  = _str(ch, "categoryLabel")
-        if cat <> "" then
-            if meta <> "" then meta = meta + " · "
-            meta = meta + cat
-        end if
-        item.shortDescriptionLine2 = meta
-        item.hdPosterUrl = _str(ch, "logo")
-    end for
-    return content
-end function
+' ================= INFO PANEL =================
+
+' Updates the right-side info panel with channel details.
+sub _updateInfoPanel(ch as object)
+    if ch = invalid then
+        m.infoName.text = "Selecciona un canal"
+        m.infoMeta.text = ""
+        m.infoLogo.uri  = ""
+        return
+    end if
+    m.infoName.text = _str(ch, "name")
+    country = _str(ch, "countryLabel")
+    cat     = _str(ch, "categoryLabel")
+    if country <> "" and cat <> "" then
+        m.infoMeta.text = country + " · " + cat
+    else
+        m.infoMeta.text = country + cat
+    end if
+    m.infoLogo.uri = _str(ch, "logo")
+end sub
+
+sub _onHomeFocused()
+    idx = m.homeGrid.itemFocused
+    if idx >= 0 and idx < m.homeFlat.count() then
+        _updateInfoPanel(m.homeFlat[idx])
+    end if
+end sub
+
+sub _onCatFocused()
+    idx = m.catGrid.itemFocused
+    if idx >= 0 and idx < m.catFlat.count() then
+        _updateInfoPanel(m.catFlat[idx])
+    end if
+end sub
+
+sub _onGuideFocused()
+    idx = m.guideList.itemFocused
+    if idx >= 0 and idx < m.channels.count() then
+        _updateInfoPanel(m.channels[idx])
+    end if
+end sub
 
 ' ================= NAV / VIEW SWITCHING =================
 
@@ -265,6 +291,9 @@ sub _highlightTab(i as integer)
     end for
     m.views[keys[i]].visible = true
 
+    ' Info panel: show for CANALES, CATEGORÍAS, GUÍA; hide for the rest.
+    m.infoPanel.visible = (i = 0 or i = 1 or i = 2)
+
     if i = 0 and m.channels.count() = 0 and m.message.text <> "" then
         m.message.visible = true
     else
@@ -276,15 +305,15 @@ end sub
 
 sub _enterView()
     if m.tab = 0 then
-        m.activeGrid     = m.browseList
-        m.activeFlatList = m.browseFlat
+        m.activeGrid     = m.homeGrid
+        m.activeFlatList = m.homeFlat
         m.mode           = "view"
-        m.browseList.setFocus(true)
+        m.homeGrid.setFocus(true)
     else if m.tab = 1 then
-        m.activeGrid     = m.catBrowse
+        m.activeGrid     = m.catGrid
         m.activeFlatList = m.catFlat
         m.mode           = "view"
-        m.catBrowse.setFocus(true)
+        m.catGrid.setFocus(true)
     else if m.tab = 2 then
         m.activeGrid     = invalid
         m.activeFlatList = invalid
@@ -314,13 +343,13 @@ end sub
 
 ' ================= SELECTION HANDLERS =================
 
-sub _onBrowseSelected()
-    idx = m.browseList.itemSelected
-    if idx >= 0 and idx < m.browseFlat.count() then _play(m.browseFlat[idx])
+sub _onHomeSelected()
+    idx = m.homeGrid.itemSelected
+    if idx >= 0 and idx < m.homeFlat.count() then _play(m.homeFlat[idx])
 end sub
 
 sub _onCatSelected()
-    idx = m.catBrowse.itemSelected
+    idx = m.catGrid.itemSelected
     if idx >= 0 and idx < m.catFlat.count() then _play(m.catFlat[idx])
 end sub
 
@@ -357,7 +386,7 @@ sub _play(ch as object)
     m.video.visible  = true
     m.video.control  = "play"
 
-    m.playerName.text = _str(ch, "name")
+    m.playerName.text      = _str(ch, "name")
     meta = _str(ch, "countryLabel")
     cat  = _str(ch, "categoryLabel")
     if cat <> "" then meta = meta + " · " + cat
@@ -434,7 +463,6 @@ sub _openContext(ch as object)
     m.ctxBg.visible    = true
     m.ctxMenu.visible  = true
     m.ctxMenu.jumpToItem = 0
-    m.prevMode = m.mode
     m.mode = "ctx"
     m.ctxMenu.setFocus(true)
 end sub
@@ -482,7 +510,7 @@ sub _onSearchTextChange()
     q = lcase(q.trim())
     if q = "" then
         m.searchList = []
-        m.searchGrid.content = createObject("roSGNode", "ContentNode")
+        m.searchGrid.content  = createObject("roSGNode", "ContentNode")
         m.searchEmpty.visible = false
         return
     end if
@@ -499,7 +527,14 @@ sub _onSearchTextChange()
         m.searchEmpty.visible = true
     else
         m.searchEmpty.visible = false
-        m.searchGrid.content  = _buildPosterContent(results)
+        content = createObject("roSGNode", "ContentNode")
+        for each ch in results
+            item = content.createChild("ContentNode")
+            item.title = _str(ch, "name")
+            item.shortDescriptionLine1 = _str(ch, "countryLabel")
+            item.hdPosterUrl = _str(ch, "logo")
+        end for
+        m.searchGrid.content = content
     end if
 end sub
 
@@ -513,7 +548,7 @@ sub _buildSettingsMenu()
         n.title = t
     end for
     m.settingsList.content = content
-    m.settingsInfo.text = "Selecciona una opción."
+    m.settingsInfo.text    = "Selecciona una opción."
 end sub
 
 sub _onSettingsFocused()
@@ -556,6 +591,7 @@ end sub
 function onKeyEvent(key as string, press as boolean) as boolean
     if not press then return false
 
+    ' Player mode — Back exits, Up/Down changes channel.
     if m.mode = "player" then
         if key = "back" then
             _stopPlayer()
@@ -569,6 +605,7 @@ function onKeyEvent(key as string, press as boolean) as boolean
         return true
     end if
 
+    ' Context menu mode.
     if m.mode = "ctx" then
         if key = "OK" then
             _ctxActivate()
@@ -580,6 +617,7 @@ function onKeyEvent(key as string, press as boolean) as boolean
         return false
     end if
 
+    ' Nav mode — left/right cycles tabs, OK/down enters the view.
     if m.mode = "nav" then
         if key = "left" then
             _highlightTab((m.tab + 5) mod 6)
@@ -594,6 +632,7 @@ function onKeyEvent(key as string, press as boolean) as boolean
         return false
     end if
 
+    ' Search mode.
     if m.mode = "search" then
         if key = "back" then
             if m.searchFocus = "kbd" and m.searchList.count() > 0 then
@@ -611,22 +650,17 @@ function onKeyEvent(key as string, press as boolean) as boolean
         return false
     end if
 
-    ' mode = "view" — Up from the first row/item returns to the tab bar.
+    ' View mode.
     if key = "back" then
         _backToNav()
         return true
     else if key = "up" then
+        ' Return to tab bar from the first row/item of any widget.
         atTop = false
         if m.tab = 0 then
-            rif = m.browseList.rowItemFocused
-            if type(rif) = "roArray" and rif.count() > 0 then
-                if rif[0] = 0 then atTop = true
-            end if
+            if m.homeGrid.itemFocused < 4 then atTop = true
         else if m.tab = 1 then
-            rif = m.catBrowse.rowItemFocused
-            if type(rif) = "roArray" and rif.count() > 0 then
-                if rif[0] = 0 then atTop = true
-            end if
+            if m.catGrid.itemFocused < 4 then atTop = true
         else if m.tab = 2 then
             if m.guideList.itemFocused = 0 then atTop = true
         else if m.tab = 3 then
@@ -746,13 +780,6 @@ function _str(aa as object, key as string) as string
     if v = invalid then return ""
     if type(v) = "String" or type(v) = "roString" then return v
     return v.toStr()
-end function
-
-function _bool(aa as object, key as string) as boolean
-    if aa = invalid then return false
-    if type(aa) <> "roAssociativeArray" then return false
-    if not aa.DoesExist(key) then return false
-    return (aa[key] = true)
 end function
 
 function iif(cond as boolean, a as dynamic, b as dynamic) as dynamic

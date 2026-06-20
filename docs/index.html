@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GioRoku — Panel</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;background:#0D0D0D;color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.wrap{width:100%;max-width:560px}
+.logo{font-size:30px;font-weight:800;margin-bottom:4px}
+.logo span{color:#E50000}
+.sub{color:rgba(255,255,255,.4);font-size:14px;margin-bottom:36px}
+.grid{display:grid;gap:14px}
+.card{display:block;text-decoration:none;background:#1A1A1A;border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:22px 24px;transition:all .15s}
+.card:hover{border-color:#E50000;transform:translateY(-2px);background:#1f1f1f}
+.card .t{font-size:17px;font-weight:700;color:#fff;display:flex;align-items:center;gap:10px}
+.card .d{font-size:13px;color:rgba(255,255,255,.45);margin-top:6px;line-height:1.5}
+.tag{font-size:11px;font-weight:700;color:#E50000;background:rgba(229,0,0,.12);padding:3px 9px;border-radius:99px;margin-left:auto}
+.foot{margin-top:28px;font-size:12px;color:rgba(255,255,255,.25);text-align:center;line-height:1.7}
+.foot code{background:#1A1A1A;padding:2px 7px;border-radius:5px;color:rgba(255,255,255,.5)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo">Gio<span>Roku</span></div>
+  <div class="sub">Panel de administración · IPTV para Roku</div>
+
+  <div class="grid">
+    <a class="card" href="import.html">
+      <div class="t">⚡ Importación rápida <span class="tag">RECOMENDADO</span></div>
+      <div class="d">Pega una URL .m3u o sube un archivo. Detecta país y categoría automáticamente y publica tus canales con un clic.</div>
+    </a>
+    <a class="card" href="loader.html">
+      <div class="t">🛠️ Cargador avanzado</div>
+      <div class="d">Importación con vista previa, edición de canales, fuentes múltiples y control de detalle.</div>
+    </a>
+    <a class="card" href="admin/">
+      <div class="t">📊 Portal admin</div>
+      <div class="d">Estadísticas, estado de canales y gestión completa del catálogo.</div>
+    </a>
+  </div>
+
+  <div class="foot">
+    API en vivo: <code>/api/v1/status.json</code><br>
+    Los canales se sirven a tu app Roku desde esta misma página.
+  </div>
+</div>
+</body>
+</html>

@@ -182,6 +182,13 @@ sub _onLoadState()
         _populateCat()
         _populateGuide()
         _highlightTab(m.tab)
+        ' Auto-enter grid so user can navigate channels immediately.
+        if m.mode = "nav" and m.tab = 0 and m.homeFlat.count() > 0 then
+            m.activeGrid     = m.homeGrid
+            m.activeFlatList = m.homeFlat
+            m.mode           = "view"
+            m.homeGrid.setFocus(true)
+        end if
     end if
 end sub
 

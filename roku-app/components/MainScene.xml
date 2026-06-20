@@ -32,8 +32,8 @@
     <!-- ===== VIEW: EN VIVO — full-width channel grid ===== -->
     <Group id="viewHome" translation="[0, 120]" visible="true">
       <PosterGrid id="homeGrid" translation="[48, 12]"
-        basePosterSize="[290, 163]" caption1NumLines="1" caption2NumLines="0"
-        numColumns="6" numRows="4" itemSpacing="[18, 20]"
+        basePosterSize="[290, 163]" caption1NumLines="0" caption2NumLines="0"
+        numColumns="6" numRows="4" itemSpacing="[18, 18]"
         drawFocusFeedback="true" focusFootprintBlendColor="#CC1F1F" />
     </Group>
 
@@ -55,8 +55,8 @@
     <!-- ===== VIEW: CATEGORÍAS ===== -->
     <Group id="viewLive" translation="[0, 120]" visible="false">
       <PosterGrid id="catGrid" translation="[48, 12]"
-        basePosterSize="[290, 163]" caption1NumLines="1" caption2NumLines="0"
-        numColumns="6" numRows="4" itemSpacing="[18, 20]"
+        basePosterSize="[290, 163]" caption1NumLines="0" caption2NumLines="0"
+        numColumns="6" numRows="4" itemSpacing="[18, 18]"
         drawFocusFeedback="true" focusFootprintBlendColor="#CC1F1F" />
     </Group>
 

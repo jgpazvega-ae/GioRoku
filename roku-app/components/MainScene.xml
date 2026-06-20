@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="MainScene" extends="Scene">
+
+  <script type="text/brightscript" uri="pkg:/source/MainScene.brs" />
+
+  <children>
+    <!-- Background -->
+    <Rectangle id="bg" width="1920" height="1080" color="#0D0D0D" />
+
+    <!-- Header bar -->
+    <Rectangle id="headerBar" width="1920" height="96" color="#1A1A1A" />
+    <Label
+      id="brand"
+      text="GioRoku"
+      font="font:LargeBoldSystemFont"
+      color="#E50000"
+      translation="[60, 26]" />
+    <Label
+      id="brandSub"
+      text="Tu televisión latina"
+      font="font:SmallSystemFont"
+      color="#A0A0A0"
+      translation="[235, 46]" />
+    <Label
+      id="status"
+      text="Cargando…"
+      font="font:SmallSystemFont"
+      color="#A0A0A0"
+      horizAlign="right"
+      width="1780"
+      translation="[80, 46]" />
+
+    <!-- Channel grid -->
+    <PosterGrid
+      id="grid"
+      translation="[60, 140]"
+      basePosterSize="[260, 146]"
+      caption1NumLines="1"
+      numColumns="6"
+      numRows="4"
+      itemSpacing="[20, 28]"
+      drawFocusFeedback="true"
+      focusFootprintBlendColor="#E50000" />
+
+    <!-- Empty / message state -->
+    <Label
+      id="message"
+      text=""
+      font="font:MediumSystemFont"
+      color="#A0A0A0"
+      horizAlign="center"
+      vertAlign="center"
+      width="1920"
+      height="700"
+      translation="[0, 200]"
+      visible="false" />
+
+    <!-- Fullscreen video (hidden until a channel is chosen) -->
+    <Video
+      id="video"
+      width="1920"
+      height="1080"
+      translation="[0, 0]"
+      enableUI="false"
+      visible="false" />
+
+    <!-- Buffering / playback message overlay -->
+    <Label
+      id="playbackMsg"
+      text=""
+      font="font:MediumBoldSystemFont"
+      color="#FFFFFF"
+      horizAlign="center"
+      vertAlign="center"
+      width="1920"
+      height="1080"
+      visible="false" />
+  </children>
+</component>

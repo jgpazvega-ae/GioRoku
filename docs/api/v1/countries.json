@@ -1,4 +1,18 @@
 {
   "generatedAt": "2024-01-01T00:00:00Z",
-  "countries": []
+  "countries": [
+    {"code": "MX",    "name": "México",            "nameEn": "Mexico",          "flag": "🇲🇽", "sortOrder": 1,  "channelCount": 0, "keywords": []},
+    {"code": "AR",    "name": "Argentina",         "nameEn": "Argentina",       "flag": "🇦🇷", "sortOrder": 2,  "channelCount": 0, "keywords": []},
+    {"code": "CO",    "name": "Colombia",          "nameEn": "Colombia",        "flag": "🇨🇴", "sortOrder": 3,  "channelCount": 0, "keywords": []},
+    {"code": "CL",    "name": "Chile",             "nameEn": "Chile",           "flag": "🇨🇱", "sortOrder": 4,  "channelCount": 0, "keywords": []},
+    {"code": "PE",    "name": "Perú",              "nameEn": "Peru",            "flag": "🇵🇪", "sortOrder": 5,  "channelCount": 0, "keywords": []},
+    {"code": "UY",    "name": "Uruguay",           "nameEn": "Uruguay",         "flag": "🇺🇾", "sortOrder": 6,  "channelCount": 0, "keywords": []},
+    {"code": "PY",    "name": "Paraguay",          "nameEn": "Paraguay",        "flag": "🇵🇾", "sortOrder": 7,  "channelCount": 0, "keywords": []},
+    {"code": "EC",    "name": "Ecuador",           "nameEn": "Ecuador",         "flag": "🇪🇨", "sortOrder": 8,  "channelCount": 0, "keywords": []},
+    {"code": "BO",    "name": "Bolivia",           "nameEn": "Bolivia",         "flag": "🇧🇴", "sortOrder": 9,  "channelCount": 0, "keywords": []},
+    {"code": "VE",    "name": "Venezuela",         "nameEn": "Venezuela",       "flag": "🇻🇪", "sortOrder": 10, "channelCount": 0, "keywords": []},
+    {"code": "CA",    "name": "Centroamérica",     "nameEn": "Central America", "flag": "🌎",  "sortOrder": 11, "channelCount": 0, "keywords": []},
+    {"code": "US_ES", "name": "EE.UU. (Español)", "nameEn": "USA (Spanish)",   "flag": "🇺🇸", "sortOrder": 12, "channelCount": 0, "keywords": []},
+    {"code": "INTL",  "name": "Internacional",     "nameEn": "International",   "flag": "🌐",  "sortOrder": 99, "channelCount": 0, "keywords": []}
+  ]
 }

@@ -1,4 +1,14 @@
 {
   "generatedAt": "2024-01-01T00:00:00Z",
-  "categories": []
+  "categories": [
+    {"id": "entertainment", "label": "Entretenimiento", "labelEn": "Entertainment", "icon": "star",           "color": "#E74C3C", "sortOrder": 1, "channelCount": 0, "keywords": []},
+    {"id": "news",          "label": "Noticias",        "labelEn": "News",          "icon": "newspaper",      "color": "#3498DB", "sortOrder": 2, "channelCount": 0, "keywords": []},
+    {"id": "sports",        "label": "Deportes",        "labelEn": "Sports",        "icon": "trophy",         "color": "#27AE60", "sortOrder": 3, "channelCount": 0, "keywords": []},
+    {"id": "movies",        "label": "Películas",       "labelEn": "Movies",        "icon": "film",           "color": "#9B59B6", "sortOrder": 4, "channelCount": 0, "keywords": []},
+    {"id": "kids",          "label": "Infantil",        "labelEn": "Kids",          "icon": "baby",           "color": "#F39C12", "sortOrder": 5, "channelCount": 0, "keywords": []},
+    {"id": "music",         "label": "Música",          "labelEn": "Music",         "icon": "music",          "color": "#E91E63", "sortOrder": 6, "channelCount": 0, "keywords": []},
+    {"id": "documentary",   "label": "Documentales",    "labelEn": "Documentary",   "icon": "book",           "color": "#16A085", "sortOrder": 7, "channelCount": 0, "keywords": []},
+    {"id": "religious",     "label": "Religioso",       "labelEn": "Religious",     "icon": "heart",          "color": "#8E44AD", "sortOrder": 8, "channelCount": 0, "keywords": []},
+    {"id": "shopping",      "label": "Compras",         "labelEn": "Shopping",      "icon": "shopping-cart",  "color": "#D35400", "sortOrder": 9, "channelCount": 0, "keywords": []}
+  ]
 }

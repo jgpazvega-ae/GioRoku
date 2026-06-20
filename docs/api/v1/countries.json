@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-20T18:48:15Z",
+  "generatedAt": "2026-06-20T20:10:24Z",
   "countries": [
     {
       "code": "MX",
@@ -98,7 +98,7 @@
       "flag": "CA",
       "sortOrder": 11,
       "keywords": [],
-      "channelCount": 12
+      "channelCount": 11
     },
     {
       "code": "US_ES",
@@ -107,7 +107,7 @@
       "flag": "US",
       "sortOrder": 12,
       "keywords": [],
-      "channelCount": 6
+      "channelCount": 3
     },
     {
       "code": "INTL",
@@ -116,7 +116,7 @@
       "flag": "--",
       "sortOrder": 99,
       "keywords": [],
-      "channelCount": 3456
+      "channelCount": 1870
     }
   ]
 }

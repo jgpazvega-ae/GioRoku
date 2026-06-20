@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="LoadingSpinner" extends="Group">
+  <interface>
+    <field id="visible" type="boolean" value="true" />
+    <field id="message" type="string" value="Cargando…" />
+  </interface>
+
+  <script type="text/brightscript" uri="pkg:/source/components/LoadingSpinner.brs" />
+
+  <children>
+    <Rectangle
+      id="overlay"
+      width="300"
+      height="120"
+      color="#1A1A1A"
+      translation="[810, 480]" />
+
+    <BusySpinner
+      id="spinner"
+      translation="[935, 505]" />
+
+    <Label
+      id="msgLabel"
+      font="font:SmallSystemFont"
+      color="#FFFFFF"
+      horizAlign="center"
+      width="300"
+      translation="[810, 555]" />
+  </children>
+</component>

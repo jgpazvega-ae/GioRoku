@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="SearchScreen" extends="Group">
+  <interface>
+    <field id="channels" type="assocarray" />
+    <field id="storage"  type="assocarray" />
+    <field id="api"      type="assocarray" />
+    <field id="query"    type="string" />
+  </interface>
+
+  <script type="text/brightscript" uri="pkg:/source/screens/SearchScreen.brs" />
+
+  <children>
+    <Rectangle id="bg" width="1920" height="1080" color="#0D0D0D" />
+
+    <Label
+      text="Buscar canales"
+      font="font:LargeBoldSystemFont"
+      color="#FFFFFF"
+      translation="[60, 30]" />
+
+    <!-- Keyboard (top half) -->
+    <Keyboard
+      id="keyboard"
+      translation="[200, 110]" />
+
+    <!-- Results grid (bottom half) -->
+    <PosterGrid
+      id="resultsGrid"
+      translation="[60, 560]"
+      basePosterSize="[200, 112]"
+      caption1NumLines="1"
+      caption2NumLines="1"
+      numColumns="9"
+      itemSpacing="[16, 16]"
+      focusFootprintBlendColor="#E50000"
+      drawFocusFeedback="true" />
+
+    <Label
+      id="noResultsLabel"
+      text=""
+      font="font:MediumSystemFont"
+      color="#A0A0A0"
+      horizAlign="center"
+      width="1920"
+      translation="[0, 700]"
+      visible="false" />
+  </children>
+</component>

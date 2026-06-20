@@ -15,8 +15,8 @@ sub init()
     for i = 0 to 6
         m.tabsNodes.push(m.top.findNode("tab" + i.toStr()))
     end for
-    m.tabX = [248, 404, 595, 796, 892, 1068, 1199]
-    m.tabW = [120, 155, 165,  60, 140,   95,  110]
+    m.tabX = [240, 380, 534, 706, 792, 938, 1050]
+    m.tabW = [120, 134, 146,  68, 128,  92,  104]
 
     m.views = {
         home:     m.top.findNode("viewHome"),
@@ -364,11 +364,11 @@ sub _highlightTab(i as integer)
             m.tabsNodes[k].color = "#FFFFFF"
             m.tabsNodes[k].font  = "font:MediumBoldSystemFont"
         else
-            m.tabsNodes[k].color = "#787878"
+            m.tabsNodes[k].color = "#9CA3AF"
             m.tabsNodes[k].font  = "font:MediumSystemFont"
         end if
     end for
-    m.underline.translation = [m.tabX[i], 108]
+    m.underline.translation = [m.tabX[i], 30]
     m.underline.width       = m.tabW[i]
 
     keys = ["home","movies","live","guide","fav","search","settings"]
@@ -377,8 +377,8 @@ sub _highlightTab(i as integer)
     end for
     m.views[keys[i]].visible = true
 
-    ' Info panel: show for CANALES(0), CATEGORÍAS(2), GUÍA(3); hide for the rest.
-    m.infoPanel.visible = (i = 0 or i = 2 or i = 3)
+    ' Info bar: show for EN VIVO(0) and CATEGORÍAS(2) only.
+    m.infoPanel.visible = (i = 0 or i = 2)
 
     if i = 0 and m.channels.count() = 0 and m.message.text <> "" then
         m.message.visible = true
@@ -591,7 +591,7 @@ sub _ctxActivate()
 end sub
 
 sub _openContextForActiveGrid()
-    if m.tab = 2 then
+    if m.tab = 3 then
         idx = m.guideList.itemFocused
         if idx >= 0 and idx < m.channels.count() then _openContext(m.channels[idx])
         return
@@ -967,19 +967,21 @@ sub _setZap(num as string, name as string, meta as string, logo as string, hint 
     if num <> "" then
         m.zapNum.text      = num
         m.zapNumBg.visible = true
-        m.zapName.translation = [484, 894]
-        m.zapMeta.translation = [486, 958]
+        m.zapLogo.uri      = logo
+        m.zapLogo.visible  = (logo <> "")
+        m.zapName.translation = [414, 876]
+        m.zapMeta.translation = [416, 942]
     else
         m.zapNum.text      = ""
         m.zapNumBg.visible = false
-        m.zapName.translation = [300, 894]
-        m.zapMeta.translation = [302, 958]
+        m.zapLogo.visible  = false
+        m.zapLogo.uri      = ""
+        m.zapName.translation = [48, 876]
+        m.zapMeta.translation = [48, 942]
     end if
-    m.zapName.text   = name
-    m.zapMeta.text   = meta
-    m.zapLogo.uri    = logo
-    m.zapLogo.visible = (logo <> "")
-    m.zapHint.text   = hint
+    m.zapName.text = name
+    m.zapMeta.text = meta
+    m.zapHint.text = hint
 end sub
 
 sub _showZap()

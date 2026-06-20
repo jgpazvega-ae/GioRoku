@@ -23,10 +23,10 @@ sub _render()
     if c.hasField("chLive") then online = c.chLive
     if online then
         m.live.text  = "● EN VIVO"
-        m.live.color = "#E50000"
+        m.live.color = "#CC1F1F"
     else
         m.live.text  = "● FUERA DE LÍNEA"
-        m.live.color = "#707070"
+        m.live.color = "#6B7280"
     end if
 end sub
 

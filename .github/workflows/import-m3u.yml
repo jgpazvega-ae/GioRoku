@@ -1,0 +1,145 @@
+name: Importar canales M3U
+
+on:
+  workflow_dispatch:
+    inputs:
+      m3u_url:
+        description: 'URL de la lista M3U/M3U8'
+        required: true
+        type: string
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Parsear M3U y generar JSON
+        env:
+          M3U_URL: ${{ inputs.m3u_url }}
+        run: |
+          python3 << 'PYEOF'
+          import re, json, os, unicodedata, urllib.request
+          from pathlib import Path
+          from datetime import datetime, timedelta
+
+          url = os.environ['M3U_URL']
+          print(f'Descargando: {url}')
+          req = urllib.request.Request(url, headers={'User-Agent': 'GioRoku/1.0'})
+          with urllib.request.urlopen(req, timeout=30) as r:
+              text = r.read().decode('utf-8', errors='replace')
+          print(f'Descargado {len(text)} bytes')
+
+          # ── parse ──────────────────────────────────────────────────────────
+          raw = []
+          lines = text.splitlines()
+          attrs = None
+          for line in lines:
+              line = line.strip()
+              if not line:
+                  continue
+              if line.startswith('#EXTINF:'):
+                  attrs = {}
+                  m = re.search(r',(.+)$', line)
+                  if m:
+                      attrs['_n'] = m.group(1).strip()
+                  for k, v in re.findall(r'([\w-]+)="([^"]*)"', line):
+                      attrs[k.lower()] = v
+              elif not line.startswith('#') and attrs is not None:
+                  if re.match(r'^https?:|^rtmp:|^rtsp:', line, re.I):
+                      raw.append({
+                          'name': attrs.get('tvg-name', attrs.get('_n', 'Unknown')),
+                          'logo': attrs.get('tvg-logo', ''),
+                          'group': attrs.get('group-title', ''),
+                          'tvg_id': attrs.get('tvg-id', ''),
+                          'language': attrs.get('tvg-language', 'es'),
+                          'url': line,
+                      })
+                  attrs = None
+          print(f'{len(raw)} canales detectados en el M3U')
+
+          # ── detección país / categoría ─────────────────────────────────────
+          CPFX = {'mx_':'MX','ar_':'AR','co_':'CO','cl_':'CL','pe_':'PE','uy_':'UY','py_':'PY','ec_':'EC','bo_':'BO','ve_':'VE','us_':'US_ES'}
+          CKW  = {'MX':['mexico','azteca','televisa','multimedios','canal 5','imagen','milenio','foro tv'],'AR':['argentina','telefe','elnueve','a24','tn noticias','cronica'],'CO':['colombia','caracol','rcn','canal uno'],'CL':['chile','chv','chilevision','t13','tvn'],'PE':['peru','rpptv','latina tv','panamericana'],'UY':['uruguay','canal 10 uy','teledoce'],'PY':['paraguay','telefuturo'],'EC':['ecuador','teleamazonas','ecuavisa'],'BO':['bolivia','unitel'],'VE':['venezuela','televen','venevision'],'CA':['costa rica','guatemala','honduras','el salvador','nicaragua','panama'],'US_ES':['univision','telemundo','entravision']}
+          CATKW= {'news':['noticia','news','cnn','bbc','informativ','noticiero','24hora'],'sports':['deport','sport','espn','fox sport','futbol','soccer'],'movies':['cine','movie','pelicul','hbo','paramount'],'kids':['infantil','kids','niños','cartoon','disney','nickelodeon'],'music':['music','musica','mtv','salsa','cumbia'],'documentary':['documental','documentary','discovery','nat geo','history'],'religious':['religioso','cristiano','evangelical'],'shopping':['shopping','compras','teletienda']}
+          CLB  = {'MX':'México','AR':'Argentina','CO':'Colombia','CL':'Chile','PE':'Perú','UY':'Uruguay','PY':'Paraguay','EC':'Ecuador','BO':'Bolivia','VE':'Venezuela','CA':'Centroamérica','US_ES':'EE.UU. (Esp.)','INTL':'Internacional'}
+          CATL = {'news':'Noticias','sports':'Deportes','movies':'Películas','kids':'Infantil','music':'Música','documentary':'Documentales','religious':'Religioso','shopping':'Compras','entertainment':'Entretenimiento'}
+
+          def nn(s):
+              return unicodedata.normalize('NFD', s or '').encode('ascii','ignore').decode().lower()
+
+          def detect_country(ch):
+              tid = nn(ch['tvg_id'])
+              for p, c in CPFX.items():
+                  if tid.startswith(p): return c
+              n, g = nn(ch['name']), nn(ch['group'])
+              for code, kws in CKW.items():
+                  for kw in kws:
+                      if nn(kw) in g or nn(kw) in n: return code
+              return 'INTL'
+
+          def detect_cat(ch):
+              n, g = nn(ch['name']), nn(ch['group'])
+              for cat, kws in CATKW.items():
+                  for kw in kws:
+                      if nn(kw) in g or nn(kw) in n: return cat
+              return 'entertainment'
+
+          now = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+          seen, channels = set(), []
+          for i, ch in enumerate(raw):
+              country, cat = detect_country(ch), detect_cat(ch)
+              raw_id = re.sub(r'[^a-z0-9]+', '_', (ch['tvg_id'] or ch['name']).lower()).strip('_')[:60] or f'ch{i}'
+              uid, j = raw_id, 2
+              while uid in seen:
+                  uid = f'{raw_id}_{j}'; j += 1
+              seen.add(uid)
+              channels.append({'id':uid,'name':ch['name'],'logo':ch['logo'] or '','category':cat,'categoryLabel':CATL.get(cat,'Entretenimiento'),'country':country,'countryLabel':CLB.get(country,'Internacional'),'language':ch['language'] or 'es','streamUrl':ch['url'],'backupUrls':[],'quality':'SD','isOnline':True,'isEnabled':True,'isFeatured':False,'epgId':ch['tvg_id'] or None,'tags':[],'offlineCount':0,'lastCheck':now,'lastOnline':now,'responseMs':None,'sourceId':'manual_import','sourcePriority':5})
+
+          # ── escribir archivos ─────────────────────────────────────────────
+          base = Path('docs/api/v1')
+          by_c = {}
+          by_k = {}
+          for c in channels:
+              by_c.setdefault(c['country'], []).append(c)
+              by_k.setdefault(c['category'], []).append(c)
+
+          PS = 100
+          tp = max(1, (len(channels) + PS - 1) // PS)
+          pg = base / 'channels' / 'page'
+          pg.mkdir(parents=True, exist_ok=True)
+          for p in range(1, tp + 1):
+              (pg / f'{p}.json').write_text(json.dumps({'page':p,'pageSize':PS,'totalPages':tp,'totalChannels':len(channels),'channels':channels[(p-1)*PS:p*PS]}, ensure_ascii=False, indent=2))
+
+          cd = base / 'channels' / 'country'
+          cd.mkdir(parents=True, exist_ok=True)
+          for code, chs in by_c.items():
+              (cd / f'{code}.json').write_text(json.dumps({'country':code,'channels':chs}, ensure_ascii=False, indent=2))
+
+          kd = base / 'channels' / 'category'
+          kd.mkdir(parents=True, exist_ok=True)
+          for cat, chs in by_k.items():
+              (kd / f'{cat}.json').write_text(json.dumps({'category':cat,'channels':chs}, ensure_ascii=False, indent=2))
+
+          CATS=[{'id':'entertainment','label':'Entretenimiento','labelEn':'Entertainment','icon':'star','color':'#E74C3C','sortOrder':1,'keywords':[]},{'id':'news','label':'Noticias','labelEn':'News','icon':'newspaper','color':'#3498DB','sortOrder':2,'keywords':[]},{'id':'sports','label':'Deportes','labelEn':'Sports','icon':'trophy','color':'#27AE60','sortOrder':3,'keywords':[]},{'id':'movies','label':'Películas','labelEn':'Movies','icon':'film','color':'#9B59B6','sortOrder':4,'keywords':[]},{'id':'kids','label':'Infantil','labelEn':'Kids','icon':'baby','color':'#F39C12','sortOrder':5,'keywords':[]},{'id':'music','label':'Música','labelEn':'Music','icon':'music','color':'#E91E63','sortOrder':6,'keywords':[]},{'id':'documentary','label':'Documentales','labelEn':'Documentary','icon':'book','color':'#16A085','sortOrder':7,'keywords':[]},{'id':'religious','label':'Religioso','labelEn':'Religious','icon':'heart','color':'#8E44AD','sortOrder':8,'keywords':[]},{'id':'shopping','label':'Compras','labelEn':'Shopping','icon':'shopping-cart','color':'#D35400','sortOrder':9,'keywords':[]}]
+          (base / 'categories.json').write_text(json.dumps({'generatedAt':now,'categories':[{**c,'channelCount':len(by_k.get(c['id'],[]))} for c in CATS]}, ensure_ascii=False, indent=2))
+
+          CTRS=[{'code':'MX','name':'México','nameEn':'Mexico','flag':'🇲🇽','sortOrder':1},{'code':'AR','name':'Argentina','nameEn':'Argentina','flag':'🇦🇷','sortOrder':2},{'code':'CO','name':'Colombia','nameEn':'Colombia','flag':'🇨🇴','sortOrder':3},{'code':'CL','name':'Chile','nameEn':'Chile','flag':'🇨🇱','sortOrder':4},{'code':'PE','name':'Perú','nameEn':'Peru','flag':'🇵🇪','sortOrder':5},{'code':'UY','name':'Uruguay','nameEn':'Uruguay','flag':'🇺🇾','sortOrder':6},{'code':'PY','name':'Paraguay','nameEn':'Paraguay','flag':'🇵🇾','sortOrder':7},{'code':'EC','name':'Ecuador','nameEn':'Ecuador','flag':'🇪🇨','sortOrder':8},{'code':'BO','name':'Bolivia','nameEn':'Bolivia','flag':'🇧🇴','sortOrder':9},{'code':'VE','name':'Venezuela','nameEn':'Venezuela','flag':'🇻🇪','sortOrder':10},{'code':'CA','name':'Centroamérica','nameEn':'Central America','flag':'🌎','sortOrder':11},{'code':'US_ES','name':'EE.UU. (Español)','nameEn':'USA (Spanish)','flag':'🇺🇸','sortOrder':12},{'code':'INTL','name':'Internacional','nameEn':'International','flag':'🌐','sortOrder':99}]
+          (base / 'countries.json').write_text(json.dumps({'generatedAt':now,'countries':[{**c,'keywords':[],'channelCount':len(by_c.get(c['code'],[]))} for c in CTRS]}, ensure_ascii=False, indent=2))
+
+          next_run = datetime.utcnow().replace(hour=0,minute=0,second=0).strftime('%Y-%m-%dT%H:%M:%SZ')
+          (base / 'epg.json').write_text(json.dumps({'generatedAt':now,'programs':{}}, ensure_ascii=False, indent=2))
+          (base / 'status.json').write_text(json.dumps({'generatedAt':now,'pipelineVersion':'1.0.0','stats':{'totalChannels':len(channels),'onlineChannels':len(channels),'offlineChannels':0,'disabledChannels':0,'totalSources':1,'activeSources':1,'totalCountries':len(by_c),'totalCategories':len(by_k),'lastValidationRun':now,'nextScheduledRun':next_run},'sources':[{'id':'manual_import','name':'Importación Manual','channelCount':len(channels),'lastRefresh':now,'isHealthy':True}]}, ensure_ascii=False, indent=2))
+
+          print(f'✓ {len(channels)} canales | {len(by_c)} países | {len(by_k)} categorías | {tp} página(s)')
+          PYEOF
+
+      - name: Commit y push
+        run: |
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add docs/api/v1/
+          git diff --staged --quiet && echo "Sin cambios" || (git commit -m "feat: importar canales desde M3U (${{ inputs.m3u_url }})" && git push)

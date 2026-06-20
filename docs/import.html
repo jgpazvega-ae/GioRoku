@@ -3,326 +3,243 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GioRoku — Agregar Lista</title>
+<title>GioRoku — Importar Canales</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:system-ui,sans-serif;background:#0D0D0D;color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
 .box{width:100%;max-width:540px}
 .logo{font-size:22px;font-weight:800;margin-bottom:6px}
 .logo span{color:#E50000}
-.sub{color:rgba(255,255,255,.35);font-size:13px;margin-bottom:32px}
+.sub{color:rgba(255,255,255,.35);font-size:13px;margin-bottom:28px}
 
-/* URL card */
-.url-card{background:#1A1A1A;border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:24px}
-.url-row{display:flex;gap:8px}
+.card{background:#1A1A1A;border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:24px;margin-bottom:14px}
+.step{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:#E50000;margin-bottom:10px}
+
+.url-row{display:flex;gap:8px;margin-bottom:10px}
 .url-input{flex:1;padding:12px 16px;background:#262626;border:1.5px solid rgba(255,255,255,.1);border-radius:10px;color:#fff;font-size:14px;outline:none;transition:border-color .15s}
 .url-input:focus{border-color:#E50000;box-shadow:0 0 0 3px rgba(229,0,0,.1)}
 .url-input::placeholder{color:rgba(255,255,255,.2)}
-.btn{padding:12px 20px;border-radius:10px;font-size:14px;font-weight:700;border:none;cursor:pointer;transition:all .15s;white-space:nowrap}
+.url-input[readonly]{cursor:default;color:rgba(255,255,255,.5);font-size:12px}
+
+.btn{padding:12px 20px;border-radius:10px;font-size:14px;font-weight:700;border:none;cursor:pointer;transition:all .15s;white-space:nowrap;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px}
 .btn:disabled{opacity:.35;cursor:not-allowed}
-.btn-go{background:#E50000;color:#fff;min-width:110px}
-.btn-go:not(:disabled):hover{background:#c00;transform:translateY(-1px)}
-.btn-file{background:#262626;color:rgba(255,255,255,.65);margin-top:10px;width:100%;display:flex;align-items:center;justify-content:center;gap:8px}
-.btn-file:not(:disabled):hover{background:#303030}
-
-/* States */
-#state-idle{}
-#state-busy,#state-done,#state-err,#state-setup{display:none}
-
-/* Progress */
-.prog{margin-top:20px}
-.prog-bar{height:5px;background:#262626;border-radius:4px;overflow:hidden;margin:8px 0}
-.prog-fill{height:100%;background:#E50000;border-radius:4px;transition:width .4s ease;width:0}
-.prog-fill.done{background:#00C851}
-.prog-txt{font-size:12px;color:rgba(255,255,255,.4);display:flex;justify-content:space-between}
-.log{font-size:11px;font-family:monospace;color:rgba(255,255,255,.3);max-height:120px;overflow-y:auto;margin-top:8px;line-height:1.8}
-.ok{color:#00C851}.err{color:#FF4444}
-
-/* Done */
-.done-box{text-align:center;padding:8px 0 4px}
-.done-icon{font-size:44px;margin-bottom:10px}
-.done-title{font-size:18px;font-weight:700;margin-bottom:4px}
-.done-sub{font-size:13px;color:rgba(255,255,255,.4);margin-bottom:20px}
-.done-tip{background:#262626;border-radius:10px;padding:12px 16px;font-size:12px;color:rgba(255,255,255,.5);text-align:left}
-.done-tip strong{color:rgba(255,255,255,.75)}
-.btn-again{background:#262626;color:rgba(255,255,255,.65);width:100%;margin-top:12px}
-.btn-again:hover{background:#303030}
-
-/* Error */
-.err-box{background:rgba(255,68,68,.07);border:1px solid rgba(255,68,68,.2);border-radius:10px;padding:14px 16px;margin-top:16px;font-size:13px;color:#FF6B6B}
-.err-box strong{display:block;margin-bottom:4px}
-.err-detail{font-size:11px;font-family:monospace;color:rgba(255,100,100,.6);margin-top:6px;word-break:break-all}
-
-/* Setup */
-.setup-title{font-size:14px;font-weight:700;margin-bottom:14px;color:rgba(255,255,255,.7)}
-.field{margin-bottom:10px}
-.field label{display:block;font-size:11px;font-weight:600;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
-.field input{width:100%;padding:10px 14px;background:#262626;border:1.5px solid rgba(255,255,255,.08);border-radius:8px;color:#fff;font-size:13px;outline:none;transition:border-color .15s}
-.field input:focus{border-color:#E50000}
-.setup-note{font-size:11px;color:rgba(255,255,255,.25);margin-top:14px;line-height:1.6}
-.btn-save{background:#E50000;color:#fff;width:100%;margin-top:12px}
-.btn-save:hover{background:#c00}
-.link{color:#E50000;font-size:11px;display:inline-block;margin-top:12px;cursor:pointer;text-decoration:underline}
-
+.btn-primary{background:#E50000;color:#fff}
+.btn-primary:not(:disabled):hover{background:#c00;transform:translateY(-1px)}
+.btn-ghost{background:#262626;color:rgba(255,255,255,.65)}
+.btn-ghost:hover{background:#303030}
+.btn-full{width:100%}
 input[type=file]{display:none}
+
+.preview{display:none;background:#262626;border-radius:10px;padding:14px 16px;margin-top:14px}
+.preview.visible{display:block}
+.preview-stat{display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:6px}
+.preview-stat:last-child{margin-bottom:0}
+.badge{background:#E50000;color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;min-width:36px;text-align:center}
+
+.steps-box{background:#0F0F0F;border:1px solid rgba(255,255,255,.05);border-radius:10px;padding:14px 16px;margin-top:14px;font-size:13px;line-height:1.8;color:rgba(255,255,255,.5)}
+.steps-box strong{color:rgba(255,255,255,.8)}
+.steps-box code{background:#1A1A1A;padding:1px 6px;border-radius:4px;font-size:12px;color:#E50000}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#00C851;color:#fff;padding:10px 22px;border-radius:99px;font-size:13px;font-weight:700;transition:transform .3s ease;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+.log{font-size:11px;font-family:monospace;color:rgba(255,255,255,.3);max-height:100px;overflow-y:auto;margin-top:10px;line-height:1.8;display:none}
+.log.visible{display:block}
+.ok{color:#00C851}.er{color:#FF4444}
+
+.back{color:rgba(255,255,255,.3);font-size:12px;margin-top:14px;cursor:pointer;text-decoration:underline;display:inline-block}
 </style>
 </head>
 <body>
 <div class="box">
   <div class="logo">Gio<span>Roku</span></div>
-  <div class="sub">Agrega tu lista M3U con un clic</div>
+  <div class="sub">Importa tu lista M3U — sin token, vía GitHub Actions</div>
 
-  <!-- SETUP: first-time config -->
-  <div id="state-setup">
-    <div class="url-card">
-      <div class="setup-title">⚙️ Configuración inicial (solo una vez)</div>
-      <div class="field"><label>Usuario de GitHub</label><input id="s-owner" placeholder="jgpazvega-ae"></div>
-      <div class="field"><label>Repositorio</label><input id="s-repo" placeholder="GioRoku"></div>
-      <div class="field"><label>Rama</label><input id="s-branch" placeholder="main"></div>
-      <div class="field"><label>Personal Access Token</label><input id="s-token" type="password" placeholder="ghp_xxxxxxxxxxxx"></div>
-      <div class="setup-note">
-        Crea tu PAT en <strong style="color:rgba(255,255,255,.5)">GitHub → Settings → Developer settings → Fine-grained tokens</strong><br>
-        Permisos necesarios: <strong style="color:rgba(255,255,255,.5)">Contents: Read &amp; Write</strong> en el repo GioRoku.
-      </div>
-      <button class="btn btn-save" onclick="saveSetup()">Guardar y continuar →</button>
+  <!-- Step 1 -->
+  <div class="card" id="card-url">
+    <div class="step">Paso 1 — Tu lista M3U</div>
+    <div class="url-row">
+      <input class="url-input" id="url-in" type="url"
+             placeholder="https://… pega tu URL .m3u / .m3u8"
+             onkeydown="if(event.key==='Enter')analyze()">
+      <button class="btn btn-primary" id="btn-analyze" onclick="analyze()">Analizar →</button>
     </div>
+    <input type="file" id="file-in" accept=".m3u,.m3u8,.txt" onchange="fromFile(event)">
+    <button class="btn btn-ghost btn-full" onclick="document.getElementById('file-in').click()">
+      📁 Subir archivo .m3u
+    </button>
+    <div class="preview" id="preview">
+      <div class="preview-stat"><span class="badge" id="p-count">0</span> canales detectados</div>
+      <div class="preview-stat"><span class="badge" id="p-ctry">0</span> países</div>
+      <div class="preview-stat"><span class="badge" id="p-cats">0</span> categorías</div>
+    </div>
+    <div class="log" id="p-log"></div>
   </div>
 
-  <!-- IDLE: main input -->
-  <div id="state-idle">
-    <div class="url-card">
-      <div class="url-row">
-        <input class="url-input" id="url-in" type="url"
-               placeholder="https://… pega aquí tu URL .m3u"
-               onkeydown="if(event.key==='Enter')go()">
-        <button class="btn btn-go" id="btn-go" onclick="go()">Agregar →</button>
-      </div>
-      <input type="file" id="file-in" accept=".m3u,.m3u8,.txt" onchange="fromFile(event)">
-      <button class="btn btn-file" onclick="document.getElementById('file-in').click()">
-        📁 Subir archivo .m3u
-      </button>
+  <!-- Step 2 -->
+  <div class="card" id="card-action" style="display:none">
+    <div class="step">Paso 2 — Importar en GitHub (sin token)</div>
+    <p style="font-size:13px;color:rgba(255,255,255,.55);margin-bottom:14px">
+      Copia la URL y luego ábrela en GitHub Actions para importar los canales automáticamente.
+    </p>
+    <div class="url-row">
+      <input class="url-input" id="url-copy" readonly>
+      <button class="btn btn-ghost" onclick="copyUrl()" title="Copiar URL">📋</button>
     </div>
-    <div style="text-align:right;margin-top:10px">
-      <span class="link" onclick="showSetup()">⚙️ Cambiar configuración GitHub</span>
+    <a id="actions-link"
+       href="https://github.com/jgpazvega-ae/GioRoku/actions/workflows/import-m3u.yml"
+       target="_blank"
+       class="btn btn-primary btn-full"
+       style="margin-top:8px"
+       onclick="copyUrl()">
+      Abrir GitHub Actions →
+    </a>
+    <div class="steps-box">
+      En GitHub Actions:<br>
+      1. Clic en <strong>Run workflow</strong> (botón azul, derecha)<br>
+      2. Pega la URL en el campo <code>URL de la lista M3U/M3U8</code><br>
+      3. Clic en <strong>Run workflow</strong><br>
+      4. Espera ~30 seg — los canales aparecerán en tu Roku
     </div>
-  </div>
-
-  <!-- BUSY: progress -->
-  <div id="state-busy">
-    <div class="url-card">
-      <div class="prog">
-        <div class="prog-txt"><span id="p-msg">Cargando lista…</span><span id="p-pct">0%</span></div>
-        <div class="prog-bar"><div class="prog-fill" id="p-fill"></div></div>
-        <div class="log" id="p-log"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- DONE -->
-  <div id="state-done">
-    <div class="url-card">
-      <div class="done-box">
-        <div class="done-icon">✅</div>
-        <div class="done-title">¡Lista publicada!</div>
-        <div class="done-sub" id="done-sub">0 canales en GitHub Pages</div>
-        <div class="done-tip">
-          En tu Roku:<br>
-          <strong>Ajustes → Desarrollador → Forzar actualización</strong><br>
-          Los canales aparecerán en ~1 minuto.
-        </div>
-        <button class="btn btn-again" onclick="reset()">↺ Agregar otra lista</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ERROR -->
-  <div id="state-err">
-    <div class="url-card">
-      <div class="err-box">
-        <strong>No se pudo publicar</strong>
-        <span id="err-txt">Error desconocido</span>
-        <div class="err-detail" id="err-detail"></div>
-      </div>
-      <button class="btn btn-go" style="width:100%;margin-top:14px" onclick="reset()">Volver a intentar</button>
-      <span class="link" onclick="showSetup()">⚙️ Revisar configuración GitHub</span>
-    </div>
+    <span class="back" onclick="reset()">← Cambiar lista</span>
   </div>
 </div>
 
+<div class="toast" id="toast">✓ URL copiada al portapapeles</div>
+
 <script>
-// ─── helpers ────────────────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
-function show(id) { ['idle','busy','done','err','setup'].forEach(s => $('state-'+s).style.display = s===id ? 'block' : 'none'); }
-function cfg() { return JSON.parse(localStorage.getItem('gl_cfg')||'{}'); }
-function hasCfg() { const c=cfg(); return c.owner && c.repo && c.token; }
 
-function log(msg, cls) {
-  const el=$('p-log'), d=document.createElement('div');
-  if(cls) d.className=cls; d.textContent=msg; el.appendChild(d); el.scrollTop=el.scrollHeight;
-}
-function prog(done, total, msg) {
-  const pct = total ? Math.round(done/total*100) : 0;
-  $('p-fill').style.width = pct+'%';
-  if(done>=total) $('p-fill').classList.add('done'); else $('p-fill').classList.remove('done');
-  $('p-msg').textContent = msg; $('p-pct').textContent = pct+'%';
-}
-
-// ─── setup ──────────────────────────────────────────────────────────────────
-function checkSetup() { hasCfg() ? show('idle') : show('setup'); }
-function showSetup() {
-  const c=cfg();
-  if(c.owner) $('s-owner').value=c.owner;
-  if(c.repo)  $('s-repo').value=c.repo;
-  if(c.branch)$('s-branch').value=c.branch;
-  if(c.token) $('s-token').value=c.token;
-  show('setup');
-}
-function saveSetup() {
-  const o=$('s-owner').value.trim(), r=$('s-repo').value.trim(), t=$('s-token').value.trim();
-  if(!o||!r||!t){alert('Usuario, repositorio y token son obligatorios.');return;}
-  localStorage.setItem('gl_cfg', JSON.stringify({owner:o,repo:r,branch:$('s-branch').value.trim()||'main',token:t}));
-  show('idle');
-}
-
-// ─── load sources ────────────────────────────────────────────────────────────
-function fromFile(e) { const f=e.target.files[0]; if(f){const r=new FileReader();r.onload=ev=>run(ev.target.result);r.readAsText(f,'utf-8');} }
-async function go() {
-  const url=$('url-in').value.trim(); if(!url){$('url-in').focus();return;}
-  show('busy'); $('p-log').innerHTML=''; prog(0,1,'Descargando lista…');
-  try {
-    let res=await fetch(url).catch(()=>null);
-    if(!res||!res.ok) res=await fetch('https://corsproxy.io/?'+encodeURIComponent(url));
-    if(!res.ok) throw new Error('HTTP '+res.status);
-    run(await res.text());
-  } catch(e) { showErr('No se pudo descargar la URL','Prueba la opción de archivo .m3u: '+e.message); }
-}
-
-// ─── parse + deploy ───────────────────────────────────────────────────────────
-async function run(text) {
-  prog(0,10,'Procesando lista M3U…');
-  const channels = enrich(parseM3U(text));
-  log(`${channels.length} canales detectados`);
-  if(!channels.length){showErr('Lista vacía','No se encontraron canales EXTINF con URLs http/rtsp válidas.');return;}
-
-  const c=cfg();
-  prog(1,10,'Leyendo repositorio…');
-  let shas;
-  try { shas=await getSHAs(c.owner,c.repo,c.branch||'main',c.token); }
-  catch(e){showErr('Error de acceso a GitHub',e.message);return;}
-
-  const files=buildFiles(channels), paths=Object.keys(files);
-  log(`${paths.length} archivos JSON a publicar`);
-
-  let done=0, errs=0;
-  for(const path of paths){
-    prog(1+Math.round(done/paths.length*8), 10, path.split('/').pop());
-    try{await putFile(c.owner,c.repo,c.branch||'main',path,files[path],shas[path],c.token);log('✓ '+path,'ok');}
-    catch(e){log('✗ '+path+': '+e.message,'err');errs++;}
-    done++;
-  }
-  prog(10,10,'¡Listo!');
-  if(errs===0){
-    $('done-sub').textContent=channels.length.toLocaleString()+' canales en GitHub Pages';
-    show('done');
-  } else {
-    showErr(`${errs} archivos fallaron`, 'Revisa el log de arriba y verifica tu PAT.');
-    show('busy');
-  }
-}
-function reset(){ $('url-in').value=''; $('file-in').value=''; show('idle'); }
-function showErr(msg,detail){ $('err-txt').textContent=msg; $('err-detail').textContent=detail||''; show('err'); }
-
-// ─── M3U parser ──────────────────────────────────────────────────────────────
-function parseM3U(text){
-  const lines=text.split(/\r?\n/),out=[];let a=null;
-  for(const raw of lines){
-    const l=raw.trim();if(!l)continue;
-    if(l.startsWith('#EXTINF:')){
-      a={};const m=/#EXTINF:[^,]*,(.*)$/.exec(l);if(m)a._n=m[1].trim();
-      let am;const re=/([\w-]+)="([^"]*)"/g;while((am=re.exec(l)))a[am[1].toLowerCase()]=am[2];
-    }else if(!l.startsWith('#')&&a!==null){
-      if(/^https?:|^rtmp:|^rtsp:/i.test(l))
-        out.push({name:a['tvg-name']||a._n||'Unknown',logo:a['tvg-logo']||'',group:a['group-title']||'',tvgId:a['tvg-id']||'',language:a['tvg-language']||'es',url:l});
-      a=null;
+// ── M3U parser (local preview only) ──────────────────────────────────────────
+function parseM3U(text) {
+  const lines = text.split(/\r?\n/), out = [];
+  let a = null;
+  for (const raw of lines) {
+    const l = raw.trim();
+    if (!l) continue;
+    if (l.startsWith('#EXTINF:')) {
+      a = {};
+      const m = /#EXTINF:[^,]*,(.*)$/.exec(l);
+      if (m) a._n = m[1].trim();
+      let am; const re = /([\w-]+)="([^"]*)"/g;
+      while ((am = re.exec(l))) a[am[1].toLowerCase()] = am[2];
+    } else if (!l.startsWith('#') && a !== null) {
+      if (/^https?:|^rtmp:|^rtsp:/i.test(l)) out.push(a);
+      a = null;
     }
   }
   return out;
 }
 
-// ─── detection tables ────────────────────────────────────────────────────────
-const CPFX={mx_:'MX',ar_:'AR',co_:'CO',cl_:'CL',pe_:'PE',uy_:'UY',py_:'PY',ec_:'EC',bo_:'BO',ve_:'VE',us_:'US_ES'};
-const CKW={MX:['mexico','azteca','televisa','multimedios','canal 5','imagen','milenio','foro tv'],AR:['argentina','telefe','elnueve','a24','tn noticias','cronica'],CO:['colombia','caracol','rcn','canal uno'],CL:['chile','chv','chilevision','t13','tvn'],PE:['peru','rpptv','latina tv','panamericana'],UY:['uruguay','canal 10 uy','teledoce'],PY:['paraguay','telefuturo'],EC:['ecuador','teleamazonas','ecuavisa'],BO:['bolivia','unitel'],VE:['venezuela','televen','venevision'],CA:['costa rica','guatemala','honduras','el salvador','nicaragua','panama'],US_ES:['univision','telemundo','entravision']};
-const CTLD={'.mx':'MX','.com.mx':'MX','.ar':'AR','.com.ar':'AR','.co':'CO','.cl':'CL','.pe':'PE','.uy':'UY','.py':'PY','.ec':'EC','.bo':'BO','.ve':'VE','.cr':'CA','.gt':'CA','.pa':'CA'};
-const CLB={MX:'México',AR:'Argentina',CO:'Colombia',CL:'Chile',PE:'Perú',UY:'Uruguay',PY:'Paraguay',EC:'Ecuador',BO:'Bolivia',VE:'Venezuela',CA:'Centroamérica',US_ES:'EE.UU. (Esp.)',INTL:'Internacional'};
-const CATKW={news:['noticia','news','cnn','bbc','informativ','noticiero','24hora'],sports:['deport','sport','espn','fox sport','futbol','fútbol','soccer'],movies:['cine','movie','pelicul','hbo','paramount','accion'],kids:['infantil','kids','niños','cartoon','disney','nickelodeon'],music:['music','musica','música','mtv','salsa','cumbia'],documentary:['documental','documentary','discovery','nat geo','history'],religious:['religioso','cristiano','evangelical'],shopping:['shopping','compras','teletienda']};
-const CATL={news:'Noticias',sports:'Deportes',movies:'Películas',kids:'Infantil',music:'Música',documentary:'Documentales',religious:'Religioso',shopping:'Compras',entertainment:'Entretenimiento'};
-const CCOLOR={entertainment:'#E74C3C',news:'#3498DB',sports:'#27AE60',movies:'#9B59B6',kids:'#F39C12',music:'#E91E63',documentary:'#16A085',religious:'#8E44AD',shopping:'#D35400'};
+function logLine(msg, cls) {
+  const el = $('p-log'), d = document.createElement('div');
+  if (cls) d.className = cls;
+  d.textContent = msg;
+  el.appendChild(d);
+  el.scrollTop = el.scrollHeight;
+  el.classList.add('visible');
+}
 
-function nn(s){return(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();}
-function detectCountry(ch){
-  const tid=nn(ch.tvgId);
-  for(const[p,c]of Object.entries(CPFX))if(tid.startsWith(p))return c;
-  const n=nn(ch.name),g=nn(ch.group);
-  for(const[code,kws]of Object.entries(CKW))for(const kw of kws)if(g.includes(nn(kw))||n.includes(nn(kw)))return code;
-  if(ch.url){const u=ch.url.split('?')[0];for(const[tld,c]of Object.entries(CTLD))if(u.endsWith(tld)||u.includes(tld+'/'))return c;}
-  return 'INTL';
-}
-function detectCat(ch){
-  const n=nn(ch.name),g=nn(ch.group);
-  for(const[cat,kws]of Object.entries(CATKW))for(const kw of kws)if(g.includes(nn(kw))||n.includes(nn(kw)))return cat;
-  return 'entertainment';
-}
-function svgLogo(name,cat){
-  const c=CCOLOR[cat]||'#555',i=(name.split(' ').slice(0,2).map(w=>w[0]||'').join('')||'TV').toUpperCase();
-  return 'data:image/svg+xml;base64,'+btoa(`<svg xmlns="http://www.w3.org/2000/svg" width="120" height="68" viewBox="0 0 120 68"><rect width="120" height="68" rx="8" fill="${c}"/><text x="60" y="44" text-anchor="middle" font-family="Arial" font-size="24" font-weight="bold" fill="white">${i}</text></svg>`);
-}
-function enrich(raw){
-  const seen=new Set(),now=new Date().toISOString();
-  return raw.map((ch,i)=>{
-    const country=detectCountry(ch),cat=detectCat(ch);
-    let id=(ch.tvgId||ch.name).toLowerCase().replace(/[^a-z0-9]/g,'_').replace(/_+/g,'_').slice(0,60).replace(/^_|_$/g,'')||`ch${i}`;
-    let uid=id,j=2;while(seen.has(uid))uid=`${id}_${j++}`;seen.add(uid);
-    return{id:uid,name:ch.name,logo:ch.logo||svgLogo(ch.name,cat),category:cat,categoryLabel:CATL[cat]||'Entretenimiento',country,countryLabel:CLB[country]||'Internacional',language:ch.language||'es',streamUrl:ch.url,backupUrls:[],quality:'SD',isOnline:true,isEnabled:true,isFeatured:false,epgId:ch.tvgId||null,tags:[],offlineCount:0,lastCheck:now,lastOnline:now,responseMs:null,sourceId:'manual_import',sourcePriority:5};
+function showPreview(channels) {
+  const countries = new Set(), cats = new Set();
+  channels.forEach(a => {
+    if (a['group-title']) cats.add(a['group-title']);
+    if (a['tvg-id']) {
+      const pfx = a['tvg-id'].slice(0, 3).toLowerCase();
+      if (pfx) countries.add(pfx);
+    }
   });
+  $('p-count').textContent = channels.length;
+  $('p-ctry').textContent = Math.max(1, countries.size);
+  $('p-cats').textContent = Math.max(1, cats.size);
+  $('preview').classList.add('visible');
 }
 
-// ─── JSON generation ──────────────────────────────────────────────────────────
-const PAGE_SIZE=100;
-const CATS_META=[{id:'entertainment',label:'Entretenimiento',labelEn:'Entertainment',icon:'star',color:'#E74C3C',sortOrder:1,keywords:[]},{id:'news',label:'Noticias',labelEn:'News',icon:'newspaper',color:'#3498DB',sortOrder:2,keywords:[]},{id:'sports',label:'Deportes',labelEn:'Sports',icon:'trophy',color:'#27AE60',sortOrder:3,keywords:[]},{id:'movies',label:'Películas',labelEn:'Movies',icon:'film',color:'#9B59B6',sortOrder:4,keywords:[]},{id:'kids',label:'Infantil',labelEn:'Kids',icon:'baby',color:'#F39C12',sortOrder:5,keywords:[]},{id:'music',label:'Música',labelEn:'Music',icon:'music',color:'#E91E63',sortOrder:6,keywords:[]},{id:'documentary',label:'Documentales',labelEn:'Documentary',icon:'book',color:'#16A085',sortOrder:7,keywords:[]},{id:'religious',label:'Religioso',labelEn:'Religious',icon:'heart',color:'#8E44AD',sortOrder:8,keywords:[]},{id:'shopping',label:'Compras',labelEn:'Shopping',icon:'shopping-cart',color:'#D35400',sortOrder:9,keywords:[]}];
-const CTRS_META=[{code:'MX',name:'México',nameEn:'Mexico',flag:'🇲🇽',sortOrder:1},{code:'AR',name:'Argentina',nameEn:'Argentina',flag:'🇦🇷',sortOrder:2},{code:'CO',name:'Colombia',nameEn:'Colombia',flag:'🇨🇴',sortOrder:3},{code:'CL',name:'Chile',nameEn:'Chile',flag:'🇨🇱',sortOrder:4},{code:'PE',name:'Perú',nameEn:'Peru',flag:'🇵🇪',sortOrder:5},{code:'UY',name:'Uruguay',nameEn:'Uruguay',flag:'🇺🇾',sortOrder:6},{code:'PY',name:'Paraguay',nameEn:'Paraguay',flag:'🇵🇾',sortOrder:7},{code:'EC',name:'Ecuador',nameEn:'Ecuador',flag:'🇪🇨',sortOrder:8},{code:'BO',name:'Bolivia',nameEn:'Bolivia',flag:'🇧🇴',sortOrder:9},{code:'VE',name:'Venezuela',nameEn:'Venezuela',flag:'🇻🇪',sortOrder:10},{code:'CA',name:'Centroamérica',nameEn:'Central America',flag:'🌎',sortOrder:11},{code:'US_ES',name:'EE.UU. (Español)',nameEn:'USA (Spanish)',flag:'🇺🇸',sortOrder:12},{code:'INTL',name:'Internacional',nameEn:'International',flag:'🌐',sortOrder:99}];
+// ── analyze from URL ──────────────────────────────────────────────────────────
+async function analyze() {
+  const url = $('url-in').value.trim();
+  if (!url) { $('url-in').focus(); return; }
+  $('btn-analyze').disabled = true;
+  $('btn-analyze').textContent = 'Analizando…';
+  $('p-log').innerHTML = '';
+  $('p-log').classList.remove('visible');
+  $('preview').classList.remove('visible');
 
-function buildFiles(chs){
-  const now=new Date().toISOString(),files={},bc={},bk={};
-  for(const c of chs){(bc[c.country]||(bc[c.country]=[])).push(c);(bk[c.category]||(bk[c.category]=[])).push(c);}
-  const tp=Math.max(1,Math.ceil(chs.length/PAGE_SIZE));
-  for(let p=1;p<=tp;p++)files[`docs/api/v1/channels/page/${p}.json`]={page:p,pageSize:PAGE_SIZE,totalPages:tp,totalChannels:chs.length,channels:chs.slice((p-1)*PAGE_SIZE,p*PAGE_SIZE)};
-  for(const[c,v]of Object.entries(bc))files[`docs/api/v1/channels/country/${c}.json`]={country:c,channels:v};
-  for(const[c,v]of Object.entries(bk))files[`docs/api/v1/channels/category/${c}.json`]={category:c,channels:v};
-  files['docs/api/v1/categories.json']={generatedAt:now,categories:CATS_META.map(c=>({...c,channelCount:(bk[c.id]||[]).length}))};
-  files['docs/api/v1/countries.json']={generatedAt:now,countries:CTRS_META.map(c=>({...c,keywords:[],channelCount:(bc[c.code]||[]).length}))};
-  files['docs/api/v1/epg.json']={generatedAt:now,programs:{}};
-  files['docs/api/v1/status.json']={generatedAt:now,pipelineVersion:'1.0.0',stats:{totalChannels:chs.length,onlineChannels:chs.length,offlineChannels:0,disabledChannels:0,totalSources:1,activeSources:1,totalCountries:Object.keys(bc).length,totalCategories:Object.keys(bk).length,lastValidationRun:now,nextScheduledRun:new Date(Date.now()+86400000).toISOString()},sources:[{id:'manual_import',name:'Importación Manual',channelCount:chs.length,lastRefresh:now,isHealthy:true}]};
-  return files;
+  try {
+    logLine('Descargando lista…');
+    let res = await fetch(url).catch(() => null);
+    if (!res || !res.ok) {
+      logLine('Intentando con proxy CORS…');
+      res = await fetch('https://corsproxy.io/?' + encodeURIComponent(url));
+    }
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const text = await res.text();
+    const channels = parseM3U(text);
+    if (!channels.length) throw new Error('No se encontraron canales EXTINF válidos');
+    logLine(`✓ ${channels.length} canales detectados`, 'ok');
+    showPreview(channels);
+    showActionStep(url);
+  } catch (e) {
+    logLine('✗ ' + e.message, 'er');
+    logLine('Si la URL no se puede descargar en el navegador por CORS, el Action de GitHub la descargará sin problema.', '');
+    showActionStep(url);
+  } finally {
+    $('btn-analyze').disabled = false;
+    $('btn-analyze').textContent = 'Analizar →';
+  }
 }
 
-// ─── GitHub API ───────────────────────────────────────────────────────────────
-function b64(str){const b=new TextEncoder().encode(str);let s='';for(const x of b)s+=String.fromCharCode(x);return btoa(s);}
-async function getSHAs(o,r,b,t){
-  const res=await fetch(`https://api.github.com/repos/${o}/${r}/git/trees/${b}?recursive=1`,{headers:{Authorization:`Bearer ${t}`,Accept:'application/vnd.github.v3+json'}});
-  if(!res.ok)throw new Error(`GitHub ${res.status}: ${res.status===401?'Token inválido':res.status===404?'Repo no encontrado':'Error de acceso'}`);
-  const d=await res.json(),m={};
-  for(const item of d.tree||[])m[item.path]=item.sha;
-  return m;
-}
-async function putFile(o,r,b,path,content,sha,t){
-  const body={message:`chore: import — ${path.split('/').pop()}`,content:b64(JSON.stringify(content,null,2)),branch:b};
-  if(sha)body.sha=sha;
-  const res=await fetch(`https://api.github.com/repos/${o}/${r}/contents/${path}`,{method:'PUT',headers:{Authorization:`Bearer ${t}`,Accept:'application/vnd.github.v3+json','Content-Type':'application/json'},body:JSON.stringify(body)});
-  if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(`${res.status}: ${e.message||'error'}`);}
+// ── analyze from file ─────────────────────────────────────────────────────────
+function fromFile(e) {
+  const f = e.target.files[0];
+  if (!f) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const text = ev.target.result;
+    const channels = parseM3U(text);
+    $('p-log').innerHTML = '';
+    if (channels.length) {
+      logLine(`✓ ${channels.length} canales en el archivo`, 'ok');
+      showPreview(channels);
+    } else {
+      logLine('✗ No se encontraron canales EXTINF', 'er');
+    }
+    // For file uploads, show instructions to upload manually
+    $('card-action').style.display = 'block';
+    $('url-copy').value = '';
+    $('url-copy').placeholder = '(archivo local — usa el botón de abajo)';
+    $('actions-link').onclick = function() {};
+  };
+  reader.readAsText(f, 'utf-8');
 }
 
-// ─── init ─────────────────────────────────────────────────────────────────────
-checkSetup();
+function showActionStep(url) {
+  $('url-copy').value = url;
+  $('actions-link').href = 'https://github.com/jgpazvega-ae/GioRoku/actions/workflows/import-m3u.yml';
+  $('card-action').style.display = 'block';
+  $('card-action').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function copyUrl() {
+  const val = $('url-copy').value;
+  if (!val) return;
+  navigator.clipboard.writeText(val).catch(() => {
+    $('url-copy').select();
+    document.execCommand('copy');
+  });
+  const t = $('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+function reset() {
+  $('card-action').style.display = 'none';
+  $('preview').classList.remove('visible');
+  $('p-log').classList.remove('visible');
+  $('p-log').innerHTML = '';
+  $('url-in').value = '';
+  $('url-in').focus();
+}
 </script>
 </body>
 </html>

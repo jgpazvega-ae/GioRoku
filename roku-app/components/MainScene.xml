@@ -161,6 +161,22 @@
                horizAlign="right" width="1824" translation="[0, 1004]" />
       </Group>
 
+      <!-- Quick channel guide while watching (video keeps playing behind it) -->
+      <Group id="miniGuide" visible="false">
+        <Rectangle id="miniBg"  width="640" height="1080" color="#0A0A0AF2" />
+        <Rectangle id="miniBar" width="4"   height="1080" color="#E50000" translation="[640, 0]" />
+        <Rectangle id="miniHdr" width="640" height="4" color="#E50000" translation="[0, 84]" />
+        <Label id="miniTitle" text="GUÍA RÁPIDA" font="font:MediumBoldSystemFont"
+               color="#FFFFFF" translation="[36, 36]" />
+        <Label id="miniClock" text="" font="font:MediumBoldSystemFont" color="#787878"
+               horizAlign="right" width="604" translation="[0, 38]" />
+        <LabelList id="miniList" width="568" itemSize="[568, 58]" itemSpacing="[0, 2]"
+          translation="[36, 104]" numRows="15" textHorizAlign="left"
+          color="#D8D8D8" focusBitmapBlendColor="#E50000" />
+        <Label id="miniHint" text="OK: Ver   ▲▼: Mover   Atrás: Cerrar"
+               font="font:SmallSystemFont" color="#606060" translation="[36, 1024]" />
+      </Group>
+
       <Label id="playerMsg" text="" font="font:MediumBoldSystemFont" color="#FFFFFF"
         horizAlign="center" vertAlign="center" width="1920" height="1080" visible="false" />
     </Group>

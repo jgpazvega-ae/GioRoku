@@ -67,6 +67,9 @@ sub init()
     m.zapMeta    = m.top.findNode("zapMeta")
     m.zapClock   = m.top.findNode("zapClock")
     m.zapHint    = m.top.findNode("zapHint")
+    m.miniGuide  = m.top.findNode("miniGuide")
+    m.miniList   = m.top.findNode("miniList")
+    m.miniClock  = m.top.findNode("miniClock")
 
     ' Context menu
     m.ctxBg   = m.top.findNode("ctxBg")
@@ -106,6 +109,7 @@ sub init()
     m.kbd.observeField("text",   "_onSearchTextChange")
     m.moviesGrid.observeField("itemSelected", "_onMoviesSelected")
     m.movKbd.observeField("text", "_onMoviesTextChange")
+    m.miniList.observeField("itemSelected", "_onMiniSelected")
     m.video.observeField("state","_onVideoState")
 
     _buildSettingsMenu()
@@ -495,6 +499,7 @@ sub _stopPlayer()
     m.video.visible      = false
     m.viewPlayer.visible = false
     m.playerMsg.visible  = false
+    m.miniGuide.visible  = false
     _hideZap()
     if m.currentMovie <> invalid then
         m.currentMovie = invalid
@@ -795,15 +800,24 @@ function onKeyEvent(key as string, press as boolean) as boolean
         else if key = "down" then
             _channelStep(-1)
         else if key = "OK" then
-            if m.zapBanner.visible then
-                _hideZap()
+            if m.currentMovie <> invalid then
+                if m.zapBanner.visible then _hideZap() else _showZap()
             else
-                _showZap()
+                _openMini()
             end if
         else if key = "options" then
             _openContext(m.currentChannel)
         end if
         return true
+    end if
+
+    ' Mini-guide (channel switcher over live video).
+    if m.mode = "mini" then
+        if key = "back" or key = "left" then
+            _closeMini()
+            return true
+        end if
+        return false
     end if
 
     ' Context menu mode.
@@ -914,6 +928,9 @@ sub _tick()
     if m.zapBanner <> invalid and m.zapBanner.visible and m.zapClock <> invalid then
         m.zapClock.text = t
     end if
+    if m.miniGuide <> invalid and m.miniGuide.visible and m.miniClock <> invalid then
+        m.miniClock.text = t
+    end if
 end sub
 
 function _clockStr() as string
@@ -975,6 +992,52 @@ end sub
 sub _hideZap()
     if m.zapBanner <> invalid then m.zapBanner.visible = false
     if m.zapTimer <> invalid then m.zapTimer.control = "stop"
+end sub
+
+' ----- Quick channel guide while watching -----
+
+sub _openMini()
+    if m.channels.count() = 0 then return
+    content = createObject("roSGNode", "ContentNode")
+    n = 0
+    for each ch in m.channels
+        n = n + 1
+        item = content.createChild("ContentNode")
+        item.title = _pad3(n) + "   " + _displayName(ch)
+    end for
+    m.miniList.content = content
+    ' Highlight the channel currently playing.
+    cur = 0
+    if m.currentChannel <> invalid then
+        curId = _str(m.currentChannel, "id")
+        for i = 0 to m.channels.count() - 1
+            if _str(m.channels[i], "id") = curId then
+                cur = i
+                exit for
+            end if
+        end for
+    end if
+    m.miniClock.text    = _clockStr()
+    m.miniList.jumpToItem = cur
+    m.miniGuide.visible = true
+    _hideZap()
+    m.mode = "mini"
+    m.miniList.setFocus(true)
+end sub
+
+sub _closeMini()
+    m.miniGuide.visible = false
+    m.mode = "player"
+    m.top.setFocus(true)
+end sub
+
+sub _onMiniSelected()
+    idx = m.miniList.itemSelected
+    if idx >= 0 and idx < m.channels.count() then
+        m.miniGuide.visible = false
+        m.mode = "player"
+        _play(m.channels[idx])
+    end if
 end sub
 
 ' ================= STORAGE =================

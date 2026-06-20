@@ -30,4 +30,5 @@ Thumbs.db
 
 # Roku package
 *.pkg
+*.zip
 out/

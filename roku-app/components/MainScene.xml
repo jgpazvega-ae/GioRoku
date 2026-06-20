@@ -11,16 +11,16 @@
     <Rectangle id="brandAccent" width="4" height="50" color="#CC1F1F" translation="[44, 25]" />
     <Label id="brand" text="GioRoku" font="font:LargeBoldSystemFont"
            color="#FFFFFF" translation="[56, 28]" />
-    <!-- Active-tab pill — slides behind the focused tab label -->
-    <Rectangle id="navUnderline" width="120" height="36" color="#CC1F1F" translation="[240, 30]" />
-    <!-- Tab labels -->
-    <Label id="tab0" text="EN VIVO"    font="font:MediumBoldSystemFont" color="#FFFFFF" translation="[248, 36]" />
-    <Label id="tab1" text="PELÍCULAS"  font="font:MediumSystemFont"     color="#9CA3AF" translation="[388, 36]" />
-    <Label id="tab2" text="CATEGORÍAS" font="font:MediumSystemFont"     color="#9CA3AF" translation="[542, 36]" />
-    <Label id="tab3" text="GUÍA"       font="font:MediumSystemFont"     color="#9CA3AF" translation="[714, 36]" />
-    <Label id="tab4" text="FAVORITOS"  font="font:MediumSystemFont"     color="#9CA3AF" translation="[800, 36]" />
-    <Label id="tab5" text="BUSCAR"     font="font:MediumSystemFont"     color="#9CA3AF" translation="[946, 36]" />
-    <Label id="tab6" text="AJUSTES"    font="font:MediumSystemFont"     color="#9CA3AF" translation="[1058, 36]" />
+    <!-- Active-tab pill — slides behind the focused tab label (starts on GUÍA) -->
+    <Rectangle id="navUnderline" width="60" height="28" color="#CC1F1F" translation="[593, 36]" />
+    <!-- Tab labels — SmallBoldSystemFont so all 7 fit without cramping -->
+    <Label id="tab0" text="EN VIVO"    font="font:SmallBoldSystemFont" color="#9CA3AF" translation="[234, 42]" />
+    <Label id="tab1" text="PELÍCULAS"  font="font:SmallBoldSystemFont" color="#9CA3AF" translation="[340, 42]" />
+    <Label id="tab2" text="CATEGORÍAS" font="font:SmallBoldSystemFont" color="#9CA3AF" translation="[461, 42]" />
+    <Label id="tab3" text="GUÍA"       font="font:SmallBoldSystemFont" color="#FFFFFF" translation="[599, 42]" />
+    <Label id="tab4" text="FAVORITOS"  font="font:SmallBoldSystemFont" color="#9CA3AF" translation="[675, 42]" />
+    <Label id="tab5" text="BUSCAR"     font="font:SmallBoldSystemFont" color="#9CA3AF" translation="[803, 42]" />
+    <Label id="tab6" text="AJUSTES"    font="font:SmallBoldSystemFont" color="#9CA3AF" translation="[904, 42]" />
     <!-- Header separator line -->
     <Rectangle id="headerAccent" width="1920" height="2" color="#2D3748" translation="[0, 118]" />
     <!-- Clock + date/status (right side) -->
@@ -29,11 +29,11 @@
     <Label id="status" text="Cargando…" font="font:SmallSystemFont" color="#6B7280"
            horizAlign="right" width="1872" translation="[0, 80]" />
 
-    <!-- ===== VIEW: EN VIVO — full-width channel grid ===== -->
-    <Group id="viewHome" translation="[0, 120]" visible="true">
+    <!-- ===== VIEW: EN VIVO — channel grid with names ===== -->
+    <Group id="viewHome" translation="[0, 120]" visible="false">
       <PosterGrid id="homeGrid" translation="[48, 12]"
-        basePosterSize="[290, 163]" caption1NumLines="0" caption2NumLines="0"
-        numColumns="6" numRows="4" itemSpacing="[18, 18]"
+        basePosterSize="[290, 163]" caption1NumLines="1" caption2NumLines="0"
+        numColumns="6" numRows="3" itemSpacing="[18, 14]"
         drawFocusFeedback="true" focusFootprintBlendColor="#CC1F1F" />
     </Group>
 
@@ -55,13 +55,13 @@
     <!-- ===== VIEW: CATEGORÍAS ===== -->
     <Group id="viewLive" translation="[0, 120]" visible="false">
       <PosterGrid id="catGrid" translation="[48, 12]"
-        basePosterSize="[290, 163]" caption1NumLines="0" caption2NumLines="0"
-        numColumns="6" numRows="4" itemSpacing="[18, 18]"
+        basePosterSize="[290, 163]" caption1NumLines="1" caption2NumLines="0"
+        numColumns="6" numRows="3" itemSpacing="[18, 14]"
         drawFocusFeedback="true" focusFootprintBlendColor="#CC1F1F" />
     </Group>
 
-    <!-- ===== VIEW: GUÍA — full-width cable-style channel guide ===== -->
-    <Group id="viewGuide" translation="[0, 120]" visible="false">
+    <!-- ===== VIEW: GUÍA — full-width cable-style channel guide (default) ===== -->
+    <Group id="viewGuide" translation="[0, 120]" visible="true">
       <Label id="guideTitle" text="GUÍA DE CANALES" font="font:SmallBoldSystemFont"
              color="#6B7280" translation="[48, 8]" />
       <MarkupList id="guideList" translation="[48, 40]"

@@ -15,8 +15,8 @@ sub init()
     for i = 0 to 6
         m.tabsNodes.push(m.top.findNode("tab" + i.toStr()))
     end for
-    m.tabX = [240, 380, 534, 706, 792, 938, 1050]
-    m.tabW = [120, 134, 146,  68, 128,  92,  104]
+    m.tabX = [228, 334, 455, 593, 669, 797, 898]
+    m.tabW = [ 90, 105, 122,  60, 112,  85,  98]
 
     m.views = {
         home:     m.top.findNode("viewHome"),
@@ -114,7 +114,7 @@ sub init()
 
     _buildSettingsMenu()
     _loadMovies()
-    _highlightTab(0)
+    _highlightTab(3)
     m.top.setFocus(true)
 
     ' Live clock — ticks every second.
@@ -182,12 +182,10 @@ sub _onLoadState()
         _populateCat()
         _populateGuide()
         _highlightTab(m.tab)
-        ' Auto-enter grid so user can navigate channels immediately.
-        if m.mode = "nav" and m.tab = 0 and m.homeFlat.count() > 0 then
-            m.activeGrid     = m.homeGrid
-            m.activeFlatList = m.homeFlat
-            m.mode           = "view"
-            m.homeGrid.setFocus(true)
+        ' Auto-enter guide so user can navigate immediately.
+        if m.mode = "nav" and m.tab = 3 then
+            m.mode = "view"
+            m.guideList.setFocus(true)
         end if
     end if
 end sub
@@ -369,13 +367,11 @@ sub _highlightTab(i as integer)
     for k = 0 to 6
         if k = i then
             m.tabsNodes[k].color = "#FFFFFF"
-            m.tabsNodes[k].font  = "font:MediumBoldSystemFont"
         else
             m.tabsNodes[k].color = "#9CA3AF"
-            m.tabsNodes[k].font  = "font:MediumSystemFont"
         end if
     end for
-    m.underline.translation = [m.tabX[i], 30]
+    m.underline.translation = [m.tabX[i], 36]
     m.underline.width       = m.tabW[i]
 
     keys = ["home","movies","live","guide","fav","search","settings"]

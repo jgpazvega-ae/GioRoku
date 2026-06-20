@@ -1,0 +1,53 @@
+{
+  "category": "shopping",
+  "channels": [
+    {
+      "id": "gemshoppingnetwork_us_sd",
+      "name": "Gem Shopping Network (720p)",
+      "logo": "https://i.imgur.com/WlHEpAu.png",
+      "category": "shopping",
+      "categoryLabel": "Compras",
+      "country": "INTL",
+      "countryLabel": "Internacional",
+      "language": "es",
+      "streamUrl": "https://amg01460-gemshoppingnetw-gem-ono-x662c.amagi.tv/playlist.m3u8",
+      "backupUrls": [],
+      "quality": "SD",
+      "isOnline": true,
+      "isEnabled": true,
+      "isFeatured": false,
+      "epgId": "GemShoppingNetwork.us@SD",
+      "tags": [],
+      "offlineCount": 0,
+      "lastCheck": "2026-06-20T18:47:21Z",
+      "lastOnline": "2026-06-20T18:47:21Z",
+      "responseMs": null,
+      "sourceId": "manual_import",
+      "sourcePriority": 5
+    },
+    {
+      "id": "tsc_ca_sd",
+      "name": "Today's Shopping Choice (TSC) (720p)",
+      "logo": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/TSC_logo.svg/960px-TSC_logo.svg.png",
+      "category": "shopping",
+      "categoryLabel": "Compras",
+      "country": "INTL",
+      "countryLabel": "Internacional",
+      "language": "es",
+      "streamUrl": "https://tscamd.akamaized.net/hls/live/503340/TSCLive/master.m3u8",
+      "backupUrls": [],
+      "quality": "SD",
+      "isOnline": true,
+      "isEnabled": true,
+      "isFeatured": false,
+      "epgId": "TSC.ca@SD",
+      "tags": [],
+      "offlineCount": 0,
+      "lastCheck": "2026-06-20T18:47:21Z",
+      "lastOnline": "2026-06-20T18:47:21Z",
+      "responseMs": null,
+      "sourceId": "manual_import",
+      "sourcePriority": 5
+    }
+  ]
+}

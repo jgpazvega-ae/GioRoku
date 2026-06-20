@@ -1,17 +1,25 @@
 {
-  "generatedAt": "2024-01-01T00:00:00Z",
+  "generatedAt": "2026-06-20T18:47:21Z",
   "pipelineVersion": "1.0.0",
   "stats": {
-    "totalChannels": 0,
-    "onlineChannels": 0,
+    "totalChannels": 3567,
+    "onlineChannels": 3567,
     "offlineChannels": 0,
     "disabledChannels": 0,
     "totalSources": 1,
-    "activeSources": 0,
-    "totalCountries": 0,
-    "totalCategories": 0,
-    "lastValidationRun": null,
-    "nextScheduledRun": "2024-01-16T00:00:00Z"
+    "activeSources": 1,
+    "totalCountries": 13,
+    "totalCategories": 8,
+    "lastValidationRun": "2026-06-20T18:47:21Z",
+    "nextScheduledRun": "2026-06-20T00:00:00Z"
   },
-  "sources": []
+  "sources": [
+    {
+      "id": "manual_import",
+      "name": "Importacion Manual",
+      "channelCount": 3567,
+      "lastRefresh": "2026-06-20T18:47:21Z",
+      "isHealthy": true
+    }
+  ]
 }

@@ -1,0 +1,29 @@
+{
+  "country": "UY",
+  "channels": [
+    {
+      "id": "dsportsuruguay_uy_sd",
+      "name": "DSports Uruguay",
+      "logo": "https://i.imgur.com/2PoEm1x.png",
+      "category": "sports",
+      "categoryLabel": "Deportes",
+      "country": "UY",
+      "countryLabel": "Uruguay",
+      "language": "es",
+      "streamUrl": "https://cors-proxy.cooks.fyi/http://147.135.114.221:8001/play/a00m/index.m3u8",
+      "backupUrls": [],
+      "quality": "SD",
+      "isOnline": true,
+      "isEnabled": true,
+      "isFeatured": false,
+      "epgId": "DSportsUruguay.uy@SD",
+      "tags": [],
+      "offlineCount": 0,
+      "lastCheck": "2026-06-20T18:47:21Z",
+      "lastOnline": "2026-06-20T18:47:21Z",
+      "responseMs": null,
+      "sourceId": "manual_import",
+      "sourcePriority": 5
+    }
+  ]
+}

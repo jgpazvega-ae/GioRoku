@@ -1,18 +1,122 @@
 {
-  "generatedAt": "2024-01-01T00:00:00Z",
+  "generatedAt": "2026-06-20T18:47:21Z",
   "countries": [
-    {"code": "MX",    "name": "México",            "nameEn": "Mexico",          "flag": "🇲🇽", "sortOrder": 1,  "channelCount": 0, "keywords": []},
-    {"code": "AR",    "name": "Argentina",         "nameEn": "Argentina",       "flag": "🇦🇷", "sortOrder": 2,  "channelCount": 0, "keywords": []},
-    {"code": "CO",    "name": "Colombia",          "nameEn": "Colombia",        "flag": "🇨🇴", "sortOrder": 3,  "channelCount": 0, "keywords": []},
-    {"code": "CL",    "name": "Chile",             "nameEn": "Chile",           "flag": "🇨🇱", "sortOrder": 4,  "channelCount": 0, "keywords": []},
-    {"code": "PE",    "name": "Perú",              "nameEn": "Peru",            "flag": "🇵🇪", "sortOrder": 5,  "channelCount": 0, "keywords": []},
-    {"code": "UY",    "name": "Uruguay",           "nameEn": "Uruguay",         "flag": "🇺🇾", "sortOrder": 6,  "channelCount": 0, "keywords": []},
-    {"code": "PY",    "name": "Paraguay",          "nameEn": "Paraguay",        "flag": "🇵🇾", "sortOrder": 7,  "channelCount": 0, "keywords": []},
-    {"code": "EC",    "name": "Ecuador",           "nameEn": "Ecuador",         "flag": "🇪🇨", "sortOrder": 8,  "channelCount": 0, "keywords": []},
-    {"code": "BO",    "name": "Bolivia",           "nameEn": "Bolivia",         "flag": "🇧🇴", "sortOrder": 9,  "channelCount": 0, "keywords": []},
-    {"code": "VE",    "name": "Venezuela",         "nameEn": "Venezuela",       "flag": "🇻🇪", "sortOrder": 10, "channelCount": 0, "keywords": []},
-    {"code": "CA",    "name": "Centroamérica",     "nameEn": "Central America", "flag": "🌎",  "sortOrder": 11, "channelCount": 0, "keywords": []},
-    {"code": "US_ES", "name": "EE.UU. (Español)", "nameEn": "USA (Spanish)",   "flag": "🇺🇸", "sortOrder": 12, "channelCount": 0, "keywords": []},
-    {"code": "INTL",  "name": "Internacional",     "nameEn": "International",   "flag": "🌐",  "sortOrder": 99, "channelCount": 0, "keywords": []}
+    {
+      "code": "MX",
+      "name": "Mexico",
+      "nameEn": "Mexico",
+      "flag": "MX",
+      "sortOrder": 1,
+      "keywords": [],
+      "channelCount": 40
+    },
+    {
+      "code": "AR",
+      "name": "Argentina",
+      "nameEn": "Argentina",
+      "flag": "AR",
+      "sortOrder": 2,
+      "keywords": [],
+      "channelCount": 5
+    },
+    {
+      "code": "CO",
+      "name": "Colombia",
+      "nameEn": "Colombia",
+      "flag": "CO",
+      "sortOrder": 3,
+      "keywords": [],
+      "channelCount": 8
+    },
+    {
+      "code": "CL",
+      "name": "Chile",
+      "nameEn": "Chile",
+      "flag": "CL",
+      "sortOrder": 4,
+      "keywords": [],
+      "channelCount": 12
+    },
+    {
+      "code": "PE",
+      "name": "Peru",
+      "nameEn": "Peru",
+      "flag": "PE",
+      "sortOrder": 5,
+      "keywords": [],
+      "channelCount": 6
+    },
+    {
+      "code": "UY",
+      "name": "Uruguay",
+      "nameEn": "Uruguay",
+      "flag": "UY",
+      "sortOrder": 6,
+      "keywords": [],
+      "channelCount": 1
+    },
+    {
+      "code": "PY",
+      "name": "Paraguay",
+      "nameEn": "Paraguay",
+      "flag": "PY",
+      "sortOrder": 7,
+      "keywords": [],
+      "channelCount": 7
+    },
+    {
+      "code": "EC",
+      "name": "Ecuador",
+      "nameEn": "Ecuador",
+      "flag": "EC",
+      "sortOrder": 8,
+      "keywords": [],
+      "channelCount": 7
+    },
+    {
+      "code": "BO",
+      "name": "Bolivia",
+      "nameEn": "Bolivia",
+      "flag": "BO",
+      "sortOrder": 9,
+      "keywords": [],
+      "channelCount": 4
+    },
+    {
+      "code": "VE",
+      "name": "Venezuela",
+      "nameEn": "Venezuela",
+      "flag": "VE",
+      "sortOrder": 10,
+      "keywords": [],
+      "channelCount": 3
+    },
+    {
+      "code": "CA",
+      "name": "Centroamerica",
+      "nameEn": "Central America",
+      "flag": "CA",
+      "sortOrder": 11,
+      "keywords": [],
+      "channelCount": 12
+    },
+    {
+      "code": "US_ES",
+      "name": "EE.UU. (Espanol)",
+      "nameEn": "USA (Spanish)",
+      "flag": "US",
+      "sortOrder": 12,
+      "keywords": [],
+      "channelCount": 6
+    },
+    {
+      "code": "INTL",
+      "name": "Internacional",
+      "nameEn": "International",
+      "flag": "--",
+      "sortOrder": 99,
+      "keywords": [],
+      "channelCount": 3456
+    }
   ]
 }

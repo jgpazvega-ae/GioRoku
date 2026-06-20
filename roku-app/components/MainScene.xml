@@ -59,13 +59,13 @@
         drawFocusFeedback="true" focusFootprintBlendColor="#E50000" />
     </Group>
 
-    <!-- ===== VIEW: GUÍA — channel list (left portion) ===== -->
+    <!-- ===== VIEW: GUÍA — cable-style channel grid with logos ===== -->
     <Group id="viewGuide" translation="[0, 124]" visible="false">
       <Label id="guideTitle" text="Guía de canales" font="font:MediumBoldSystemFont"
              color="#FFFFFF" translation="[56, 4]" />
-      <LabelList id="guideList" translation="[56, 52]" width="1200"
-        itemSize="[1200, 60]" itemSpacing="[0, 4]" textHorizAlign="left"
-        color="#FFFFFF" focusBitmapBlendColor="#E50000" numRows="14" />
+      <MarkupList id="guideList" translation="[56, 50]"
+        itemComponentName="GuideRow" itemSize="[1200, 92]" itemSpacing="[0, 4]"
+        numRows="9" drawFocusFeedback="false" vertFocusAnimationStyle="fixedFocusWrap" />
     </Group>
 
     <!-- ===== VIEW: FAVORITOS — full width grid ===== -->

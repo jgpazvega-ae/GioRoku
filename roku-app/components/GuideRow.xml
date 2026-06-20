@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="GuideRow" extends="Group">
+  <interface>
+    <field id="itemContent"  type="node"  onChange="_render" />
+    <field id="focusPercent" type="float" onChange="_onFocus" />
+    <field id="width"        type="float" />
+    <field id="height"       type="float" />
+  </interface>
+  <children>
+    <!-- Focus highlight (driven by focusPercent) -->
+    <Rectangle id="rowFocus" width="1200" height="86" color="#242424" opacity="0" />
+    <Rectangle id="rowBar"   width="4"    height="86" color="#E50000" opacity="0" />
+    <!-- Channel-number dial block -->
+    <Rectangle id="numBg" width="90" height="54" color="#E50000" translation="[14, 16]" />
+    <Label id="num" text="" font="font:MediumBoldSystemFont" color="#FFFFFF"
+           horizAlign="center" vertAlign="center" width="90" height="54" translation="[14, 16]" />
+    <!-- Logo -->
+    <Poster id="logo" width="118" height="66" translation="[124, 10]" />
+    <!-- Name + meta -->
+    <Label id="name" text="" font="font:MediumBoldSystemFont" color="#FFFFFF"
+           translation="[266, 12]" width="720" />
+    <Label id="meta" text="" font="font:SmallSystemFont" color="#909090"
+           translation="[266, 52]" width="720" />
+    <!-- Live badge, right side -->
+    <Label id="live" text="● EN VIVO" font="font:SmallBoldSystemFont" color="#E50000"
+           horizAlign="right" width="1170" translation="[0, 32]" />
+  </children>
+  <script type="text/brightscript" uri="pkg:/components/GuideRow.brs" />
+</component>

@@ -245,9 +245,15 @@ sub _populateGuide()
         item = content.createChild("ContentNode")
         meta = _str(ch, "countryLabel")
         cat  = _str(ch, "categoryLabel")
-        if cat <> "" then meta = meta + " · " + cat
-        num = _pad3(n)
-        item.title = num + "    " + _displayName(ch) + "    —    " + meta
+        q    = ucase(_str(ch, "quality"))
+        if cat <> "" then meta = meta + "  ·  " + cat
+        if q <> "" then meta = meta + "  ·  " + q
+        online = true
+        if type(ch) = "roAssociativeArray" and ch.DoesExist("isOnline") then online = (ch.isOnline = true)
+        item.title       = _displayName(ch)
+        item.description  = meta
+        item.hdPosterUrl  = _str(ch, "logo")
+        item.addFields({ chNum: _pad3(n), chLive: online })
     end for
     m.guideList.content = content
 end sub

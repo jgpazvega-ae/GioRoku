@@ -5,13 +5,13 @@ end sub
 sub fetch()
     base = m.top.baseUrl
     page = _fetchJSON(base + "/channels/page/1.json")
-    if page = invalid
+    if page = invalid then
         m.top.taskState = "error"
         return
     end if
 
     list = []
-    if page.DoesExist("channels") and page.channels <> invalid
+    if page.DoesExist("channels") and page.channels <> invalid then
         for each ch in page.channels
             list.push(ch)
         end for
@@ -23,14 +23,14 @@ sub fetch()
     if last > 10 then last = 10
     for p = 2 to last
         extra = _fetchJSON(base + "/channels/page/" + p.toStr() + ".json")
-        if extra <> invalid and extra.DoesExist("channels") and extra.channels <> invalid
+        if extra <> invalid and extra.DoesExist("channels") and extra.channels <> invalid then
             for each ch in extra.channels
                 list.push(ch)
             end for
         end if
     end for
 
-    m.top.channels = list
+    m.top.result = {channels: list}
     m.top.taskState = "done"
 end sub
 

@@ -106,8 +106,11 @@ sub _onLoadState()
         _showMessage("Sin conexión a internet." + chr(10) + "Verifica tu red e inténtalo de nuevo.")
         m.status.text = "Sin conexión"
     else if state = "done" then
-        list = m.loadTask.channels
-        if list = invalid then list = []
+        res = m.loadTask.result
+        list = []
+        if res <> invalid and res.DoesExist("channels") and res.channels <> invalid then
+            list = res.channels
+        end if
         m.channels = list
         m.status.text = list.count().toStr() + " canales"
         if list.count() = 0 then

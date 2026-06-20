@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-20T22:07:21Z",
+  "generatedAt": "2026-06-20T22:18:53Z",
   "countries": [
     {
       "code": "MX",
@@ -8,7 +8,7 @@
       "flag": "MX",
       "sortOrder": 1,
       "keywords": [],
-      "channelCount": 18
+      "channelCount": 0
     },
     {
       "code": "AR",
@@ -116,7 +116,7 @@
       "flag": "--",
       "sortOrder": 99,
       "keywords": [],
-      "channelCount": 127
+      "channelCount": 0
     }
   ]
 }

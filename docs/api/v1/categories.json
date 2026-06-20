@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-20T22:07:21Z",
+  "generatedAt": "2026-06-20T22:18:53Z",
   "categories": [
     {
       "id": "entertainment",
@@ -9,7 +9,7 @@
       "color": "#E74C3C",
       "sortOrder": 1,
       "keywords": [],
-      "channelCount": 127
+      "channelCount": 0
     },
     {
       "id": "news",
@@ -19,7 +19,7 @@
       "color": "#3498DB",
       "sortOrder": 2,
       "keywords": [],
-      "channelCount": 7
+      "channelCount": 0
     },
     {
       "id": "sports",
@@ -29,7 +29,7 @@
       "color": "#27AE60",
       "sortOrder": 3,
       "keywords": [],
-      "channelCount": 2
+      "channelCount": 0
     },
     {
       "id": "movies",
@@ -39,7 +39,7 @@
       "color": "#9B59B6",
       "sortOrder": 4,
       "keywords": [],
-      "channelCount": 3
+      "channelCount": 0
     },
     {
       "id": "kids",
@@ -49,7 +49,7 @@
       "color": "#F39C12",
       "sortOrder": 5,
       "keywords": [],
-      "channelCount": 2
+      "channelCount": 0
     },
     {
       "id": "music",
@@ -59,7 +59,7 @@
       "color": "#E91E63",
       "sortOrder": 6,
       "keywords": [],
-      "channelCount": 4
+      "channelCount": 0
     },
     {
       "id": "documentary",

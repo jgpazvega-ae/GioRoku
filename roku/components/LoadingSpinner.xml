@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <component name="LoadingSpinner" extends="Group">
   <interface>
-    <field id="visible" type="boolean" value="true" />
     <field id="message" type="string" value="Cargando…" />
   </interface>
 

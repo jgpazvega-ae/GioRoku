@@ -6,4 +6,3 @@ build_version=00001
 splash_color=#0D0D0D
 splash_min_time=1500
 ui_resolutions=hd,fhd
-bs_prof_sample_main=pkg:/source/main.brs

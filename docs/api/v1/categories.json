@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-20T23:38:28Z",
+  "generatedAt": "2026-06-20T23:54:40Z",
   "categories": [
     {
       "id": "entertainment",
@@ -9,7 +9,7 @@
       "color": "#E74C3C",
       "sortOrder": 1,
       "keywords": [],
-      "channelCount": 1949
+      "channelCount": 1235
     },
     {
       "id": "news",
@@ -19,7 +19,7 @@
       "color": "#3498DB",
       "sortOrder": 2,
       "keywords": [],
-      "channelCount": 144
+      "channelCount": 88
     },
     {
       "id": "sports",
@@ -29,7 +29,7 @@
       "color": "#27AE60",
       "sortOrder": 3,
       "keywords": [],
-      "channelCount": 4
+      "channelCount": 50
     },
     {
       "id": "movies",
@@ -39,7 +39,7 @@
       "color": "#9B59B6",
       "sortOrder": 4,
       "keywords": [],
-      "channelCount": 55
+      "channelCount": 37
     },
     {
       "id": "kids",
@@ -49,7 +49,7 @@
       "color": "#F39C12",
       "sortOrder": 5,
       "keywords": [],
-      "channelCount": 26
+      "channelCount": 9
     },
     {
       "id": "music",
@@ -59,7 +59,7 @@
       "color": "#E91E63",
       "sortOrder": 6,
       "keywords": [],
-      "channelCount": 190
+      "channelCount": 50
     },
     {
       "id": "documentary",
@@ -69,7 +69,7 @@
       "color": "#16A085",
       "sortOrder": 7,
       "keywords": [],
-      "channelCount": 18
+      "channelCount": 6
     },
     {
       "id": "religious",
@@ -79,7 +79,7 @@
       "color": "#8E44AD",
       "sortOrder": 8,
       "keywords": [],
-      "channelCount": 65
+      "channelCount": 0
     },
     {
       "id": "shopping",
@@ -89,7 +89,7 @@
       "color": "#D35400",
       "sortOrder": 9,
       "keywords": [],
-      "channelCount": 0
+      "channelCount": 1
     }
   ]
 }

@@ -565,7 +565,14 @@ end function
 function onKeyEvent(key as string, press as boolean) as boolean
     if not press then return false
     if m.player.visible then return false
+    ' Left arrow at scene level (fallback for screens that don't consume it)
     if key = "left" and not m.sidebarOpen then
+        _openSidebar()
+        return true
+    end if
+    ' Back at scene level — fires when Home screen's onKeyEvent doesn't consume Back
+    ' (extra safety net in case Back bubbles past all screens)
+    if key = "back" and not m.sidebarOpen and m.currentScreen = "home" then
         _openSidebar()
         return true
     end if

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="SplashScreen" extends="Group">
+  <interface>
+    <field id="result" type="assocarray" />
+    <field id="done"   type="boolean" value="false" />
+  </interface>
+  <children>
+    <Rectangle width="1920" height="1080" color="#0A0D14" />
+    <!-- Brand -->
+    <Label text="GIO" font="font:LargeBoldSystemFont" color="#CC1F1F"
+           translation="[790, 360]" />
+    <Label text="ROKU" font="font:LargeBoldSystemFont" color="#FFFFFF"
+           translation="[900, 360]" />
+    <Rectangle width="340" height="5" color="#CC1F1F" translation="[790, 450]" />
+    <Label text="Tu televisión latina" font="font:SmallSystemFont" color="#6B7280"
+           translation="[790, 470]" width="340" horizAlign="center" />
+    <!-- Progress -->
+    <Rectangle width="960" height="3" color="#1A1F2E" translation="[480, 560]" />
+    <Rectangle id="progressBar" width="0" height="3" color="#CC1F1F" translation="[480, 560]" />
+    <Label id="statusLabel" text="Iniciando…" font="font:SmallSystemFont" color="#9CA3AF"
+           translation="[480, 578]" width="960" horizAlign="center" />
+  </children>
+  <script type="text/brightscript" uri="pkg:/components/SplashScreen.brs" />
+</component>

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="MoviesScreen" extends="Group">
+  <interface>
+    <field id="rowData"  type="node"   onChange="_onRowData" />
+    <field id="navigate" type="string" value="" />
+    <field id="playItem" type="node"   />
+  </interface>
+  <children>
+    <Rectangle width="1920" height="1080" color="#111827" />
+
+    <!-- Header -->
+    <Rectangle width="1920" height="76" color="#0A0D14" />
+    <Rectangle width="4" height="76" color="#CC1F1F" />
+    <Label text="PELÍCULAS" font="font:MediumBoldSystemFont" color="#FFFFFF"
+           translation="[24, 22]" />
+    <Label text="Dominio público · Internet Archive"
+           font="font:SmallSystemFont" color="#6B7280" translation="[24, 50]" />
+    <Label text="← Menú    OK Reproducir"
+           font="font:SmallSystemFont" color="#6B7280"
+           horizAlign="right" width="1880" translation="[0, 36]" />
+    <Rectangle width="1920" height="2" color="#2D3748" translation="[0, 76]" />
+
+    <!-- Movie hero info (updates on focus) -->
+    <Rectangle id="heroBg" width="1920" height="200" color="#0A0D14" translation="[0, 78]" />
+    <Poster id="heroPoster" width="160" height="180" translation="[60, 88]" loadDisplayMode="scaleToFit" />
+    <Label id="heroTitle" text="" font="font:MediumBoldSystemFont" color="#FFFFFF"
+           translation="[240, 92]" width="1200" />
+    <Label id="heroMeta" text="" font="font:SmallSystemFont" color="#9CA3AF"
+           translation="[240, 140]" width="1200" />
+    <Label id="heroDesc" text="" font="font:SmallSystemFont" color="#FFFFFF"
+           translation="[240, 180]" width="1200" numLines="2" wrap="true" />
+
+    <!-- Row list -->
+    <RowList id="rowList"
+             translation="[0, 290]"
+             itemSize="[180, 270]"
+             itemSpacing="[12, 0]"
+             numRows="2"
+             rowLabelOffset="[60, -46]"
+             showRowLabel="true"
+             rowLabelColor="#9CA3AF"
+             focusedRowLabelColor="#FFFFFF"
+             />
+
+    <Label id="emptyMsg" text="" font="font:SmallSystemFont" color="#6B7280"
+           translation="[0, 600]" width="1920" horizAlign="center"
+           visible="false" />
+  </children>
+  <script type="text/brightscript" uri="pkg:/source/HelperService.brs" />
+  <script type="text/brightscript" uri="pkg:/components/MoviesScreen.brs" />
+</component>

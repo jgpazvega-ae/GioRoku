@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="SearchScreen" extends="Group">
+  <interface>
+    <field id="searchQuery"   type="string" value="" />
+    <field id="searchResults" type="node"   onChange="_onResults" />
+    <field id="navigate"      type="string" value="" />
+    <field id="playItem"      type="node"   />
+  </interface>
+  <children>
+    <Rectangle width="1920" height="1080" color="#111827" />
+
+    <!-- Header -->
+    <Rectangle width="1920" height="76" color="#0A0D14" />
+    <Rectangle width="4" height="76" color="#CC1F1F" />
+    <Label text="BUSCAR" font="font:MediumBoldSystemFont" color="#FFFFFF"
+           translation="[24, 22]" />
+    <Label text="Canales y películas"
+           font="font:SmallSystemFont" color="#6B7280" translation="[24, 50]" />
+    <Rectangle width="1920" height="2" color="#2D3748" translation="[0, 76]" />
+
+    <!-- Keyboard -->
+    <Keyboard id="kbd" translation="[60, 90]" />
+
+    <!-- Results section header -->
+    <Label id="resultsHdr" text="" font="font:SmallBoldSystemFont" color="#9CA3AF"
+           translation="[800, 110]" width="1060" visible="false" />
+
+    <!-- Results list -->
+    <MarkupList id="resultsList"
+                translation="[800, 140]"
+                itemSize="[1060, 80]"
+                itemSpacing="[0, 2]"
+                numRows="11"
+                itemComponentName="GuideRow"
+                visible="false" />
+
+    <Label id="emptyMsg" text="" font="font:SmallSystemFont" color="#6B7280"
+           translation="[800, 400]" width="1060" horizAlign="center"
+           wrap="true" visible="false" />
+  </children>
+  <script type="text/brightscript" uri="pkg:/source/HelperService.brs" />
+  <script type="text/brightscript" uri="pkg:/components/SearchScreen.brs" />
+</component>

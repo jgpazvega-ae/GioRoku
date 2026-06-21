@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="SettingsScreen" extends="Group">
+  <interface>
+    <field id="navigate"    type="string"  value="" />
+    <field id="reloadReq"   type="boolean" value="false" />
+    <field id="reloadState" type="string"  value="" onChange="_onReloadState" />
+    <field id="reloadCount" type="integer" value="0" />
+  </interface>
+  <children>
+    <Rectangle width="1920" height="1080" color="#111827" />
+
+    <!-- Header -->
+    <Rectangle width="1920" height="76" color="#0A0D14" />
+    <Rectangle width="4" height="76" color="#CC1F1F" />
+    <Label text="CONFIGURACIÓN" font="font:MediumBoldSystemFont" color="#FFFFFF"
+           translation="[24, 22]" />
+    <Label text="GioRoku v2.0" font="font:SmallSystemFont" color="#6B7280"
+           translation="[24, 50]" />
+    <Rectangle width="1920" height="2" color="#2D3748" translation="[0, 76]" />
+
+    <!-- Settings list -->
+    <LabelList id="settingsList"
+               translation="[80, 120]"
+               itemSize="[700, 68]"
+               itemSpacing="[0, 4]"
+               numRows="8"
+               focusBitmapBlendColor="#CC1F1F"
+               textHorizAlign="left" />
+
+    <!-- Info panel (right side) -->
+    <Rectangle width="960" height="800" color="#0A0D14" translation="[860, 120]" />
+    <Rectangle width="4" height="800" color="#CC1F1F" translation="[860, 120]" />
+    <Label id="infoText" text="Selecciona una opción."
+           font="font:SmallSystemFont" color="#9CA3AF"
+           translation="[888, 160]" width="880"
+           wrap="true" />
+
+    <Label text="← Menú    OK Seleccionar    Atrás Volver"
+           font="font:SmallSystemFont" color="#6B7280"
+           translation="[80, 1040]" />
+  </children>
+  <script type="text/brightscript" uri="pkg:/source/HelperService.brs" />
+  <script type="text/brightscript" uri="pkg:/source/StorageService.brs" />
+  <script type="text/brightscript" uri="pkg:/components/SettingsScreen.brs" />
+</component>

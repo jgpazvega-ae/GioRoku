@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="FavScreen" extends="Group">
+  <interface>
+    <field id="channelData" type="node"   onChange="_onChannelData" />
+    <field id="navigate"    type="string" value="" />
+    <field id="playItem"    type="node"   />
+  </interface>
+  <children>
+    <Rectangle width="1920" height="1080" color="#111827" />
+
+    <!-- Header -->
+    <Rectangle width="1920" height="76" color="#0A0D14" />
+    <Rectangle width="4" height="76" color="#CC1F1F" />
+    <Label text="FAVORITOS" font="font:MediumBoldSystemFont" color="#FFFFFF"
+           translation="[24, 22]" />
+    <Label id="countLabel" text="" font="font:SmallSystemFont" color="#9CA3AF"
+           translation="[24, 50]" />
+    <Label text="← Menú    OK Reproducir    * Quitar favorito"
+           font="font:SmallSystemFont" color="#6B7280"
+           horizAlign="right" width="1880" translation="[0, 36]" />
+    <Rectangle width="1920" height="2" color="#2D3748" translation="[0, 76]" />
+
+    <MarkupList id="favList"
+                translation="[0, 78]"
+                itemSize="[1824, 80]"
+                itemSpacing="[0, 2]"
+                numRows="12"
+                itemComponentName="GuideRow" />
+
+    <Label id="emptyMsg" text="No tienes canales favoritos." + chr(10) + "Presiona * en cualquier canal para añadirlo."
+           font="font:SmallSystemFont" color="#6B7280"
+           translation="[0, 480]" width="1920" horizAlign="center"
+           wrap="true" visible="false" />
+  </children>
+  <script type="text/brightscript" uri="pkg:/source/HelperService.brs" />
+  <script type="text/brightscript" uri="pkg:/source/StorageService.brs" />
+  <script type="text/brightscript" uri="pkg:/components/FavScreen.brs" />
+</component>

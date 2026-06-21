@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="HomeScreen" extends="Group">
+  <interface>
+    <field id="rowData"  type="node"    onChange="_onRowData" />
+    <field id="navigate" type="string"  value="" />
+    <field id="playItem" type="node"    />
+  </interface>
+  <children>
+    <Rectangle width="1920" height="1080" color="#111827" />
+
+    <!-- ===== HERO SECTION (top 440px) ===== -->
+    <Rectangle id="heroBg" width="1920" height="440" color="#0A0D14" />
+    <!-- Gradient fade from hero bg to content bg -->
+    <Rectangle width="1920" height="40" color="#111827" translation="[0, 400]" />
+
+    <!-- Poster / Logo area -->
+    <Rectangle id="heroPosterBg" width="380" height="340" color="#1A1F2E" translation="[60, 50]" />
+    <Poster id="heroPoster" width="380" height="340" translation="[60, 50]" loadDisplayMode="scaleToFit" />
+
+    <!-- Text info -->
+    <Label id="heroTitle" text="GioRoku" font="font:LargeBoldSystemFont" color="#FFFFFF"
+           translation="[480, 60]" width="1380" />
+    <Label id="heroBadge" text="● EN VIVO" font="font:SmallBoldSystemFont" color="#CC1F1F"
+           translation="[480, 170]" />
+    <Label id="heroMeta"  text="" font="font:SmallSystemFont" color="#9CA3AF"
+           translation="[480, 210]" width="1380" />
+    <Label id="heroDesc"  text="" font="font:SmallSystemFont" color="#FFFFFF"
+           translation="[480, 260]" width="1380" numLines="3" wrap="true" />
+    <!-- Hint -->
+    <Label id="heroHint" text="OK Reproducir    * Favorito    ← Menú"
+           font="font:SmallSystemFont" color="#6B7280"
+           translation="[480, 390]" />
+
+    <!-- ===== ROW LIST (below hero) ===== -->
+    <RowList id="rowList"
+             translation="[0, 450]"
+             itemSize="[260, 146]"
+             itemSpacing="[14, 0]"
+             numRows="3"
+             rowLabelOffset="[60, -46]"
+             rowItemImageOffset="[0, 0]"
+             focusXOffset="0"
+             rowFocusAnimationStyle="fixedFocusWrap"
+             showRowLabel="true"
+             rowLabelColor="#9CA3AF"
+             focusedRowLabelColor="#FFFFFF"
+             />
+
+    <!-- Empty state -->
+    <Label id="emptyMsg" text="" font="font:SmallSystemFont" color="#6B7280"
+           translation="[0, 700]" width="1920" horizAlign="center"
+           wrap="true" visible="false" />
+  </children>
+  <script type="text/brightscript" uri="pkg:/source/HelperService.brs" />
+  <script type="text/brightscript" uri="pkg:/source/StorageService.brs" />
+  <script type="text/brightscript" uri="pkg:/components/HomeScreen.brs" />
+</component>

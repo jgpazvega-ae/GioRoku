@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="AppScene" extends="Scene">
+  <children>
+    <Rectangle id="bg" width="1920" height="1080" color="#111827" />
+
+    <!-- Screens — one visible at a time -->
+    <SplashScreen   id="splash"    visible="true"  />
+    <HomeScreen     id="home"      visible="false" />
+    <LiveTVScreen   id="livetv"    visible="false" />
+    <GuideScreen    id="guide"     visible="false" />
+    <MoviesScreen   id="movies"    visible="false" />
+    <FavScreen      id="favorites" visible="false" />
+    <SearchScreen   id="search"    visible="false" />
+    <SettingsScreen id="settings"  visible="false" />
+
+    <!-- Sidebar — renders over screens -->
+    <Sidebar id="sidebar" visible="false" />
+
+    <!-- Player — top of z-order -->
+    <PlayerScreen id="player" visible="false" />
+  </children>
+  <script type="text/brightscript" uri="pkg:/source/HelperService.brs" />
+  <script type="text/brightscript" uri="pkg:/source/StorageService.brs" />
+  <script type="text/brightscript" uri="pkg:/components/AppScene.brs" />
+</component>

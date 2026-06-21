@@ -1,12 +1,10 @@
-' GioRoku — entry point. Single self-contained scene for maximum reliability.
+' GioRoku v2 — entry point.
 sub Main(args as object)
     screen = CreateObject("roSGScreen")
-    port = CreateObject("roMessagePort")
+    port   = CreateObject("roMessagePort")
     screen.setMessagePort(port)
-
-    scene = screen.CreateScene("MainScene")
+    scene  = screen.CreateScene("AppScene")
     screen.show()
-
     while true
         msg = wait(0, port)
         if type(msg) = "roSGScreenEvent" then

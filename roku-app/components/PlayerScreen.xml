@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="PlayerScreen" extends="Group">
+  <interface>
+    <field id="content"     type="node"    onChange="_onContent" />
+    <field id="allChannels" type="node"    />
+    <field id="done"        type="boolean" value="false" />
+  </interface>
+  <children>
+    <!-- Full-screen video -->
+    <Video id="video" width="1920" height="1080" />
+
+    <!-- Buffering label -->
+    <Label id="bufLabel" text="" font="font:MediumBoldSystemFont" color="#FFFFFF"
+           translation="[760, 510]" width="400" horizAlign="center" visible="false" />
+
+    <!-- ========== ZAP BANNER (top) ========== -->
+    <Rectangle id="zapBg" width="1920" height="160" color="#0A0D14" opacity="0.88"
+               translation="[0, 0]" visible="false" />
+    <!-- Channel number block -->
+    <Rectangle id="zapNumBg" width="140" height="120" color="#CC1F1F"
+               translation="[40, 20]" visible="false" />
+    <Label id="zapNum" text="" font="font:LargeBoldSystemFont" color="#FFFFFF"
+           horizAlign="center" vertAlign="center" width="140" height="120"
+           translation="[40, 20]" visible="false" />
+    <!-- Logo -->
+    <Poster id="zapLogo" width="160" height="100" translation="[200, 30]" visible="false" />
+    <!-- Title + meta -->
+    <Label id="zapName" text="" font="font:MediumBoldSystemFont" color="#FFFFFF"
+           translation="[380, 30]" width="1200" />
+    <Label id="zapMeta" text="" font="font:SmallSystemFont" color="#9CA3AF"
+           translation="[380, 80]" width="1200" />
+    <!-- Clock + hint -->
+    <Label id="zapClock" text="" font="font:SmallBoldSystemFont" color="#FFFFFF"
+           horizAlign="right" width="1860" translation="[0, 30]" />
+    <Label id="zapHint" text="▲▼ Canal    OK Info    Atrás Salir"
+           font="font:SmallSystemFont" color="#6B7280"
+           horizAlign="right" width="1860" translation="[0, 110]" />
+
+    <!-- ========== INFO OVERLAY (bottom, shown on OK) ========== -->
+    <Rectangle id="infoBg" width="1920" height="200" color="#0A0D14" opacity="0.92"
+               translation="[0, 880]" visible="false" />
+    <Poster id="infoLogo" width="140" height="90" translation="[40, 895]" visible="false" />
+    <Label id="infoTitle" text="" font="font:MediumBoldSystemFont" color="#FFFFFF"
+           translation="[200, 890]" width="1100" visible="false" />
+    <Label id="infoMeta"  text="" font="font:SmallSystemFont" color="#9CA3AF"
+           translation="[200, 940]" width="1100" visible="false" />
+    <Label id="infoBadge" text="● EN VIVO" font="font:SmallBoldSystemFont" color="#CC1F1F"
+           translation="[200, 975]" visible="false" />
+    <!-- Progress bar area -->
+    <Rectangle id="progBg"  width="1520" height="4"  color="#2D3748" translation="[200, 1010]" visible="false" />
+    <Rectangle id="progBar" width="0"    height="4"  color="#CC1F1F" translation="[200, 1010]" visible="false" />
+    <Label id="progTime" text="" font="font:SmallSystemFont" color="#9CA3AF"
+           translation="[1740, 1000]" visible="false" />
+  </children>
+  <script type="text/brightscript" uri="pkg:/source/HelperService.brs" />
+  <script type="text/brightscript" uri="pkg:/source/StorageService.brs" />
+  <script type="text/brightscript" uri="pkg:/components/PlayerScreen.brs" />
+</component>

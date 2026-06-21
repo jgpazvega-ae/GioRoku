@@ -3,34 +3,16 @@ sub init()
     m.statusLabel = m.top.findNode("statusLabel")
     m.done        = false
 
-    ' Offline-first: load bundled channels + movies instantly (no network needed)
+    ' Offline-first: bundled channels + movies load instantly (no network)
     m.bundledChannels = _readBundled("pkg:/data/channels.json", "channels")
     m.bundledMovies   = _readBundled("pkg:/data/movies.json",   "movies")
 
-    m.statusLabel.text  = m.bundledChannels.count().toStr() + " canales"
-    m.progressBar.width = 480
+    m.statusLabel.text  = "Conectando…"
+    m.progressBar.width = 320
 
-    ' Proceed timer — PRIMARY path. Appended to the tree so it reliably fires
-    ' even when LoadTask blocks. After this delay we always advance to Home.
-    m.proceedTimer = createObject("roSGNode", "Timer")
-    m.proceedTimer.duration = 2.5
-    m.proceedTimer.repeat   = false
-    m.proceedTimer.id       = "proceedTimer"
-    m.top.appendChild(m.proceedTimer)
-    m.proceedTimer.observeField("fire", "_onProceed")
-    m.proceedTimer.control  = "start"
-
-    ' Optional network refresh — runs in parallel, never blocks the transition
-    m.netTimer = createObject("roSGNode", "Timer")
-    m.netTimer.duration = 0.3
-    m.netTimer.repeat   = false
-    m.netTimer.id       = "netTimer"
-    m.top.appendChild(m.netTimer)
-    m.netTimer.observeField("fire", "_startLoad")
-    m.netTimer.control  = "start"
-end sub
-
-sub _startLoad()
+    ' Start network load DIRECTLY (no Timer). The Task-completion observer
+    ' is the only reliable trigger on this device; the LoadTask now has a
+    ' hard 8s-per-request cap, so taskState always settles to done/error.
     m.loadTask = createObject("roSGNode", "LoadTask")
     m.loadTask.baseUrl = "https://raw.githubusercontent.com/jgpazvega-ae/GioRoku/main/docs/api/v1"
     m.loadTask.observeField("taskState", "_onTaskDone")
@@ -49,16 +31,13 @@ sub _onTaskDone()
         end if
     end if
 
-    ' Network upgrade only if it returned more than the bundled baseline
+    ' ALWAYS finish here (reliable Task observer). Use the network list only
+    ' if it returned more than the bundled baseline; otherwise use bundled.
     if netChannels.count() > m.bundledChannels.count() then
         _finish(netChannels)
+    else
+        _finish(m.bundledChannels)
     end if
-end sub
-
-sub _onProceed()
-    ' Primary transition — always advance with bundled data (network may
-    ' have already upgraded via _onTaskDone, in which case m.done is set)
-    _finish(m.bundledChannels)
 end sub
 
 sub _finish(channels as object)

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-21T03:40:25Z",
+  "generatedAt": "2026-06-21T04:26:35Z",
   "countries": [
     {
       "code": "MX",
@@ -26,7 +26,7 @@
       "flag": "CO",
       "sortOrder": 3,
       "keywords": [],
-      "channelCount": 5
+      "channelCount": 0
     },
     {
       "code": "CL",
@@ -44,7 +44,7 @@
       "flag": "PE",
       "sortOrder": 5,
       "keywords": [],
-      "channelCount": 7
+      "channelCount": 0
     },
     {
       "code": "UY",
@@ -107,7 +107,7 @@
       "flag": "US",
       "sortOrder": 12,
       "keywords": [],
-      "channelCount": 3
+      "channelCount": 0
     },
     {
       "code": "INTL",
@@ -116,7 +116,7 @@
       "flag": "--",
       "sortOrder": 99,
       "keywords": [],
-      "channelCount": 108
+      "channelCount": 0
     }
   ]
 }

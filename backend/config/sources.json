@@ -14,5 +14,37 @@
       "verify_ssl": true,
       "headers": {}
     }
+  },
+  {
+    "id": "dmelendez11_m3u",
+    "name": "Lista Canales M3U — dmelendez11",
+    "type": "m3u",
+    "url": "https://raw.githubusercontent.com/dmelendez11/lista-canales-m3u/main/canales_v2_con_logos.m3u",
+    "priority": 2,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "dmelendez11_especial",
+    "name": "Lista Especial con Respaldos — dmelendez11",
+    "type": "m3u",
+    "url": "https://raw.githubusercontent.com/dmelendez11/lista-canales-m3u/main/lista_especial_con_respaldos.m3u",
+    "priority": 3,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": true,
+      "headers": {}
+    }
   }
 ]

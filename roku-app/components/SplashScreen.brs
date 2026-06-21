@@ -1,11 +1,27 @@
 sub init()
     m.progressBar = m.top.findNode("progressBar")
     m.statusLabel = m.top.findNode("statusLabel")
+    m.done        = false
+
     m.timer = createObject("roSGNode", "Timer")
     m.timer.duration = 0.4
     m.timer.repeat   = false
     m.timer.observeField("fire", "_startLoad")
     m.timer.control  = "start"
+
+    m.watchdog = createObject("roSGNode", "Timer")
+    m.watchdog.duration = 25
+    m.watchdog.repeat   = false
+    m.watchdog.observeField("fire", "_onWatchdog")
+    m.watchdog.control  = "start"
+end sub
+
+sub _onWatchdog()
+    if m.done then return
+    m.statusLabel.text = "Sin conexión – continuando sin canales"
+    m.top.result = {channels: [], movies: []}
+    m.top.done   = true
+    m.done       = true
 end sub
 
 sub _startLoad()
@@ -45,5 +61,6 @@ sub _onTaskDone()
     m.statusLabel.text  = "Listo"
 
     m.top.result = {channels: channels, movies: movies}
+    m.done       = true
     m.top.done   = true
 end sub

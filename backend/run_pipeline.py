@@ -75,8 +75,10 @@ async def _run(stages: list[str], country: str | None, dry_run: bool):
 
     if "generate" in stages:
         console.rule("6 — Generate API")
-        stats = APIGenerator(base, dry_run=dry_run).write_all()
-        console.print(f"[green]{stats['total_files']} files written[/green]")
+        gen = APIGenerator(base, dry_run=dry_run)
+        stats = gen.write_all()
+        bundled = gen.write_bundled_roku()
+        console.print(f"[green]{stats['total_files']} API files · {bundled} channels bundled for Roku[/green]")
 
     console.rule("[bold green]Done[/bold green]")
 

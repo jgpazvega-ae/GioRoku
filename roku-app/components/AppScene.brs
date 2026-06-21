@@ -75,7 +75,7 @@ sub _onBgRefresh()
     if state <> "done" then return
     res = m.bgTask.result
     if res = invalid or not res.DoesExist("channels") or res.channels = invalid then return
-    if res.channels.count() > m.channels.count() then
+    if res.channels.count() > 0 then
         m.channels     = res.channels
         m.channelNodes = invalid
         if m.currentScreen = "home" then _prepareHome()

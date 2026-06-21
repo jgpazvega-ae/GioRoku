@@ -73,6 +73,22 @@ class APIGenerator:
         console.print(f"[green]API: {total} files, {len(channels)} channels[/green]")
         return {"total_files": total, "total_channels": len(channels)}
 
+    def write_bundled_roku(self) -> int:
+        """Write roku-app/data/channels.json with only validated online channels."""
+        channels = self._channels()
+        online = [ch for ch in channels if ch.get("isOnline")]
+        roku_path = self.out.parent.parent.parent / "roku-app" / "data" / "channels.json"
+        if not self.dry_run:
+            roku_path.parent.mkdir(parents=True, exist_ok=True)
+            roku_path.write_text(
+                json.dumps({"channels": online}, ensure_ascii=False, indent=1),
+                encoding="utf-8",
+            )
+            console.print(f"[green]Roku bundle: {len(online)} online channels → {roku_path}[/green]")
+        else:
+            console.print(f"[dim]DRY Roku bundle: {len(online)} online channels[/dim]")
+        return len(online)
+
     def _write(self, rel: str, data):
         path = self.out / rel
         if self.dry_run:
@@ -96,7 +112,7 @@ class APIGenerator:
                     last_check, last_online, response_ms, source_id, source_priority
                 FROM channels
                 WHERE COALESCE(override_enabled,is_enabled)=1
-                ORDER BY source_priority, name
+                ORDER BY is_online DESC, response_ms ASC NULLS LAST, name
             """).fetchall()
         result = []
         for r in rows:

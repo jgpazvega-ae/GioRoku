@@ -44,6 +44,16 @@ sub init()
 
     m.player.observeField("done",          "_onPlayerDone")
 
+    ' References to each screen's primary focusable control. Focus must land
+    ' on these inner nodes (not the screen Group) or arrow keys do nothing.
+    m.homeList     = m.home.findNode("rowList")
+    m.livetvList   = m.livetv.findNode("chanList")
+    m.guideList    = m.guide.findNode("guideList")
+    m.moviesList   = m.movies.findNode("rowList")
+    m.favList      = m.favorites.findNode("favList")
+    m.searchKbd    = m.search.findNode("kbd")
+    m.settingsList = m.settings.findNode("settingsList")
+
     ' --- Bulletproof startup --------------------------------------------
     ' Load bundled channels + movies SYNCHRONOUSLY on the render thread and
     ' go straight to Home. No Task, no Timer, no cross-component observer —
@@ -98,44 +108,61 @@ sub _navigateTo(screen as string)
     m.sidebarOpen     = false
     m.currentScreen   = screen
 
+    ' Make the screen visible FIRST, then load its data, then focus its inner
+    ' control. Setting focus while the screen is still hidden does not stick.
     if screen = "home" then
-        _prepareHome()
         m.home.visible = true
-        m.home.setFocus(true)
+        _prepareHome()
         m.sidebar.activeItem = 0
 
     else if screen = "livetv" then
-        _prepareLiveTV()
         m.livetv.visible = true
-        m.livetv.setFocus(true)
+        _prepareLiveTV()
         m.sidebar.activeItem = 1
 
     else if screen = "guide" then
-        _prepareGuide()
         m.guide.visible = true
-        m.guide.setFocus(true)
+        _prepareGuide()
 
     else if screen = "movies" then
-        _prepareMovies()
         m.movies.visible = true
-        m.movies.setFocus(true)
+        _prepareMovies()
         m.sidebar.activeItem = 2
 
     else if screen = "favorites" then
-        _prepareFavorites()
         m.favorites.visible = true
-        m.favorites.setFocus(true)
+        _prepareFavorites()
         m.sidebar.activeItem = 3
 
     else if screen = "search" then
         m.search.visible = true
-        m.search.setFocus(true)
         m.sidebar.activeItem = 4
 
     else if screen = "settings" then
         m.settings.visible = true
-        m.settings.setFocus(true)
         m.sidebar.activeItem = 5
+    end if
+
+    _focusScreen(screen)
+end sub
+
+' Focus the primary inner control of a screen — never the screen Group,
+' or the RowList/MarkupList never receives arrow keys.
+sub _focusScreen(screen as string)
+    if screen = "home" then
+        if m.homeList <> invalid then m.homeList.setFocus(true)
+    else if screen = "livetv" then
+        if m.livetvList <> invalid then m.livetvList.setFocus(true)
+    else if screen = "guide" then
+        if m.guideList <> invalid then m.guideList.setFocus(true)
+    else if screen = "movies" then
+        if m.moviesList <> invalid then m.moviesList.setFocus(true)
+    else if screen = "favorites" then
+        if m.favList <> invalid then m.favList.setFocus(true)
+    else if screen = "search" then
+        if m.searchKbd <> invalid then m.searchKbd.setFocus(true)
+    else if screen = "settings" then
+        if m.settingsList <> invalid then m.settingsList.setFocus(true)
     end if
 end sub
 
@@ -170,8 +197,7 @@ sub _onSidebarNavigate()
     if dest = "close" then
         m.sidebar.visible = false
         m.sidebarOpen     = false
-        n = m.top.findNode(m.currentScreen)
-        if n <> invalid then n.setFocus(true)
+        _focusScreen(m.currentScreen)
     else
         _navigateTo(dest)
     end if
@@ -209,8 +235,7 @@ sub _onPlayerDone()
     if not m.player.done then return
     m.player.done    = false
     m.player.visible = false
-    n = m.top.findNode(m.currentScreen)
-    if n <> invalid then n.setFocus(true)
+    _focusScreen(m.currentScreen)
 end sub
 
 ' ===================== SEARCH =====================

@@ -439,7 +439,7 @@ sub _prepareLiveTV()
     if m.liveTVContent = invalid then
         content = createObject("roSGNode", "ContentNode")
         n = 0
-        LIVE_LIMIT = 500
+        LIVE_LIMIT = 200
         for each ch in m.channels
             if n >= LIVE_LIMIT then exit for
             n = n + 1

@@ -28,7 +28,7 @@
                 itemSize="[1824, 80]"
                 itemSpacing="[0, 2]"
                 numRows="12"
-                itemComponentName="GuideRow" />
+                itemComponentName="LiveTVRow" />
 
     <!-- Empty state -->
     <Label id="emptyMsg" text="" font="font:SmallSystemFont" color="#6B7280"

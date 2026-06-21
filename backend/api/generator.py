@@ -109,24 +109,34 @@ class APIGenerator:
         "MX","AR","CO","CL","VE","PE","UY","PY","EC","BO",
         "US_ES","SV","GT","HN","NI","CR","PA","DO","CU","PR"
     )
-    # Sources whose channels are included even when country=INTL (they serve
-    # Latin American / Spanish-language content reliably).
-    LATAM_SOURCES = (
-        # iptv-org country playlists — already filtered by country
-        "iptvorg_mx","iptvorg_ar","iptvorg_co","iptvorg_cl","iptvorg_pe",
-        "iptvorg_ve","iptvorg_us_spa","iptvorg_spa_lang","m3u_iptvcat_mx",
-        # Community curated lists focused on Latin America / Mexico
-        "dmelendez11_m3u",       # CNN en Español, Cinecanal, ESPN 2-6, Fox Sports, etc.
-        "dmelendez11_especial",  # Full MX cable lineup: Discovery, History, HBO, ESPN…
-        "achoapps_acho",         # ESPN, Animal Planet, Cartoon Network, HBO 2, MTV…
-        "achoapps_mexico3",      # Mexico-focused list
-        "bitly_variada_tv2",     # "SUR:" tagged South American cable channels
-        "freetv_iptv",
+    # Tier 1 — Spanish Latin American CABLE channels (ESPN, Discovery, History,
+    # HBO, TNT, Fox Sports, CNN en Español…).  Included regardless of country tag.
+    CABLE_SOURCES = (
+        "dmelendez11_especial",  # 49 ch: ESPN 1-6, Discovery HD, History, HBO, TNT, FX…
+        "dmelendez11_m3u",       # 80 ch: CNN en Español, Cinecanal, ESPN 2-6, Fox Sports…
+    )
+    # Tier 2 — Mexico / LATAM curated lists.  Include all their channels (country
+    # tags are mostly LATAM).
+    CURATED_SOURCES = (
+        "achoapps_mexico3",      # 64 ch: Azteca, Canal 5, Multimedios, Milenio…
+    )
+    # Tier 3 — Official iptv-org country playlists — only LATAM-country channels.
+    OFFICIAL_SOURCES = (
+        "iptvorg_mx","iptvorg_ar","iptvorg_co","iptvorg_cl",
+        "iptvorg_pe","iptvorg_ve","m3u_iptvcat_mx",
+    )
+    # Tier 3b — achoapps_acho has 576 channels but 468 tagged INTL (Indian content).
+    # Include only the ones actually tagged with LATAM countries (~99 remain).
+    COUNTRY_FILTERED_SOURCES = (
+        "achoapps_acho",
     )
 
     def _channels(self) -> list[dict]:
         countries_sql = ",".join(f"'{c}'" for c in self.LATAM_COUNTRIES)
-        sources_sql   = ",".join(f"'{s}'" for s in self.LATAM_SOURCES)
+        cable_sql    = ",".join(f"'{s}'" for s in self.CABLE_SOURCES)
+        curated_sql  = ",".join(f"'{s}'" for s in self.CURATED_SOURCES)
+        official_sql = ",".join(f"'{s}'" for s in self.OFFICIAL_SOURCES)
+        cfilt_sql    = ",".join(f"'{s}'" for s in self.COUNTRY_FILTERED_SOURCES)
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
             rows = conn.execute(f"""
@@ -142,14 +152,18 @@ class APIGenerator:
                 FROM channels
                 WHERE COALESCE(override_enabled,is_enabled)=1
                   AND (
-                    COALESCE(override_country,country) IN ({countries_sql})
-                    OR source_id IN ({sources_sql})
+                    source_id IN ({cable_sql})
+                    OR source_id IN ({curated_sql})
+                    OR (source_id IN ({official_sql}) AND COALESCE(override_country,country) IN ({countries_sql}))
+                    OR (source_id IN ({cfilt_sql})    AND COALESCE(override_country,country) IN ({countries_sql}))
                   )
                 ORDER BY
-                    CASE WHEN COALESCE(override_country,country) = 'MX' THEN 0 ELSE 1 END,
+                    CASE WHEN source_id IN ({cable_sql})   THEN 0
+                         WHEN source_id IN ({curated_sql}) THEN 1
+                         ELSE 2 END,
                     is_featured DESC,
-                    CASE WHEN COALESCE(override_country,country) = 'MX'                            THEN 0
-                         WHEN COALESCE(override_country,country) IN ('AR','CO','CL','VE','PE','UY','PY','EC','BO') THEN 1
+                    CASE WHEN COALESCE(override_country,country) = 'MX' THEN 0
+                         WHEN COALESCE(override_country,country) IN ('AR','CO','CL','VE','PE','UY','PY','EC','BO','US_ES','DO','PR','CU','GT','HN','SV','NI','CR','PA') THEN 1
                          ELSE 2 END,
                     is_online DESC, response_ms ASC NULLS LAST, name
             """).fetchall()

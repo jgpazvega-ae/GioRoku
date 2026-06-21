@@ -104,10 +104,23 @@ class APIGenerator:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(data, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
 
+    # Countries considered "Latino" — only these appear in API and Roku bundle.
+    LATAM_COUNTRIES = (
+        "MX","AR","CO","CL","VE","PE","UY","PY","EC","BO",
+        "US_ES","SV","GT","HN","NI","CR","PA","DO","CU","PR"
+    )
+    LATAM_SOURCES = (
+        "iptvorg_mx","iptvorg_ar","iptvorg_co","iptvorg_cl","iptvorg_pe",
+        "iptvorg_ve","iptvorg_us_spa","iptvorg_spa_lang",
+        "freetv_iptv","m3u_iptvcat_mx",
+    )
+
     def _channels(self) -> list[dict]:
+        countries_sql = ",".join(f"'{c}'" for c in self.LATAM_COUNTRIES)
+        sources_sql   = ",".join(f"'{s}'" for s in self.LATAM_SOURCES)
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
-            rows = conn.execute("""
+            rows = conn.execute(f"""
                 SELECT id,
                     COALESCE(override_name,name) AS name,
                     COALESCE(override_logo,logo) AS logo,
@@ -119,7 +132,12 @@ class APIGenerator:
                     last_check, last_online, response_ms, source_id, source_priority
                 FROM channels
                 WHERE COALESCE(override_enabled,is_enabled)=1
+                  AND (
+                    COALESCE(override_country,country) IN ({countries_sql})
+                    OR source_id IN ({sources_sql})
+                  )
                 ORDER BY
+                    CASE WHEN COALESCE(override_country,country) = 'MX' THEN 0 ELSE 1 END,
                     is_featured DESC,
                     CASE WHEN COALESCE(override_country,country) = 'MX'                            THEN 0
                          WHEN COALESCE(override_country,country) IN ('AR','CO','CL','VE','PE','UY','PY','EC','BO') THEN 1

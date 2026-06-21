@@ -10,11 +10,13 @@ sub init()
     m.sidebar   = m.top.findNode("sidebar")
     m.player    = m.top.findNode("player")
 
-    m.channels    = []
-    m.allMovies   = []
-    m.currentScreen = "splash"
-    m.sidebarOpen   = false
-    m.channelNodes  = invalid
+    m.channels      = []
+    m.allMovies     = []
+    m.currentScreen  = "splash"
+    m.sidebarOpen    = false
+    m.channelNodes   = invalid
+    m.liveTVContent  = invalid
+    m.guideContent   = invalid
 
     m.home.observeField("navigate",        "_onNavigate")
     m.home.observeField("playItem",        "_onPlayItem")
@@ -79,8 +81,10 @@ sub _onBgRefresh()
     ' This prevents a downgrade when the network load cap returns fewer channels
     ' than the bundled data/channels.json.
     if res.channels.count() > m.channels.count() then
-        m.channels     = res.channels
-        m.channelNodes = invalid
+        m.channels      = res.channels
+        m.channelNodes  = invalid
+        m.liveTVContent = invalid
+        m.guideContent  = invalid
         if m.currentScreen = "home" then _prepareHome()
     end if
 end sub
@@ -311,8 +315,10 @@ sub _onReloadDone()
     if state = "done" then
         res = m.loadTask.result
         if res <> invalid and res.DoesExist("channels") and res.channels <> invalid then
-            m.channels = res.channels
-            m.channelNodes = invalid
+            m.channels      = res.channels
+            m.channelNodes  = invalid
+            m.liveTVContent = invalid
+            m.guideContent  = invalid
         end if
         m.settings.reloadCount = m.channels.count()
         m.settings.reloadState = "done"
@@ -371,7 +377,7 @@ sub _prepareHome()
     row2.title = "TV en Vivo"
     n = 0
     for each ch in m.channels
-        if n >= 30 then exit for
+        if n >= 60 then exit for
         it = row2.createChild("ContentNode")
         it.title       = _displayName(ch)
         it.hdPosterUrl = _str(ch, "logo")
@@ -426,61 +432,63 @@ sub _prepareHome()
 end sub
 
 sub _prepareLiveTV()
-    root = _buildChannelNodes()
-    ' Build a new ContentNode with chLive field for GuideRow rendering.
-    ' Cap at 3000 to avoid multi-second freeze from creating too many ContentNodes.
-    content = createObject("roSGNode", "ContentNode")
-    n = 0
-    for each ch in m.channels
-        if n >= 3000 then exit for
-        n = n + 1
-        it = content.createChild("ContentNode")
-        it.title       = _displayName(ch)
-        it.hdPosterUrl = _str(ch, "logo")
-        it.url         = _str(ch, "streamUrl")
-        it.streamFormat = "hls"
-        it.live        = true
-        meta = _str(ch, "countryLabel")
-        cat  = _str(ch, "categoryLabel")
-        if meta <> "" and cat <> "" then
-            it.description = meta + " · " + cat
-        else
-            it.description = meta + cat
-        end if
-        online = true
-        if type(ch) = "roAssociativeArray" and ch.DoesExist("isOnline") then
-            online = (ch.isOnline = true)
-        end if
-        it.addFields({chNum: _pad3(n), chId: _str(ch, "id"), chLive: online, isLive: true})
-    end for
-    m.livetv.channelData = content
+    _buildChannelNodes()
+    if m.liveTVContent = invalid then
+        content = createObject("roSGNode", "ContentNode")
+        n = 0
+        for each ch in m.channels
+            n = n + 1
+            it = content.createChild("ContentNode")
+            it.title        = _displayName(ch)
+            it.hdPosterUrl  = _str(ch, "logo")
+            it.url          = _str(ch, "streamUrl")
+            it.streamFormat = "hls"
+            it.live         = true
+            meta = _str(ch, "countryLabel")
+            cat  = _str(ch, "categoryLabel")
+            if meta <> "" and cat <> "" then
+                it.description = meta + " · " + cat
+            else
+                it.description = meta + cat
+            end if
+            online = true
+            if type(ch) = "roAssociativeArray" and ch.DoesExist("isOnline") then
+                online = (ch.isOnline = true)
+            end if
+            it.addFields({chNum: _pad3(n), chId: _str(ch, "id"), chLive: online, isLive: true})
+        end for
+        m.liveTVContent = content
+    end if
+    m.livetv.channelData = m.liveTVContent
 end sub
 
 sub _prepareGuide()
-    content = createObject("roSGNode", "ContentNode")
-    n = 0
-    for each ch in m.channels
-        if n >= 3000 then exit for
-        n = n + 1
-        it = content.createChild("ContentNode")
-        meta = _str(ch, "countryLabel")
-        cat  = _str(ch, "categoryLabel")
-        q    = ucase(_str(ch, "quality"))
-        if cat <> "" then meta = meta + "  ·  " + cat
-        if q <> "" then meta = meta + "  ·  " + q
-        online = true
-        if type(ch) = "roAssociativeArray" and ch.DoesExist("isOnline") then
-            online = (ch.isOnline = true)
-        end if
-        it.title       = _displayName(ch)
-        it.description = meta
-        it.hdPosterUrl = _str(ch, "logo")
-        it.url         = _str(ch, "streamUrl")
-        it.streamFormat = "hls"
-        it.live        = true
-        it.addFields({chNum: _pad3(n), chLive: online, chId: _str(ch, "id"), isLive: true})
-    end for
-    m.guide.channelData = content
+    if m.guideContent = invalid then
+        content = createObject("roSGNode", "ContentNode")
+        n = 0
+        for each ch in m.channels
+            n = n + 1
+            it = content.createChild("ContentNode")
+            meta = _str(ch, "countryLabel")
+            cat  = _str(ch, "categoryLabel")
+            q    = ucase(_str(ch, "quality"))
+            if cat <> "" then meta = meta + "  ·  " + cat
+            if q <> "" then meta = meta + "  ·  " + q
+            online = true
+            if type(ch) = "roAssociativeArray" and ch.DoesExist("isOnline") then
+                online = (ch.isOnline = true)
+            end if
+            it.title        = _displayName(ch)
+            it.description  = meta
+            it.hdPosterUrl  = _str(ch, "logo")
+            it.url          = _str(ch, "streamUrl")
+            it.streamFormat = "hls"
+            it.live         = true
+            it.addFields({chNum: _pad3(n), chLive: online, chId: _str(ch, "id"), isLive: true})
+        end for
+        m.guideContent = content
+    end if
+    m.guide.channelData = m.guideContent
 end sub
 
 sub _prepareMovies()

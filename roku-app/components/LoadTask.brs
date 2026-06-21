@@ -21,7 +21,7 @@ sub fetch()
     totalPages = 1
     if page.DoesExist("totalPages") then totalPages = page.totalPages
     last = totalPages
-    if last > 10 then last = 10
+    if last > 80 then last = 80  ' 80 pages × 100 channels = 8000 max
     for p = 2 to last
         extra = _fetchJSON(base + "/channels/page/" + p.toStr() + ".json")
         if extra <> invalid and extra.DoesExist("channels") and extra.channels <> invalid then

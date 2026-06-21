@@ -75,7 +75,10 @@ sub _onBgRefresh()
     if state <> "done" then return
     res = m.bgTask.result
     if res = invalid or not res.DoesExist("channels") or res.channels = invalid then return
-    if res.channels.count() > 0 then
+    ' Only upgrade if the network result has MORE channels than what's bundled.
+    ' This prevents a downgrade when the network load cap returns fewer channels
+    ' than the bundled data/channels.json.
+    if res.channels.count() > m.channels.count() then
         m.channels     = res.channels
         m.channelNodes = invalid
         if m.currentScreen = "home" then _prepareHome()
@@ -325,6 +328,7 @@ function _buildChannelNodes() as object
     root = createObject("roSGNode", "ContentNode")
     n = 0
     for each ch in m.channels
+        if n >= 3000 then exit for
         n = n + 1
         it = root.createChild("ContentNode")
         it.title       = _displayName(ch)
@@ -423,10 +427,12 @@ end sub
 
 sub _prepareLiveTV()
     root = _buildChannelNodes()
-    ' Build a new ContentNode with chLive field for GuideRow rendering
+    ' Build a new ContentNode with chLive field for GuideRow rendering.
+    ' Cap at 3000 to avoid multi-second freeze from creating too many ContentNodes.
     content = createObject("roSGNode", "ContentNode")
     n = 0
     for each ch in m.channels
+        if n >= 3000 then exit for
         n = n + 1
         it = content.createChild("ContentNode")
         it.title       = _displayName(ch)
@@ -454,6 +460,7 @@ sub _prepareGuide()
     content = createObject("roSGNode", "ContentNode")
     n = 0
     for each ch in m.channels
+        if n >= 3000 then exit for
         n = n + 1
         it = content.createChild("ContentNode")
         meta = _str(ch, "countryLabel")

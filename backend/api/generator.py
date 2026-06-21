@@ -74,11 +74,16 @@ class APIGenerator:
         return {"total_files": total, "total_channels": len(channels)}
 
     def write_bundled_roku(self) -> int:
-        """Write roku-app/data/channels.json with trusted + validated online channels."""
+        """Write roku-app/data/channels.json with the top 3000 channels.
+
+        Limit to 3000 so the Roku can parse the bundled JSON in ~1s instead of ~5s.
+        Cable/pay-TV channels are first (is_featured DESC), so they are always included.
+        The background LoadTask fetches the full API and upgrades the list at runtime
+        if more channels are available.
+        """
         channels = self._channels()
-        # Prefer trusted (community-verified) or channels that have been explicitly validated
         quality = [ch for ch in channels if ch.get("isOnline") and (ch.get("isTrusted") or ch.get("lastCheck"))]
-        online = quality if quality else [ch for ch in channels if ch.get("isOnline")]
+        online = (quality if quality else [ch for ch in channels if ch.get("isOnline")])[:3000]
         roku_path = self.out.parent.parent.parent / "roku-app" / "data" / "channels.json"
         if not self.dry_run:
             roku_path.parent.mkdir(parents=True, exist_ok=True)

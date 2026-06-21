@@ -2,6 +2,7 @@ sub init()
     m.favList    = m.top.findNode("favList")
     m.countLabel = m.top.findNode("countLabel")
     m.emptyMsg   = m.top.findNode("emptyMsg")
+    m.emptyMsg.text = "No tienes canales favoritos." + chr(10) + "Presiona * en cualquier canal para añadirlo."
 
     m.favList.observeField("itemSelected", "_onItemSelected")
 end sub

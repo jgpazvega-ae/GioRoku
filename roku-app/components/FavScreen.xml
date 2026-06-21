@@ -27,7 +27,7 @@
                 numRows="12"
                 itemComponentName="GuideRow" />
 
-    <Label id="emptyMsg" text="No tienes canales favoritos." + chr(10) + "Presiona * en cualquier canal para añadirlo."
+    <Label id="emptyMsg" text=""
            font="font:SmallSystemFont" color="#6B7280"
            translation="[0, 480]" width="1920" horizAlign="center"
            wrap="true" visible="false" />

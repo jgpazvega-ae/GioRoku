@@ -133,3 +133,56 @@ jobs:
           git add docs/api/
           git diff --staged --quiet || git commit -m "chore: api update $(date -u '+%Y-%m-%d %H:%M UTC')"
           git push
+
+      - name: Channel status summary
+        if: always()
+        run: |
+          python3 - <<'PYEOF'
+          import json, sqlite3, sys
+          from pathlib import Path
+
+          db = Path("backend/db/iptv.db")
+          if not db.exists():
+              sys.exit(0)
+
+          with sqlite3.connect(db) as conn:
+              conn.row_factory = sqlite3.Row
+              rows = conn.execute("""
+                  SELECT name, country, category, is_online, response_ms, offline_count
+                  FROM channels WHERE is_enabled=1
+                  ORDER BY is_online DESC, response_ms ASC NULLS LAST, name
+              """).fetchall()
+
+          total  = len(rows)
+          online = sum(1 for r in rows if r["is_online"])
+          pct    = round(online / total * 100) if total else 0
+
+          SUMMARY = Path(
+              __import__("os").environ.get("GITHUB_STEP_SUMMARY", "/dev/stdout")
+          )
+          lines = [
+              "## 📡 GioRoku — Pipeline nocturno\n",
+              f"| | |", f"|---|---|",
+              f"| **Total** | {total} |",
+              f"| **✅ En línea** | {online} |",
+              f"| **❌ Fuera de línea** | {total-online} |",
+              f"| **Disponibilidad** | **{pct}%** |", "",
+          ]
+          on_rows = [r for r in rows if r["is_online"]]
+          if on_rows:
+              lines += [f"### ✅ Funcionales ({len(on_rows)})\n",
+                        "| Canal | País | ms |", "|---|---|---|"]
+              lines += [f"| {r['name']} | {r['country'] or '—'} | {r['response_ms'] or '—'} |"
+                        for r in on_rows]
+              lines.append("")
+          off_rows = [r for r in rows if not r["is_online"]]
+          if off_rows:
+              lines += [f"<details><summary>❌ Fuera de línea ({len(off_rows)})</summary>\n",
+                        "| Canal | País | Fallos |", "|---|---|---|"]
+              lines += [f"| {r['name']} | {r['country'] or '—'} | {r['offline_count'] or 0} |"
+                        for r in off_rows]
+              lines += ["</details>", ""]
+          lines.append("> [Ver estado en vivo](https://jgpazvega-ae.github.io/GioRoku/status.html)")
+          SUMMARY.write_text("\n".join(lines), encoding="utf-8")
+          print(f"Summary written: {online}/{total} ({pct}%)")
+          PYEOF

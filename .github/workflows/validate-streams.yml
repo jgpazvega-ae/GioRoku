@@ -58,6 +58,78 @@ jobs:
         run: |
           git config user.name "GioRoku Bot"
           git config user.email "bot@gioroku.local"
-          git add api/
+          git add docs/api/
           git diff --staged --quiet || git commit -m "chore: manual validation update $(date -u '+%Y-%m-%d %H:%M UTC')"
           git push
+
+      - name: Channel status summary
+        if: always()
+        run: |
+          python3 - <<'PYEOF'
+          import json, sqlite3, sys
+          from pathlib import Path
+
+          db = Path("backend/db/iptv.db")
+          if not db.exists():
+              print("No DB found — skipping summary")
+              sys.exit(0)
+
+          with sqlite3.connect(db) as conn:
+              conn.row_factory = sqlite3.Row
+              rows = conn.execute("""
+                  SELECT name, country, category, stream_url,
+                         is_online, response_ms, last_check, offline_count
+                  FROM channels
+                  WHERE is_enabled = 1
+                  ORDER BY is_online DESC, response_ms ASC NULLS LAST, name
+              """).fetchall()
+
+          total   = len(rows)
+          online  = sum(1 for r in rows if r["is_online"])
+          offline = total - online
+          pct     = round(online / total * 100) if total else 0
+
+          SUMMARY = Path(
+              __import__("os").environ.get("GITHUB_STEP_SUMMARY", "/dev/stdout")
+          )
+
+          def ms_str(ms):
+              if ms is None: return "—"
+              return f"{ms} ms"
+
+          lines = []
+          lines.append("## 📡 GioRoku — Verificación de canales\n")
+          lines.append(f"| | |")
+          lines.append(f"|---|---|")
+          lines.append(f"| **Total canales** | {total} |")
+          lines.append(f"| **✅ En línea** | {online} |")
+          lines.append(f"| **❌ Fuera de línea** | {offline} |")
+          lines.append(f"| **Disponibilidad** | **{pct}%** |")
+          lines.append("")
+
+          # Online channels table
+          online_rows = [r for r in rows if r["is_online"]]
+          if online_rows:
+              lines.append(f"### ✅ Canales funcionales ({len(online_rows)})\n")
+              lines.append("| Canal | País | Categoría | Respuesta |")
+              lines.append("|---|---|---|---|")
+              for r in online_rows:
+                  lines.append(f"| {r['name']} | {r['country'] or '—'} | {r['category'] or '—'} | {ms_str(r['response_ms'])} |")
+              lines.append("")
+
+          # Offline channels table
+          offline_rows = [r for r in rows if not r["is_online"]]
+          if offline_rows:
+              lines.append(f"<details><summary>❌ Canales fuera de línea ({len(offline_rows)})</summary>\n")
+              lines.append("| Canal | País | Fallos consecutivos |")
+              lines.append("|---|---|---|")
+              for r in offline_rows:
+                  lines.append(f"| {r['name']} | {r['country'] or '—'} | {r['offline_count'] or 0} |")
+              lines.append("</details>")
+              lines.append("")
+
+          lines.append(f"> Verificación completada — [Ver en GioRoku Pages](https://jgpazvega-ae.github.io/GioRoku/status.html)")
+
+          SUMMARY.write_text("\n".join(lines), encoding="utf-8")
+          print(f"Summary: {online}/{total} online ({pct}%)")
+          PYEOF

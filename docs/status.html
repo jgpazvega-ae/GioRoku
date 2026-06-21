@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GioRoku — Estado de Canales</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0D0D0D;--surface:#1A1A1A;--elevated:#262626;--border:rgba(255,255,255,.07);
+  --red:#E50000;--green:#00C851;--yellow:#FFBB33;--gray:rgba(255,255,255,.3);
+  --txt:rgba(255,255,255,.87);--txt-muted:rgba(255,255,255,.45);--txt-dim:rgba(255,255,255,.22);
+}
+html{scrollbar-width:thin;scrollbar-color:var(--elevated) var(--bg)}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;line-height:1.5}
+
+/* ── Header ── */
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 24px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:10;backdrop-filter:blur(8px)}
+.logo{font-size:20px;font-weight:800;letter-spacing:-.5px}
+.logo span{color:var(--red)}
+.header-sub{font-size:13px;color:var(--txt-muted);flex:1}
+.refresh-btn{padding:7px 16px;border-radius:8px;background:var(--elevated);border:1px solid var(--border);color:var(--txt);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px}
+.refresh-btn:hover{border-color:var(--red);background:#2a1a1a}
+.refresh-btn.spinning svg{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.back-link{font-size:12px;color:var(--txt-muted);text-decoration:none;padding:6px 12px;border-radius:6px;border:1px solid var(--border);transition:all .15s}
+.back-link:hover{border-color:var(--border);color:var(--txt)}
+
+/* ── Page layout ── */
+.page{max-width:1100px;margin:0 auto;padding:32px 20px 80px}
+
+/* ── Stats cards ── */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:32px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px 22px;transition:border-color .15s}
+.stat.online{border-color:rgba(0,200,81,.25)}
+.stat.offline{border-color:rgba(229,0,0,.18)}
+.stat-value{font-size:40px;font-weight:800;line-height:1;margin-bottom:4px}
+.stat.online .stat-value{color:var(--green)}
+.stat.offline .stat-value{color:var(--red)}
+.stat.total .stat-value{color:var(--txt)}
+.stat.pct .stat-value{color:var(--yellow)}
+.stat-label{font-size:12px;color:var(--txt-muted);font-weight:500;text-transform:uppercase;letter-spacing:.6px}
+.stat-sub{font-size:11px;color:var(--txt-dim);margin-top:4px}
+
+/* ── Last updated bar ── */
+.meta-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:12px;color:var(--txt-muted)}
+.meta-bar strong{color:var(--txt)}
+.pulse{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;margin-right:6px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+
+/* ── Filters ── */
+.filters{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;align-items:center}
+.filter-btn{padding:6px 16px;border-radius:99px;border:1.5px solid var(--border);background:none;color:var(--txt-muted);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s}
+.filter-btn:hover{border-color:var(--red);color:var(--txt)}
+.filter-btn.active{background:var(--red);border-color:var(--red);color:#fff}
+.search-box{margin-left:auto;padding:6px 14px;background:var(--elevated);border:1.5px solid var(--border);border-radius:8px;color:var(--txt);font-size:13px;outline:none;width:220px;transition:border-color .15s}
+.search-box:focus{border-color:var(--red)}
+.search-box::placeholder{color:var(--txt-dim)}
+
+/* ── Channel grid ── */
+.ch-grid{display:grid;gap:8px}
+.ch-row{display:grid;grid-template-columns:48px 64px 1fr auto auto;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px;transition:border-color .15s}
+.ch-row:hover{border-color:rgba(255,255,255,.15)}
+.ch-num{font-size:11px;font-weight:700;color:var(--txt-dim);text-align:center}
+.ch-logo{width:48px;height:30px;object-fit:contain;border-radius:4px;background:var(--elevated)}
+.ch-logo-placeholder{width:48px;height:30px;background:var(--elevated);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--txt-dim)}
+.ch-info{}
+.ch-name{font-size:13px;font-weight:600;color:var(--txt);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:380px}
+.ch-meta{font-size:11px;color:var(--txt-dim);margin-top:1px}
+.ch-ms{font-size:11px;color:var(--txt-dim);text-align:right;min-width:52px}
+.badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:99px;white-space:nowrap}
+.badge.online{background:rgba(0,200,81,.12);color:var(--green)}
+.badge.offline{background:rgba(229,0,0,.10);color:var(--red)}
+
+/* ── Empty / loading ── */
+.skeleton{background:linear-gradient(90deg,var(--surface) 25%,var(--elevated) 50%,var(--surface) 75%);background-size:400% 100%;animation:shimmer 1.6s ease infinite;border-radius:10px;height:54px}
+@keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
+.empty{text-align:center;padding:60px 20px;color:var(--txt-dim);font-size:14px}
+
+/* ── Progress bar ── */
+.progress-wrap{margin-bottom:28px}
+.progress-label{display:flex;justify-content:space-between;font-size:12px;color:var(--txt-muted);margin-bottom:6px}
+.progress-bar{height:8px;background:var(--elevated);border-radius:99px;overflow:hidden}
+.progress-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--green),#00e560);transition:width .6s ease}
+
+/* ── Validate CTA ── */
+.cta{background:rgba(229,0,0,.07);border:1px solid rgba(229,0,0,.2);border-radius:12px;padding:16px 20px;display:flex;align-items:center;gap:14px;margin-bottom:28px}
+.cta-text{flex:1}
+.cta-title{font-size:14px;font-weight:700;margin-bottom:2px}
+.cta-sub{font-size:12px;color:var(--txt-muted);line-height:1.5}
+.cta-btn{padding:9px 18px;background:var(--red);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;text-decoration:none;transition:background .15s}
+.cta-btn:hover{background:#c00}
+
+@media(max-width:620px){
+  .ch-row{grid-template-columns:40px 1fr auto;}.ch-logo,.ch-num{display:none}
+  .stats{grid-template-columns:1fr 1fr}
+  .search-box{width:100%;margin-left:0}
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">Gio<span>Roku</span></div>
+  <div class="header-sub">Estado de canales · API en vivo</div>
+  <button class="refresh-btn" id="refreshBtn" onclick="loadAll()">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <path d="M1 4v6h6M23 20v-6h-6"/>
+      <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/>
+    </svg>
+    Actualizar
+  </button>
+  <a class="back-link" href="index.html">← Panel</a>
+</header>
+
+<div class="page">
+
+  <!-- Stats cards -->
+  <div class="stats" id="statsRow">
+    <div class="stat total"><div class="stat-value" id="s-total">—</div><div class="stat-label">Total canales</div></div>
+    <div class="stat online"><div class="stat-value" id="s-online">—</div><div class="stat-label">En línea</div><div class="stat-sub" id="s-online-sub"></div></div>
+    <div class="stat offline"><div class="stat-value" id="s-offline">—</div><div class="stat-label">Fuera de línea</div></div>
+    <div class="stat pct"><div class="stat-value" id="s-pct">—</div><div class="stat-label">Disponibilidad</div><div class="stat-sub" id="s-pct-sub"></div></div>
+  </div>
+
+  <!-- Progress bar -->
+  <div class="progress-wrap" id="progressWrap" style="display:none">
+    <div class="progress-label">
+      <span>Canales funcionales</span>
+      <span id="prog-label">0 / 0</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+
+  <!-- Meta bar -->
+  <div class="meta-bar" id="metaBar">
+    <span><span class="pulse"></span>Cargando datos desde la API…</span>
+    <span id="lastCheck"></span>
+  </div>
+
+  <!-- Validate CTA -->
+  <div class="cta">
+    <div class="cta-text">
+      <div class="cta-title">¿Quieres validar canales ahora?</div>
+      <div class="cta-sub">La validación automática corre cada noche. Para forzar una verificación manual, ejecuta el workflow desde GitHub Actions.</div>
+    </div>
+    <a class="cta-btn" href="https://github.com/jgpazvega-ae/GioRoku/actions/workflows/validate-streams.yml" target="_blank">
+      Validar ahora ↗
+    </a>
+  </div>
+
+  <!-- Filter bar -->
+  <div class="filters">
+    <button class="filter-btn active" data-filter="all" onclick="setFilter('all',this)">Todos</button>
+    <button class="filter-btn" data-filter="online" onclick="setFilter('online',this)">✅ En línea</button>
+    <button class="filter-btn" data-filter="offline" onclick="setFilter('offline',this)">❌ Fuera de línea</button>
+    <input class="search-box" id="searchBox" type="search" placeholder="Buscar canal…" oninput="renderList()">
+  </div>
+
+  <!-- Channel list -->
+  <div class="ch-grid" id="chGrid">
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+  </div>
+
+</div>
+
+<script>
+const API = 'api/v1';
+let allChannels = [];
+let currentFilter = 'all';
+
+async function loadAll() {
+  const btn = document.getElementById('refreshBtn');
+  btn.classList.add('spinning');
+  try {
+    await Promise.all([loadStatus(), loadChannels()]);
+  } finally {
+    btn.classList.remove('spinning');
+  }
+}
+
+async function loadStatus() {
+  try {
+    const r = await fetch(`${API}/status.json?_=${Date.now()}`);
+    const d = await r.json();
+    const s = d.stats || d;
+    const total   = s.totalChannels   || 0;
+    const online  = s.onlineChannels  || 0;
+    const offline = s.offlineChannels || (total - online);
+    const pct     = total > 0 ? Math.round(online / total * 100) : 0;
+
+    document.getElementById('s-total').textContent   = total;
+    document.getElementById('s-online').textContent  = online;
+    document.getElementById('s-offline').textContent = offline;
+    document.getElementById('s-pct').textContent     = pct + '%';
+    document.getElementById('s-online-sub').textContent = `de ${total} canales`;
+    document.getElementById('s-pct-sub').textContent = pct >= 50 ? '🟢 Normal' : pct >= 20 ? '🟡 Parcial' : '🔴 Degradado';
+
+    const pw = document.getElementById('progressWrap');
+    pw.style.display = 'block';
+    document.getElementById('prog-label').textContent = `${online} / ${total}`;
+    document.getElementById('prog-fill').style.width  = pct + '%';
+
+    const gen = d.generatedAt || d.lastValidationRun || '';
+    if (gen) {
+      const dt = new Date(gen);
+      document.getElementById('lastCheck').textContent = 'Actualizado: ' + dt.toLocaleString('es-MX');
+    }
+    document.getElementById('metaBar').innerHTML =
+      `<span><span class="pulse"></span><strong>${online} canales funcionales</strong> de ${total} en catálogo</span>` +
+      `<span id="lastCheck">${gen ? 'Actualizado: ' + new Date(gen).toLocaleString('es-MX') : ''}</span>`;
+  } catch(e) {
+    document.getElementById('metaBar').innerHTML = '<span style="color:var(--red)">⚠ No se pudo leer status.json</span>';
+  }
+}
+
+async function loadChannels() {
+  try {
+    // Load page 1 first to know totalPages
+    const p1 = await fetch(`${API}/channels/page/1.json?_=${Date.now()}`).then(r=>r.json());
+    const total = p1.totalPages || 1;
+    let channels = [...(p1.channels || [])];
+
+    // Load remaining pages in parallel
+    if (total > 1) {
+      const rest = await Promise.all(
+        Array.from({length: total-1}, (_,i) =>
+          fetch(`${API}/channels/page/${i+2}.json?_=${Date.now()}`).then(r=>r.json())
+        )
+      );
+      for (const pg of rest) channels = channels.concat(pg.channels || []);
+    }
+
+    allChannels = channels;
+    renderList();
+  } catch(e) {
+    document.getElementById('chGrid').innerHTML = '<div class="empty">⚠ No se pudieron cargar los canales.</div>';
+  }
+}
+
+function setFilter(f, el) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderList();
+}
+
+function renderList() {
+  const q = (document.getElementById('searchBox').value || '').toLowerCase().trim();
+  let channels = allChannels;
+
+  if (currentFilter === 'online')  channels = channels.filter(c => c.isOnline);
+  if (currentFilter === 'offline') channels = channels.filter(c => !c.isOnline);
+  if (q) channels = channels.filter(c =>
+    (c.name||'').toLowerCase().includes(q) ||
+    (c.countryLabel||'').toLowerCase().includes(q) ||
+    (c.categoryLabel||'').toLowerCase().includes(q)
+  );
+
+  const grid = document.getElementById('chGrid');
+  if (!channels.length) {
+    grid.innerHTML = '<div class="empty">Sin canales para mostrar.</div>';
+    return;
+  }
+
+  grid.innerHTML = channels.map((ch, i) => {
+    const logo = ch.logo
+      ? `<img class="ch-logo" src="${escHtml(ch.logo)}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+      : '';
+    const placeholder = `<div class="ch-logo-placeholder" style="${ch.logo?'display:none':''}">IMG</div>`;
+    const badge = ch.isOnline
+      ? `<span class="badge online">● EN LÍNEA</span>`
+      : `<span class="badge offline">● FUERA</span>`;
+    const ms = ch.responseMs ? `${ch.responseMs} ms` : '';
+    const meta = [ch.countryLabel, ch.categoryLabel].filter(Boolean).join(' · ');
+    const num = String(i+1).padStart(3,'0');
+    const lastCheck = ch.lastCheck ? timeAgo(ch.lastCheck) : '—';
+    return `<div class="ch-row">
+      <div class="ch-num">${num}</div>
+      <div style="display:flex">${logo}${placeholder}</div>
+      <div class="ch-info">
+        <div class="ch-name" title="${escHtml(ch.name||'')}">${escHtml(ch.name||'Sin nombre')}</div>
+        <div class="ch-meta">${escHtml(meta)} · verificado ${escHtml(lastCheck)}</div>
+      </div>
+      <div class="ch-ms">${escHtml(ms)}</div>
+      ${badge}
+    </div>`;
+  }).join('');
+}
+
+function timeAgo(iso) {
+  if (!iso) return '—';
+  const diff = Date.now() - new Date(iso).getTime();
+  const h = Math.floor(diff / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  if (h > 24) return Math.floor(h/24) + 'd';
+  if (h > 0)  return h + 'h';
+  if (m > 0)  return m + 'min';
+  return 'ahora';
+}
+
+function escHtml(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Auto-refresh every 5 minutes
+setInterval(loadAll, 5 * 60 * 1000);
+loadAll();
+</script>
+</body>
+</html>

@@ -37,7 +37,7 @@ function onKeyEvent(key as string, press as boolean) as boolean
         m.top.navigate = "sidebar"
         return true
     else if key = "back" then
-        m.top.navigate = "home"
+        m.top.navigate = "sidebar"
         return true
     else if key = "options" then
         idx     = m.favList.itemFocused

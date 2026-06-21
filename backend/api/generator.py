@@ -109,10 +109,19 @@ class APIGenerator:
         "MX","AR","CO","CL","VE","PE","UY","PY","EC","BO",
         "US_ES","SV","GT","HN","NI","CR","PA","DO","CU","PR"
     )
+    # Sources whose channels are included even when country=INTL (they serve
+    # Latin American / Spanish-language content reliably).
     LATAM_SOURCES = (
+        # iptv-org country playlists — already filtered by country
         "iptvorg_mx","iptvorg_ar","iptvorg_co","iptvorg_cl","iptvorg_pe",
-        "iptvorg_ve","iptvorg_us_spa","iptvorg_spa_lang",
-        "freetv_iptv","m3u_iptvcat_mx",
+        "iptvorg_ve","iptvorg_us_spa","iptvorg_spa_lang","m3u_iptvcat_mx",
+        # Community curated lists focused on Latin America / Mexico
+        "dmelendez11_m3u",       # CNN en Español, Cinecanal, ESPN 2-6, Fox Sports, etc.
+        "dmelendez11_especial",  # Full MX cable lineup: Discovery, History, HBO, ESPN…
+        "achoapps_acho",         # ESPN, Animal Planet, Cartoon Network, HBO 2, MTV…
+        "achoapps_mexico3",      # Mexico-focused list
+        "bitly_variada_tv2",     # "SUR:" tagged South American cable channels
+        "freetv_iptv",
     )
 
     def _channels(self) -> list[dict]:

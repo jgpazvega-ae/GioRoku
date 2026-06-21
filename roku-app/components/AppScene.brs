@@ -61,7 +61,7 @@ sub init()
     ' splash stuck on "Conectando…".
     m.channels  = _readBundled("pkg:/data/channels.json", "channels")
     m.allMovies = _readBundled("pkg:/data/movies.json",   "movies")
-    _navigateTo("home")
+    _navigateTo("livetv")
 
     ' Background refresh from GitHub Pages — never blocks the UI. Home is
     ' already shown from bundled data; if the server returns MORE channels
@@ -86,6 +86,7 @@ sub _onBgRefresh()
         m.liveTVContent = invalid
         m.guideContent  = invalid
         if m.currentScreen = "home" then _prepareHome()
+        if m.currentScreen = "livetv" then _prepareLiveTV()
     end if
 end sub
 
@@ -587,7 +588,7 @@ function onKeyEvent(key as string, press as boolean) as boolean
     end if
     ' Back at scene level — fires when Home screen's onKeyEvent doesn't consume Back
     ' (extra safety net in case Back bubbles past all screens)
-    if key = "back" and not m.sidebarOpen and m.currentScreen = "home" then
+    if key = "back" and not m.sidebarOpen and (m.currentScreen = "home" or m.currentScreen = "livetv") then
         _openSidebar()
         return true
     end if

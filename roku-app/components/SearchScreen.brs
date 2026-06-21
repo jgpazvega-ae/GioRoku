@@ -96,7 +96,7 @@ function onKeyEvent(key as string, press as boolean) as boolean
             m.focus = "kbd"
             m.kbd.setFocus(true)
         else
-            m.top.navigate = "home"
+            m.top.navigate = "sidebar"
         end if
         return true
     end if

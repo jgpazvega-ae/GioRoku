@@ -16,8 +16,6 @@ sub init()
     m.sidebarOpen   = false
     m.channelNodes  = invalid
 
-    m.splash.observeField("done",          "_onSplashDone")
-
     m.home.observeField("navigate",        "_onNavigate")
     m.home.observeField("playItem",        "_onPlayItem")
 
@@ -74,7 +72,6 @@ end sub
 
 sub _onBgRefresh()
     state = m.bgTask.taskState
-    if state <> "done" and state <> "error" then return
     if state <> "done" then return
     res = m.bgTask.result
     if res = invalid or not res.DoesExist("channels") or res.channels = invalid then return
@@ -84,6 +81,7 @@ sub _onBgRefresh()
         if m.currentScreen = "home" then _prepareHome()
     end if
 end sub
+
 
 function _readBundled(path as string, key as string) as object
     out = []
@@ -97,22 +95,6 @@ function _readBundled(path as string, key as string) as object
     return out
 end function
 
-
-' ===================== SPLASH DONE =====================
-
-sub _onSplashDone()
-    if not m.splash.done then return
-    res = m.splash.result
-    if res <> invalid then
-        if res.DoesExist("channels") and res.channels <> invalid then
-            m.channels = res.channels
-        end if
-        if res.DoesExist("movies") and res.movies <> invalid then
-            m.allMovies = res.movies
-        end if
-    end if
-    _navigateTo("home")
-end sub
 
 ' ===================== NAVIGATION =====================
 
@@ -255,6 +237,7 @@ end sub
 sub _onPlayerDone()
     if not m.player.done then return
     m.player.done    = false
+    m.player.content = invalid
     m.player.visible = false
     _focusScreen(m.currentScreen)
 end sub
@@ -315,7 +298,7 @@ sub _onReloadReq()
     m.settings.reloadState = "loading"
 
     m.loadTask = createObject("roSGNode", "LoadTask")
-    m.loadTask.baseUrl = "https://raw.githubusercontent.com/jgpazvega-ae/GioRoku/main/docs/api/v1"
+    m.loadTask.baseUrl = "https://jgpazvega-ae.github.io/GioRoku/api/v1"
     m.loadTask.observeField("taskState", "_onReloadDone")
     m.loadTask.control = "RUN"
 end sub
@@ -371,6 +354,9 @@ sub _prepareHome()
                 it.url         = _str(ch, "streamUrl")
                 it.streamFormat = "hls"
                 it.live        = true
+                chMeta = _str(ch, "countryLabel")
+                chCat  = _str(ch, "categoryLabel")
+                if chMeta <> "" and chCat <> "" then it.description = chMeta + " · " + chCat else it.description = chMeta + chCat
                 it.addFields({chId: id, isLive: true})
             end if
         end for
@@ -388,6 +374,9 @@ sub _prepareHome()
         it.url         = _str(ch, "streamUrl")
         it.streamFormat = "hls"
         it.live        = true
+        chMeta = _str(ch, "countryLabel")
+        chCat  = _str(ch, "categoryLabel")
+        if chMeta <> "" and chCat <> "" then it.description = chMeta + " · " + chCat else it.description = chMeta + chCat
         it.addFields({chId: _str(ch, "id"), isLive: true})
         n = n + 1
     end for
@@ -420,6 +409,9 @@ sub _prepareHome()
                 it.url         = _str(ch, "streamUrl")
                 it.streamFormat = "hls"
                 it.live        = true
+                chMeta = _str(ch, "countryLabel")
+                chCat  = _str(ch, "categoryLabel")
+                if chMeta <> "" and chCat <> "" then it.description = chMeta + " · " + chCat else it.description = chMeta + chCat
                 it.addFields({chId: id, isLive: true})
             end if
         end for
@@ -486,7 +478,7 @@ end sub
 
 sub _prepareMovies()
     root   = createObject("roSGNode", "ContentNode")
-    genres = ["Action","Adventure","Comedy","Drama","Horror","Sci-Fi","Romance","Documentary","Animation","Thriller","Western","Musical","Mystery","Fantasy","Biography","History","Crime"]
+    genres = ["Comedia","Drama","Terror","Clásico","Aventura","Cine mudo","Ciencia ficción","Western","Romance","Acción","Crimen","Cine negro","Bélica","Animación","Misterio","Musical","Suspenso"]
 
     if m.allMovies.count() > 0 then
         pop = root.createChild("ContentNode")

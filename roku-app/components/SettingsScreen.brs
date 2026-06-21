@@ -24,7 +24,7 @@ sub _showInfo(idx as integer)
     s = _getSettings()
     if idx = 0 then
         st = iif(s.parentalEnabled, "Activado", "Desactivado")
-        m.infoText.text = "Controles parentales: " + st + chr(10) + chr(10) + "Pulsa OK para activar o desactivar."
+        m.infoText.text = "Controles parentales: " + st + chr(10) + chr(10) + "Pulsa OK para activar o desactivar." + chr(10) + chr(10) + "(Función en desarrollo — la configuración se guarda pero aún no filtra contenido.)"
     else if idx = 1 then
         m.infoText.text = "Limpiar datos" + chr(10) + chr(10) + "Borra favoritos y canales recientes almacenados en el Roku."
     else if idx = 2 then

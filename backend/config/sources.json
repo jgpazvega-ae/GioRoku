@@ -830,5 +830,192 @@
       "verify_ssl": false,
       "headers": {}
     }
+  },
+  {
+    "id": "iptvorg_mx",
+    "name": "iptv-org — México (comunidad verificada)",
+    "type": "m3u",
+    "url": "https://iptv-org.github.io/iptv/countries/mx.m3u",
+    "priority": 1,
+    "is_enabled": true,
+    "trusted": true,
+    "refresh_interval_hours": 12,
+    "options": {
+      "timeout_seconds": 45,
+      "encoding": "utf-8",
+      "user_agent": "Mozilla/5.0 (SmartTV)",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "iptvorg_ar",
+    "name": "iptv-org — Argentina (comunidad verificada)",
+    "type": "m3u",
+    "url": "https://iptv-org.github.io/iptv/countries/ar.m3u",
+    "priority": 2,
+    "is_enabled": true,
+    "trusted": true,
+    "refresh_interval_hours": 12,
+    "options": {
+      "timeout_seconds": 45,
+      "encoding": "utf-8",
+      "user_agent": "Mozilla/5.0 (SmartTV)",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "iptvorg_co",
+    "name": "iptv-org — Colombia (comunidad verificada)",
+    "type": "m3u",
+    "url": "https://iptv-org.github.io/iptv/countries/co.m3u",
+    "priority": 2,
+    "is_enabled": true,
+    "trusted": true,
+    "refresh_interval_hours": 12,
+    "options": {
+      "timeout_seconds": 45,
+      "encoding": "utf-8",
+      "user_agent": "Mozilla/5.0 (SmartTV)",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "iptvorg_ve",
+    "name": "iptv-org — Venezuela (comunidad verificada)",
+    "type": "m3u",
+    "url": "https://iptv-org.github.io/iptv/countries/ve.m3u",
+    "priority": 2,
+    "is_enabled": true,
+    "trusted": true,
+    "refresh_interval_hours": 12,
+    "options": {
+      "timeout_seconds": 45,
+      "encoding": "utf-8",
+      "user_agent": "Mozilla/5.0 (SmartTV)",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "iptvorg_cl",
+    "name": "iptv-org — Chile (comunidad verificada)",
+    "type": "m3u",
+    "url": "https://iptv-org.github.io/iptv/countries/cl.m3u",
+    "priority": 2,
+    "is_enabled": true,
+    "trusted": true,
+    "refresh_interval_hours": 12,
+    "options": {
+      "timeout_seconds": 45,
+      "encoding": "utf-8",
+      "user_agent": "Mozilla/5.0 (SmartTV)",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "iptvorg_pe",
+    "name": "iptv-org — Perú (comunidad verificada)",
+    "type": "m3u",
+    "url": "https://iptv-org.github.io/iptv/countries/pe.m3u",
+    "priority": 2,
+    "is_enabled": true,
+    "trusted": true,
+    "refresh_interval_hours": 12,
+    "options": {
+      "timeout_seconds": 45,
+      "encoding": "utf-8",
+      "user_agent": "Mozilla/5.0 (SmartTV)",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "iptvorg_us_spa",
+    "name": "iptv-org — USA en Español (comunidad verificada)",
+    "type": "m3u",
+    "url": "https://iptv-org.github.io/iptv/countries/us.m3u",
+    "priority": 3,
+    "is_enabled": true,
+    "trusted": true,
+    "refresh_interval_hours": 12,
+    "options": {
+      "timeout_seconds": 45,
+      "encoding": "utf-8",
+      "user_agent": "Mozilla/5.0 (SmartTV)",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "iptvorg_spa_lang",
+    "name": "iptv-org — Todos los canales en Español",
+    "type": "m3u",
+    "url": "https://iptv-org.github.io/iptv/languages/spa.m3u",
+    "priority": 3,
+    "is_enabled": true,
+    "trusted": true,
+    "refresh_interval_hours": 12,
+    "options": {
+      "timeout_seconds": 60,
+      "encoding": "utf-8",
+      "user_agent": "Mozilla/5.0 (SmartTV)",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "freetv_iptv",
+    "name": "Free-TV/IPTV — Lista comunidad global",
+    "type": "m3u",
+    "url": "https://raw.githubusercontent.com/Free-TV/IPTV/master/playlist.m3u8",
+    "priority": 3,
+    "is_enabled": true,
+    "trusted": true,
+    "refresh_interval_hours": 12,
+    "options": {
+      "timeout_seconds": 45,
+      "encoding": "utf-8",
+      "user_agent": "Mozilla/5.0 (SmartTV)",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "m3u_iptvcat_mx",
+    "name": "M3U-IPTVCat — México Cable & OTA",
+    "type": "m3u",
+    "url": "https://raw.githubusercontent.com/iptv-org/iptv/master/streams/mx.m3u",
+    "priority": 1,
+    "is_enabled": true,
+    "trusted": true,
+    "refresh_interval_hours": 6,
+    "options": {
+      "timeout_seconds": 45,
+      "encoding": "utf-8",
+      "user_agent": "Mozilla/5.0 (SmartTV)",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "gadg_mx_cable",
+    "name": "gadgethacks — México OTA+Cable",
+    "type": "m3u",
+    "url": "https://raw.githubusercontent.com/gadgethacks/mx-iptv/main/playlist.m3u8",
+    "priority": 2,
+    "is_enabled": true,
+    "trusted": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 45,
+      "encoding": "utf-8",
+      "user_agent": "Mozilla/5.0 (SmartTV)",
+      "verify_ssl": true,
+      "headers": {}
+    }
   }
 ]

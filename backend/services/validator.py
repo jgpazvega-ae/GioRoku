@@ -99,11 +99,11 @@ class StreamValidator:
             conn.row_factory = sqlite3.Row
             if country:
                 rows = conn.execute(
-                    "SELECT id,stream_url FROM channels WHERE country=? AND is_enabled=1", (country,)
+                    "SELECT id,stream_url FROM channels WHERE country=? AND is_enabled=1 AND is_trusted=0", (country,)
                 ).fetchall()
             else:
                 rows = conn.execute(
-                    "SELECT id,stream_url FROM channels WHERE is_enabled=1"
+                    "SELECT id,stream_url FROM channels WHERE is_enabled=1 AND is_trusted=0"
                 ).fetchall()
         return [dict(r) for r in rows]
 
@@ -111,12 +111,14 @@ class StreamValidator:
         now = datetime.utcnow().isoformat()
         with sqlite3.connect(self.db_path) as conn:
             for r in results:
+                # Trusted channels: only update response_ms/last_check, never toggle is_online
                 conn.execute(
                     """UPDATE channels SET
-                       is_online=?, response_ms=?, last_check=?,
-                       last_online=CASE WHEN ? THEN ? ELSE last_online END,
-                       offline_count=CASE WHEN ? THEN 0 ELSE offline_count+1 END,
-                       is_enabled=CASE WHEN offline_count>=6 AND NOT ? THEN 0 ELSE is_enabled END
+                       is_online=CASE WHEN is_trusted THEN 1 ELSE ? END,
+                       response_ms=?, last_check=?,
+                       last_online=CASE WHEN is_trusted OR ? THEN ? ELSE last_online END,
+                       offline_count=CASE WHEN is_trusted OR ? THEN 0 ELSE offline_count+1 END,
+                       is_enabled=CASE WHEN NOT is_trusted AND offline_count>=6 AND NOT ? THEN 0 ELSE is_enabled END
                        WHERE id=?""",
                     (r.is_online, r.response_ms, now,
                      r.is_online, now, r.is_online, r.is_online, r.channel_id),

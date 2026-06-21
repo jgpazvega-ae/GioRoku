@@ -74,9 +74,11 @@ class APIGenerator:
         return {"total_files": total, "total_channels": len(channels)}
 
     def write_bundled_roku(self) -> int:
-        """Write roku-app/data/channels.json with only validated online channels."""
+        """Write roku-app/data/channels.json with trusted + validated online channels."""
         channels = self._channels()
-        online = [ch for ch in channels if ch.get("isOnline")]
+        # Prefer trusted (community-verified) or channels that have been explicitly validated
+        quality = [ch for ch in channels if ch.get("isOnline") and (ch.get("isTrusted") or ch.get("lastCheck"))]
+        online = quality if quality else [ch for ch in channels if ch.get("isOnline")]
         roku_path = self.out.parent.parent.parent / "roku-app" / "data" / "channels.json"
         if not self.dry_run:
             roku_path.parent.mkdir(parents=True, exist_ok=True)
@@ -108,11 +110,14 @@ class APIGenerator:
                     COALESCE(override_country,country) AS country,
                     language, stream_url, backup_urls, quality,
                     is_online, COALESCE(override_enabled,is_enabled) AS is_enabled,
-                    is_featured, epg_id, tags, offline_count,
+                    is_featured, is_trusted, epg_id, tags, offline_count,
                     last_check, last_online, response_ms, source_id, source_priority
                 FROM channels
                 WHERE COALESCE(override_enabled,is_enabled)=1
-                ORDER BY is_online DESC, response_ms ASC NULLS LAST, name
+                ORDER BY
+                    CASE WHEN COALESCE(override_country,country) IN ('MX','AR','CO','CL','VE','PE') THEN 0 ELSE 1 END,
+                    CASE WHEN COALESCE(override_country,country) = 'MX' THEN 0 ELSE 1 END,
+                    is_online DESC, response_ms ASC NULLS LAST, name
             """).fetchall()
         result = []
         for r in rows:
@@ -121,6 +126,7 @@ class APIGenerator:
             d["isOnline"] = bool(d.pop("is_online"))
             d["isEnabled"] = bool(d.pop("is_enabled"))
             d["isFeatured"] = bool(d.pop("is_featured"))
+            d["isTrusted"] = bool(d.pop("is_trusted"))
             d["streamUrl"] = d.pop("stream_url")
             d["offlineCount"] = d.pop("offline_count")
             d["lastCheck"] = d.pop("last_check")

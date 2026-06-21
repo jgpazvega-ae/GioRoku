@@ -6,6 +6,7 @@ import unicodedata
 from pathlib import Path
 from Levenshtein import ratio
 from rich.console import Console
+from models.source import Source
 
 console = Console()
 
@@ -25,6 +26,7 @@ CREATE TABLE IF NOT EXISTS channels (
     is_online INTEGER DEFAULT 1,
     is_enabled INTEGER DEFAULT 1,
     is_featured INTEGER DEFAULT 0,
+    is_trusted INTEGER DEFAULT 0,
     epg_id TEXT,
     tags TEXT DEFAULT '[]',
     offline_count INTEGER DEFAULT 0,
@@ -45,8 +47,21 @@ CREATE TABLE IF NOT EXISTS channels (
 class Deduplicator:
     def __init__(self, base_dir: Path):
         self.db_path = base_dir / "db" / "iptv.db"
+        self.config_dir = base_dir / "config"
         with sqlite3.connect(self.db_path) as conn:
             conn.executescript(CREATE_CHANNELS)
+            # Migrate: add is_trusted column if missing (safe on existing DBs)
+            cols = {r[1] for r in conn.execute("PRAGMA table_info(channels)").fetchall()}
+            if "is_trusted" not in cols:
+                conn.execute("ALTER TABLE channels ADD COLUMN is_trusted INTEGER DEFAULT 0")
+
+    def _trusted_source_ids(self) -> set[str]:
+        path = self.config_dir / "sources.json"
+        if not path.exists():
+            return set()
+        import json as _json
+        data = _json.loads(path.read_text())
+        return {s["id"] for s in data if s.get("trusted") and s.get("is_enabled", True)}
 
     def run(self) -> int:
         raw = self._load_raw()
@@ -104,13 +119,15 @@ class Deduplicator:
             return [dict(r) for r in conn.execute("SELECT * FROM raw_channels").fetchall()]
 
     def _save(self, channels: list[dict]):
+        trusted = self._trusted_source_ids()
         with sqlite3.connect(self.db_path) as conn:
             conn.execute("DELETE FROM channels")
             for ch in channels:
+                is_trusted = 1 if ch.get("source_id") in trusted else 0
                 conn.execute(
                     """INSERT OR REPLACE INTO channels
-                       (id,name,logo,stream_url,backup_urls,epg_id,language,source_id,source_priority)
-                       VALUES(?,?,?,?,?,?,?,?,?)""",
+                       (id,name,logo,stream_url,backup_urls,epg_id,language,source_id,source_priority,is_trusted,is_online)
+                       VALUES(?,?,?,?,?,?,?,?,?,?,?)""",
                     (
                         ch["id"],
                         ch.get("tvg_name") or ch.get("id", "Unknown"),
@@ -121,6 +138,8 @@ class Deduplicator:
                         ch.get("language", "es"),
                         ch.get("source_id"),
                         ch.get("source_priority", 10),
+                        is_trusted,
+                        1,
                     ),
                 )
 

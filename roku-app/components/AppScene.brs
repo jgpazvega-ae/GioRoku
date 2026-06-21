@@ -63,33 +63,11 @@ sub init()
     m.allMovies = _readBundled("pkg:/data/movies.json",   "movies")
     _navigateTo("livetv")
 
-    ' Background refresh from GitHub Pages — never blocks the UI. Home is
-    ' already shown from bundled data; if the server returns MORE channels
-    ' than bundled, we upgrade the list and refresh Home. Failure is a no-op.
-    m.bgTask = createObject("roSGNode", "LoadTask")
-    m.bgTask.baseUrl = "https://jgpazvega-ae.github.io/GioRoku/api/v1"
-    m.bgTask.observeField("taskState", "_onBgRefresh")
-    m.bgTask.control = "RUN"
-end sub
-
-sub _onBgRefresh()
-    state = m.bgTask.taskState
-    if state <> "done" then return
-    res = m.bgTask.result
-    if res = invalid or not res.DoesExist("channels") or res.channels = invalid then return
-    ' Only upgrade if network result has MORE channels but not more than 3× bundled —
-    ' a huge count ratio means the API returned unfiltered data (old/stale GitHub Pages)
-    ' and we should not override the quality-filtered bundled list.
-    newCount = res.channels.count()
-    bundled  = m.channels.count()
-    if newCount > bundled and newCount < bundled * 3 then
-        m.channels      = res.channels
-        m.channelNodes  = invalid
-        m.liveTVContent = invalid
-        m.guideContent  = invalid
-        if m.currentScreen = "home" then _prepareHome()
-        if m.currentScreen = "livetv" then _prepareLiveTV()
-    end if
+    ' NOTE: No automatic network refresh. The bundled channels.json is the
+    ' curated, LATAM-only, name-cleaned source of truth shipped inside the ZIP.
+    ' The public GitHub Pages API is regenerated daily and may contain 12,000+
+    ' unfiltered international channels, so we deliberately do NOT pull from it
+    ' at startup — doing so previously replaced the clean list with garbage.
 end sub
 
 
@@ -307,35 +285,20 @@ sub _onReloadReq()
     m.settings.reloadReq   = false
     m.settings.reloadState = "loading"
 
-    m.loadTask = createObject("roSGNode", "LoadTask")
-    m.loadTask.baseUrl = "https://jgpazvega-ae.github.io/GioRoku/api/v1"
-    m.loadTask.observeField("taskState", "_onReloadDone")
-    m.loadTask.control = "RUN"
-end sub
+    ' Re-read the bundled, pre-filtered LATAM channel list shipped in the app.
+    ' We intentionally do NOT fetch from the public API here: it is regenerated
+    ' daily with thousands of non-LATAM channels. The bundled list is the
+    ' curated, name-cleaned source of truth, so "Recargar canales" simply
+    ' restores it (useful if recents/favorites left the view in an odd state).
+    m.channels      = _readBundled("pkg:/data/channels.json", "channels")
+    m.channelNodes  = invalid
+    m.liveTVContent = invalid
+    m.guideContent  = invalid
+    if m.currentScreen = "home"   then _prepareHome()
+    if m.currentScreen = "livetv" then _prepareLiveTV()
 
-sub _onReloadDone()
-    state = m.loadTask.taskState
-    if state = "done" then
-        res = m.loadTask.result
-        if res <> invalid and res.DoesExist("channels") and res.channels <> invalid then
-            newCount = res.channels.count()
-            bundled  = m.channels.count()
-            ' Same ratio guard as background refresh: reject if API returns >3× bundled
-            ' (stale/unfiltered GitHub Pages data) or fewer than bundled.
-            if newCount > 0 and newCount < bundled * 3 then
-                m.channels      = res.channels
-                m.channelNodes  = invalid
-                m.liveTVContent = invalid
-                m.guideContent  = invalid
-                if m.currentScreen = "home"   then _prepareHome()
-                if m.currentScreen = "livetv" then _prepareLiveTV()
-            end if
-        end if
-        m.settings.reloadCount = m.channels.count()
-        m.settings.reloadState = "done"
-    else if state = "error" then
-        m.settings.reloadState = "error"
-    end if
+    m.settings.reloadCount = m.channels.count()
+    m.settings.reloadState = "done"
 end sub
 
 ' ===================== DATA BUILDERS =====================

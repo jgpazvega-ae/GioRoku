@@ -28,7 +28,7 @@ sub _showInfo(idx as integer)
     else if idx = 1 then
         m.infoText.text = "Limpiar datos" + chr(10) + chr(10) + "Borra favoritos y canales recientes almacenados en el Roku."
     else if idx = 2 then
-        m.infoText.text = "Recargar canales" + chr(10) + chr(10) + "Descarga de nuevo la lista de canales desde la API." + chr(10) + "Útil después de importar una nueva lista M3U."
+        m.infoText.text = "Recargar canales" + chr(10) + chr(10) + "Restaura la lista de canales latinos incluida en la app." + chr(10) + "Útil si la vista quedó en un estado inesperado."
     else if idx = 3 then
         m.infoText.text = "GioRoku v2.0" + chr(10) + "Tu televisión latina en Roku." + chr(10) + chr(10) + "Streams de canales desde GitHub Pages." + chr(10) + "Películas de dominio público (Internet Archive)." + chr(10) + chr(10) + "github.com/jgpazvega-ae/GioRoku"
     end if

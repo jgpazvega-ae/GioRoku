@@ -77,10 +77,12 @@ sub _onBgRefresh()
     if state <> "done" then return
     res = m.bgTask.result
     if res = invalid or not res.DoesExist("channels") or res.channels = invalid then return
-    ' Only upgrade if the network result has MORE channels than what's bundled.
-    ' This prevents a downgrade when the network load cap returns fewer channels
-    ' than the bundled data/channels.json.
-    if res.channels.count() > m.channels.count() then
+    ' Only upgrade if network result has MORE channels but not more than 3× bundled —
+    ' a huge count ratio means the API returned unfiltered data (old/stale GitHub Pages)
+    ' and we should not override the quality-filtered bundled list.
+    newCount = res.channels.count()
+    bundled  = m.channels.count()
+    if newCount > bundled and newCount < bundled * 3 then
         m.channels      = res.channels
         m.channelNodes  = invalid
         m.liveTVContent = invalid

@@ -10,11 +10,12 @@
 
     <!-- ===== HERO SECTION (top 440px) ===== -->
     <Rectangle id="heroBg" width="1920" height="440" color="#0A0D14" />
+    <Rectangle width="900" height="440" color="#0A0D14" translation="[1020, 0]" opacity="0.7" />
     <!-- Gradient fade from hero bg to content bg -->
     <Rectangle width="1920" height="40" color="#111827" translation="[0, 400]" />
 
     <!-- Poster / Logo area -->
-    <Rectangle id="heroPosterBg" width="380" height="340" color="#1A1F2E" translation="[60, 50]" />
+    <Rectangle id="heroPosterBg" width="380" height="340" color="#0F1623" translation="[60, 50]" />
     <Poster id="heroPoster" width="380" height="340" translation="[60, 50]" loadDisplayMode="scaleToFit" />
 
     <!-- Text info -->
@@ -30,6 +31,7 @@
     <Label id="heroHint" text="OK Reproducir    * Favorito    ← Menú"
            font="font:SmallSystemFont" color="#6B7280"
            translation="[480, 390]" />
+    <Rectangle width="1440" height="2" color="#CC1F1F" translation="[0, 440]" opacity="0.6" />
 
     <!-- ===== ROW LIST (below hero) ===== -->
     <RowList id="rowList"

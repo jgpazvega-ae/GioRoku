@@ -82,8 +82,7 @@ class APIGenerator:
         if more channels are available.
         """
         channels = self._channels()
-        quality = [ch for ch in channels if ch.get("isOnline") and (ch.get("isTrusted") or ch.get("lastCheck"))]
-        online = (quality if quality else [ch for ch in channels if ch.get("isOnline")])[:3000]
+        online = [ch for ch in channels if ch.get("isOnline")][:3000]
         roku_path = self.out.parent.parent.parent / "roku-app" / "data" / "channels.json"
         if not self.dry_run:
             roku_path.parent.mkdir(parents=True, exist_ok=True)
@@ -115,20 +114,33 @@ class APIGenerator:
         "dmelendez11_especial",  # 49 ch: ESPN 1-6, Discovery HD, History, HBO, TNT, FX…
         "dmelendez11_m3u",       # 80 ch: CNN en Español, Cinecanal, ESPN 2-6, Fox Sports…
     )
-    # Tier 2 — Mexico / LATAM curated lists.  Include all their channels (country
-    # tags are mostly LATAM).
+    # Tier 2 — Mexico / LATAM curated lists.  Country filter applied (INTL excluded).
     CURATED_SOURCES = (
-        "achoapps_mexico3",      # 64 ch: Azteca, Canal 5, Multimedios, Milenio…
+        "achoapps_mexico3",      # MX/AR/CL/PE channels: Azteca, Canal 5, Multimedios, Milenio…
     )
     # Tier 3 — Official iptv-org country playlists — only LATAM-country channels.
     OFFICIAL_SOURCES = (
         "iptvorg_mx","iptvorg_ar","iptvorg_co","iptvorg_cl",
         "iptvorg_pe","iptvorg_ve","m3u_iptvcat_mx",
     )
-    # Tier 3b — achoapps_acho has 576 channels but 468 tagged INTL (Indian content).
-    # Include only the ones actually tagged with LATAM countries (~99 remain).
+    # Tier 3b — achoapps_acho: include only LATAM-tagged channels.
     COUNTRY_FILTERED_SOURCES = (
         "achoapps_acho",
+    )
+    # Non-Spanish channels mixed into cable sources (Russian, Turkish, Asian, radio).
+    BLOCKED_NAMES = (
+        # Russian cable (dmelendez11_m3u)
+        "NTV Hit","NTV Pravo","NTV Ruso","NTV Serial HD","NTV Style HD",
+        "Sochi Live HD","RT Noticias","Страна FM","Canal Ruso",
+        # Asian / Turkish
+        "BigAsia HD","Kanal D Drama",
+        # Spain-only (not LATAM)
+        "La 2",
+        # Radio stations
+        "1Mus","City Radio",
+        # Numbered entries in dmelendez11_especial
+        "025. BigR - Golden Oldielive ✅ ✅",
+        "113. NTV ✅ ✅",
     )
 
     def _channels(self) -> list[dict]:
@@ -137,6 +149,7 @@ class APIGenerator:
         curated_sql  = ",".join(f"'{s}'" for s in self.CURATED_SOURCES)
         official_sql = ",".join(f"'{s}'" for s in self.OFFICIAL_SOURCES)
         cfilt_sql    = ",".join(f"'{s}'" for s in self.COUNTRY_FILTERED_SOURCES)
+        blocked_sql  = ",".join(f"'{n}'" for n in self.BLOCKED_NAMES)
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
             rows = conn.execute(f"""
@@ -153,10 +166,29 @@ class APIGenerator:
                 WHERE COALESCE(override_enabled,is_enabled)=1
                   AND (
                     source_id IN ({cable_sql})
-                    OR source_id IN ({curated_sql})
+                    OR (source_id IN ({curated_sql}) AND COALESCE(override_country,country) IN ({countries_sql}))
                     OR (source_id IN ({official_sql}) AND COALESCE(override_country,country) IN ({countries_sql}))
                     OR (source_id IN ({cfilt_sql})    AND COALESCE(override_country,country) IN ({countries_sql}))
                   )
+                  -- Block non-Spanish channels mixed into cable sources
+                  AND COALESCE(override_name,name) NOT IN ({blocked_sql})
+                  -- Block corrupt/garbage entries (M3U directives used as channel names)
+                  AND COALESCE(override_name,name) NOT LIKE 'tvg-logo=%'
+                  AND COALESCE(override_name,name) NOT LIKE 'http%'
+                  AND COALESCE(override_name,name) NOT LIKE '--- %'
+                  AND COALESCE(override_name,name) NOT LIKE '%Chrome/%'
+                  AND COALESCE(override_name,name) NOT LIKE '%Safari/%'
+                  AND COALESCE(override_name,name) NOT LIKE '%Gecko)%'
+                  -- Block radio-only channels from achoapps_acho (music streams, FM stations)
+                  AND NOT (source_id = 'achoapps_acho' AND (
+                      COALESCE(override_name,name) LIKE 'MUSICA:%'
+                      OR COALESCE(override_name,name) LIKE 'NIU %'
+                      OR COALESCE(override_name,name) LIKE 'RADIO %'
+                      OR COALESCE(override_name,name) = 'RADIO LA SALADA'
+                      OR COALESCE(override_name,name) LIKE 'RADIOTV:%'
+                      OR COALESCE(override_name,name) LIKE 'WORLD NEWS:%'
+                      OR COALESCE(override_name,name) LIKE 'Chileiptv:INT%'
+                  ))
                 ORDER BY
                     CASE WHEN source_id IN ({cable_sql})   THEN 0
                          WHEN source_id IN ({curated_sql}) THEN 1

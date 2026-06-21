@@ -1,5 +1,6 @@
 from __future__ import annotations
 import json
+import re
 import sqlite3
 from datetime import datetime
 from pathlib import Path
@@ -83,6 +84,8 @@ class APIGenerator:
         """
         channels = self._channels()
         online = [ch for ch in channels if ch.get("isOnline")][:3000]
+        for ch in online:
+            ch["name"] = _clean_ch_name(ch["name"])
         roku_path = self.out.parent.parent.parent / "roku-app" / "data" / "channels.json"
         if not self.dry_run:
             roku_path.parent.mkdir(parents=True, exist_ok=True)
@@ -138,7 +141,13 @@ class APIGenerator:
         "La 2",
         # Radio stations
         "1Mus","City Radio",
-        # Numbered entries in dmelendez11_especial
+        # Non-Spanish from dmelendez11_especial (German, Swiss, English)
+        "018. DW ✅ ✅",            # Deutsche Welle (German)
+        "065. 127_Eurosport HD ✅ ✅",  # Eurosport (English/French)
+        "106. MyTime Movie Network ✅ ✅",  # English movies
+        "118. RTS ✅ ✅",           # Radio-Télévision Suisse (Swiss/French)
+        "099. 1 ✅ ✅",             # Unnamed/unknown channel
+        # Radio & numbered garbage
         "025. BigR - Golden Oldielive ✅ ✅",
         "113. NTV ✅ ✅",
     )
@@ -244,6 +253,19 @@ class APIGenerator:
             ).fetchall():
                 epg.setdefault(row["epg_id"], {})["next"] = _prog(row)
         return epg
+
+
+def _clean_ch_name(name: str) -> str:
+    """Strip M3U numbering noise so names are human-readable on Roku."""
+    n = name
+    n = re.sub(r'^\d{2,3}\.\s*', '', n)   # "020. " → ""
+    n = re.sub(r'^[A-Z]{2,3}:\s*', '', n)  # "CO: " → ""
+    n = re.sub(r'^\d{1,2}\.\d+', '', n)    # "09.1", "03.4" → ""
+    n = re.sub(r'^\d+_', '', n)             # "143_", "127_" → ""
+    n = re.sub(r'^\d+[a-zA-Z]+\s+', '', n) # "70w " → ""
+    n = n.replace('✅', '').replace('⭐', '')
+    n = re.sub(r'\s+', ' ', n).strip()
+    return n if n else name
 
 
 def _prog(row) -> dict:

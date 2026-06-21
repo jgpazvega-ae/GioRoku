@@ -44,8 +44,28 @@ sub init()
 
     m.player.observeField("done",          "_onPlayerDone")
 
-    m.splash.setFocus(true)
+    ' --- Bulletproof startup --------------------------------------------
+    ' Load bundled channels + movies SYNCHRONOUSLY on the render thread and
+    ' go straight to Home. No Task, no Timer, no cross-component observer —
+    ' those were silently failing to fire on this device and leaving the
+    ' splash stuck on "Conectando…".
+    m.channels  = _readBundled("pkg:/data/channels.json", "channels")
+    m.allMovies = _readBundled("pkg:/data/movies.json",   "movies")
+    _navigateTo("home")
 end sub
+
+function _readBundled(path as string, key as string) as object
+    out = []
+    raw = readAsciiFile(path)
+    if raw <> "" then
+        d = parseJSON(raw)
+        if d <> invalid and d.DoesExist(key) and d[key] <> invalid then
+            out = d[key]
+        end if
+    end if
+    return out
+end function
+
 
 ' ===================== SPLASH DONE =====================
 

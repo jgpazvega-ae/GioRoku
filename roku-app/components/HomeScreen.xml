@@ -28,7 +28,7 @@
     <Label id="heroDesc"  text="" font="font:SmallSystemFont" color="#FFFFFF"
            translation="[480, 260]" width="1380" numLines="3" wrap="true" />
     <!-- Hint -->
-    <Label id="heroHint" text="OK Reproducir    * Favorito    ← Menú"
+    <Label id="heroHint" text="OK Reproducir    * Favorito    Back Menú"
            font="font:SmallSystemFont" color="#6B7280"
            translation="[480, 390]" />
     <Rectangle width="1440" height="2" color="#CC1F1F" translation="[0, 440]" opacity="0.6" />

@@ -96,6 +96,8 @@ function onKeyEvent(key as string, press as boolean) as boolean
         m.top.navigate = "sidebar"
         return true
     else if key = "back" then
+        ' RowList consumes left arrow; Back reliably bubbles, so use it to open the menu.
+        m.top.navigate = "sidebar"
         return true
     else if key = "options" then
         ' Toggle favorite for focused item

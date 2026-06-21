@@ -76,6 +76,9 @@ function onKeyEvent(key as string, press as boolean) as boolean
     else if key = "back" then
         m.top.navigate = "home"
         return true
+    else if key = "options" then
+        m.top.navigate = "sidebar"
+        return true
     end if
     return false
 end function

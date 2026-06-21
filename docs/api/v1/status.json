@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-21T03:31:09Z",
+  "generatedAt": "2026-06-21T03:33:11Z",
   "pipelineVersion": "1.0.0",
   "stats": {
     "totalChannels": 1,
@@ -10,7 +10,7 @@
     "activeSources": 1,
     "totalCountries": 1,
     "totalCategories": 1,
-    "lastValidationRun": "2026-06-21T03:31:09Z",
+    "lastValidationRun": "2026-06-21T03:33:11Z",
     "nextScheduledRun": "2026-06-21T00:00:00Z"
   },
   "sources": [
@@ -18,7 +18,7 @@
       "id": "manual_import",
       "name": "Importacion Manual",
       "channelCount": 1,
-      "lastRefresh": "2026-06-21T03:31:09Z",
+      "lastRefresh": "2026-06-21T03:33:11Z",
       "isHealthy": true
     }
   ]

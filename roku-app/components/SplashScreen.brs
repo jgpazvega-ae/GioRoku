@@ -7,22 +7,27 @@ sub init()
     m.bundledChannels = _readBundled("pkg:/data/channels.json", "channels")
     m.bundledMovies   = _readBundled("pkg:/data/movies.json",   "movies")
 
-    m.statusLabel.text  = "Conectando…"
-    m.progressBar.width = 120
+    m.statusLabel.text  = m.bundledChannels.count().toStr() + " canales"
+    m.progressBar.width = 480
 
-    ' Kick off an optional network refresh (gets fresher/more channels if online)
-    m.timer = createObject("roSGNode", "Timer")
-    m.timer.duration = 0.3
-    m.timer.repeat   = false
-    m.timer.observeField("fire", "_startLoad")
-    m.timer.control  = "start"
+    ' Proceed timer — PRIMARY path. Appended to the tree so it reliably fires
+    ' even when LoadTask blocks. After this delay we always advance to Home.
+    m.proceedTimer = createObject("roSGNode", "Timer")
+    m.proceedTimer.duration = 2.5
+    m.proceedTimer.repeat   = false
+    m.proceedTimer.id       = "proceedTimer"
+    m.top.appendChild(m.proceedTimer)
+    m.proceedTimer.observeField("fire", "_onProceed")
+    m.proceedTimer.control  = "start"
 
-    ' Watchdog: if network is slow/unreachable, proceed with bundled data
-    m.watchdog = createObject("roSGNode", "Timer")
-    m.watchdog.duration = 8
-    m.watchdog.repeat   = false
-    m.watchdog.observeField("fire", "_onWatchdog")
-    m.watchdog.control  = "start"
+    ' Optional network refresh — runs in parallel, never blocks the transition
+    m.netTimer = createObject("roSGNode", "Timer")
+    m.netTimer.duration = 0.3
+    m.netTimer.repeat   = false
+    m.netTimer.id       = "netTimer"
+    m.top.appendChild(m.netTimer)
+    m.netTimer.observeField("fire", "_startLoad")
+    m.netTimer.control  = "start"
 end sub
 
 sub _startLoad()
@@ -44,16 +49,15 @@ sub _onTaskDone()
         end if
     end if
 
-    ' Use whichever source has more channels (network upgrade vs bundled baseline)
+    ' Network upgrade only if it returned more than the bundled baseline
     if netChannels.count() > m.bundledChannels.count() then
         _finish(netChannels)
-    else
-        _finish(m.bundledChannels)
     end if
 end sub
 
-sub _onWatchdog()
-    ' Network took too long — proceed with bundled channels (never hang)
+sub _onProceed()
+    ' Primary transition — always advance with bundled data (network may
+    ' have already upgraded via _onTaskDone, in which case m.done is set)
     _finish(m.bundledChannels)
 end sub
 

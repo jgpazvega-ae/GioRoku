@@ -62,6 +62,27 @@ sub init()
     m.channels  = _readBundled("pkg:/data/channels.json", "channels")
     m.allMovies = _readBundled("pkg:/data/movies.json",   "movies")
     _navigateTo("home")
+
+    ' Background refresh from GitHub Pages — never blocks the UI. Home is
+    ' already shown from bundled data; if the server returns MORE channels
+    ' than bundled, we upgrade the list and refresh Home. Failure is a no-op.
+    m.bgTask = createObject("roSGNode", "LoadTask")
+    m.bgTask.baseUrl = "https://jgpazvega-ae.github.io/GioRoku/api/v1"
+    m.bgTask.observeField("taskState", "_onBgRefresh")
+    m.bgTask.control = "RUN"
+end sub
+
+sub _onBgRefresh()
+    state = m.bgTask.taskState
+    if state <> "done" and state <> "error" then return
+    if state <> "done" then return
+    res = m.bgTask.result
+    if res = invalid or not res.DoesExist("channels") or res.channels = invalid then return
+    if res.channels.count() > m.channels.count() then
+        m.channels     = res.channels
+        m.channelNodes = invalid
+        if m.currentScreen = "home" then _prepareHome()
+    end if
 end sub
 
 function _readBundled(path as string, key as string) as object

@@ -1,25 +1,11 @@
 {
-  "generatedAt": "2026-06-21T03:37:32Z",
-  "pipelineVersion": "2.0.0",
-  "stats": {
-    "totalChannels": 123,
-    "onlineChannels": 123,
-    "offlineChannels": 0,
-    "disabledChannels": 0,
-    "totalSources": 1,
-    "activeSources": 1,
-    "totalCountries": 4,
-    "totalCategories": 7,
-    "lastValidationRun": "2026-06-21T03:37:32Z",
-    "nextScheduledRun": "2026-06-21T00:00:00Z"
-  },
-  "sources": [
-    {
-      "id": "dmelendez11_m3u",
-      "name": "Lista Canales M3U — dmelendez11",
-      "channelCount": 123,
-      "lastRefresh": "2026-06-21T03:37:32Z",
-      "isHealthy": true
-    }
-  ]
+ "generatedAt": "2026-06-21T04:21:29Z",
+ "pipelineVersion": "2.0.0",
+ "stats": {
+  "totalChannels": 123,
+  "onlineChannels": 18,
+  "offlineChannels": 105,
+  "totalCountries": 4,
+  "totalCategories": 7
+ }
 }

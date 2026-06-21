@@ -433,11 +433,15 @@ sub _prepareHome()
 end sub
 
 sub _prepareLiveTV()
-    _buildChannelNodes()
+    ' Do NOT call _buildChannelNodes() here — it builds 1,794 extra nodes and
+    ' freezes the render thread at startup. Channel nodes are built lazily in
+    ' _startPlayer() only when the user actually plays something.
     if m.liveTVContent = invalid then
         content = createObject("roSGNode", "ContentNode")
         n = 0
+        LIVE_LIMIT = 500
         for each ch in m.channels
+            if n >= LIVE_LIMIT then exit for
             n = n + 1
             it = content.createChild("ContentNode")
             it.title        = _displayName(ch)
@@ -459,6 +463,7 @@ sub _prepareLiveTV()
             it.addFields({chNum: _pad3(n), chId: _str(ch, "id"), chLive: online, isLive: true})
         end for
         m.liveTVContent = content
+
     end if
     m.livetv.channelData = m.liveTVContent
 end sub

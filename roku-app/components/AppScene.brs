@@ -318,10 +318,18 @@ sub _onReloadDone()
     if state = "done" then
         res = m.loadTask.result
         if res <> invalid and res.DoesExist("channels") and res.channels <> invalid then
-            m.channels      = res.channels
-            m.channelNodes  = invalid
-            m.liveTVContent = invalid
-            m.guideContent  = invalid
+            newCount = res.channels.count()
+            bundled  = m.channels.count()
+            ' Same ratio guard as background refresh: reject if API returns >3× bundled
+            ' (stale/unfiltered GitHub Pages data) or fewer than bundled.
+            if newCount > 0 and newCount < bundled * 3 then
+                m.channels      = res.channels
+                m.channelNodes  = invalid
+                m.liveTVContent = invalid
+                m.guideContent  = invalid
+                if m.currentScreen = "home"   then _prepareHome()
+                if m.currentScreen = "livetv" then _prepareLiveTV()
+            end if
         end if
         m.settings.reloadCount = m.channels.count()
         m.settings.reloadState = "done"

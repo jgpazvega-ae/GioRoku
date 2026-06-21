@@ -8,7 +8,7 @@ sub init()
     m.chanList.observeField("itemFocused",  "_onItemFocused")
 
     m.clockTimer = createObject("roSGNode", "Timer")
-    m.clockTimer.duration = 1
+    m.clockTimer.duration = 30
     m.clockTimer.repeat   = true
     m.clockTimer.observeField("fire", "_tick")
     m.clockTimer.control  = "start"

@@ -25,6 +25,7 @@ sub init()
     m.overlayVisible = false
     m.isLive         = true
     m.curName        = ""
+    m.retryCount     = 0
 
     m.video.observeField("state", "_onVideoState")
 
@@ -33,8 +34,13 @@ sub init()
     m.zapTimer.repeat   = false
     m.zapTimer.observeField("fire", "_hideZap")
 
+    m.errorTimer = createObject("roSGNode", "Timer")
+    m.errorTimer.duration = 12
+    m.errorTimer.repeat   = false
+    m.errorTimer.observeField("fire", "_onErrorTimeout")
+
     m.clockTimer = createObject("roSGNode", "Timer")
-    m.clockTimer.duration = 1
+    m.clockTimer.duration = 30
     m.clockTimer.repeat   = true
     m.clockTimer.observeField("fire", "_tick")
     m.clockTimer.control  = "start"
@@ -116,16 +122,39 @@ sub _onVideoState()
     if m.curName <> invalid then name = m.curName
     if st = "playing" then
         m.bufLabel.visible = false
+        m.errorTimer.control = "stop"
+        m.retryCount = 0
     else if st = "buffering" then
         m.bufLabel.text    = "Cargando " + name + "…" + chr(10) + chr(10) + "Si no inicia en unos segundos, pulsa ATRÁS y prueba otro canal."
         m.bufLabel.visible = true
+        m.errorTimer.control = "stop"
+        m.errorTimer.control = "start"
     else if st = "error" then
-        m.bufLabel.text    = "✕ No se pudo reproducir " + name + chr(10) + chr(10) + "Este canal puede estar fuera de línea o no disponible en tu región." + chr(10) + "Pulsa ATRÁS para volver y prueba otro."
-        m.bufLabel.visible = true
+        m.errorTimer.control = "stop"
+        if m.retryCount < 1 then
+            m.retryCount = m.retryCount + 1
+            m.bufLabel.text    = "Reintentando " + name + "…"
+            m.bufLabel.visible = true
+            m.video.control    = "stop"
+            m.video.control    = "play"
+        else
+            m.bufLabel.text    = "✕ No se pudo reproducir " + name + chr(10) + chr(10) + "Este canal puede estar fuera de línea o no disponible en tu región." + chr(10) + "Pulsa ATRÁS para volver y prueba otro."
+            m.bufLabel.visible = true
+        end if
     else if st = "finished" then
         m.bufLabel.text    = "Transmisión finalizada." + chr(10) + "Pulsa ATRÁS para volver."
         m.bufLabel.visible = true
     end if
+end sub
+
+sub _onErrorTimeout()
+    ' Buffering too long — treat as error
+    m.video.control = "stop"
+    m.retryCount = 2  ' skip auto-retry
+    name = ""
+    if m.curName <> invalid then name = m.curName
+    m.bufLabel.text    = "✕ " + name + " no responde." + chr(10) + chr(10) + "Señal no disponible o canal fuera de línea." + chr(10) + "Pulsa ATRÁS para elegir otro canal."
+    m.bufLabel.visible = true
 end sub
 
 sub _showZap()

@@ -46,5 +46,789 @@
       "verify_ssl": true,
       "headers": {}
     }
+  },
+  {
+    "id": "bitly_2QWLdcY",
+    "name": "Lista Latina — 2QWLdcY",
+    "type": "m3u",
+    "url": "http://bit.ly/2QWLdcY",
+    "priority": 4,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": false,
+      "headers": {}
+    }
+  },
+  {
+    "id": "bitly_2Q0X2t6",
+    "name": "Lista Latina — 2Q0X2t6",
+    "type": "m3u",
+    "url": "http://bit.ly/2Q0X2t6",
+    "priority": 5,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": false,
+      "headers": {}
+    }
+  },
+  {
+    "id": "bitly_2rU66Gq",
+    "name": "Lista Latina — 2rU66Gq",
+    "type": "m3u",
+    "url": "http://bit.ly/2rU66Gq",
+    "priority": 6,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": false,
+      "headers": {}
+    }
+  },
+  {
+    "id": "bitly_L4tinM3U",
+    "name": "L4tinM3U",
+    "type": "m3u",
+    "url": "http://bit.ly/L4tinM3U",
+    "priority": 7,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": false,
+      "headers": {}
+    }
+  },
+  {
+    "id": "bitly_L4tinm3u",
+    "name": "L4tinm3u (alt)",
+    "type": "m3u",
+    "url": "http://bit.ly/L4tinm3u",
+    "priority": 8,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": false,
+      "headers": {}
+    }
+  },
+  {
+    "id": "bitly_M3UU_Latin",
+    "name": "M3UU-Latin",
+    "type": "m3u",
+    "url": "http://bit.ly/M3UU-Latin",
+    "priority": 9,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": false,
+      "headers": {}
+    }
+  },
+  {
+    "id": "bitly_m3uu_Latin",
+    "name": "m3uu-Latin (alt)",
+    "type": "m3u",
+    "url": "http://bit.ly/m3uu-Latin",
+    "priority": 10,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": false,
+      "headers": {}
+    }
+  },
+  {
+    "id": "pastebin_yyEuCD54",
+    "name": "Pastebin — yyEuCD54",
+    "type": "m3u",
+    "url": "https://pastebin.com/raw/yyEuCD54",
+    "priority": 11,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "srregio_alterna",
+    "name": "SRRegio — Alterna",
+    "type": "m3u",
+    "url": "http://srregio.xyz/IPTV/alterna.m3u",
+    "priority": 12,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": false,
+      "headers": {}
+    }
+  },
+  {
+    "id": "srregio_alterna2",
+    "name": "SRRegio — Alterna 2",
+    "type": "m3u",
+    "url": "http://srregio.xyz/IPTV/alterna2.m3u",
+    "priority": 13,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": false,
+      "headers": {}
+    }
+  },
+  {
+    "id": "bitly_VIPLIST4",
+    "name": "VIP List 4",
+    "type": "m3u",
+    "url": "http://bit.ly/VIPLIST4",
+    "priority": 14,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": false,
+      "headers": {}
+    }
+  },
+  {
+    "id": "bitly_VIP_LIST4",
+    "name": "VIP-LIST4 (alt)",
+    "type": "m3u",
+    "url": "http://bit.ly/VIP-LIST4",
+    "priority": 15,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": false,
+      "headers": {}
+    }
+  },
+  {
+    "id": "pastebin_89S0bBCp",
+    "name": "Pastebin — 89S0bBCp",
+    "type": "m3u",
+    "url": "https://pastebin.com/raw/89S0bBCp",
+    "priority": 16,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "pastebin_W0vHFHLi",
+    "name": "Pastebin — W0vHFHLi",
+    "type": "m3u",
+    "url": "https://pastebin.com/raw/W0vHFHLi",
+    "priority": 17,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "achoapps_acho",
+    "name": "AchoApps — Acho",
+    "type": "m3u",
+    "url": "https://www.achoapps.com/listas/acho.m3u",
+    "priority": 18,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "achoapps_mexico3",
+    "name": "AchoApps — Mexico 3",
+    "type": "m3u",
+    "url": "https://www.achoapps.com/listas/mexico3.m3u",
+    "priority": 19,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "bitly_Lat1N0s",
+    "name": "Lat1N0s",
+    "type": "m3u",
+    "url": "http://bit.ly/Lat1N0s",
+    "priority": 20,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": false,
+      "headers": {}
+    }
+  },
+  {
+    "id": "bitly_ListaFluxs",
+    "name": "ListaFluxs",
+    "type": "m3u",
+    "url": "http://bit.ly/ListaFluxs",
+    "priority": 21,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": false,
+      "headers": {}
+    }
+  },
+  {
+    "id": "bitly_ListAlterna",
+    "name": "ListAlterna",
+    "type": "m3u",
+    "url": "http://bit.ly/ListAlterna",
+    "priority": 22,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": false,
+      "headers": {}
+    }
+  },
+  {
+    "id": "bitly_2OPhDp9",
+    "name": "Lista Latina — 2OPhDp9",
+    "type": "m3u",
+    "url": "http://bit.ly/2OPhDp9",
+    "priority": 23,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": false,
+      "headers": {}
+    }
+  },
+  {
+    "id": "pastebin_1FhEANdf",
+    "name": "Pastebin — 1FhEANdf",
+    "type": "m3u",
+    "url": "https://pastebin.com/raw/1FhEANdf",
+    "priority": 24,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "bitly_2E9eY3",
+    "name": "Lista — 2E9eY3",
+    "type": "m3u",
+    "url": "http://bit.ly/2E9eY3",
+    "priority": 25,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": false,
+      "headers": {}
+    }
+  },
+  {
+    "id": "pastebin_8SiGgkLD",
+    "name": "Pastebin — 8SiGgkLD",
+    "type": "m3u",
+    "url": "https://pastebin.com/raw/8SiGgkLD",
+    "priority": 26,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "pastebin_E0j4PBjw",
+    "name": "Pastebin — E0j4PBjw",
+    "type": "m3u",
+    "url": "https://pastebin.com/raw/E0j4PBjw",
+    "priority": 27,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "pastebin_crxn9FRx",
+    "name": "Pastebin — crxn9FRx",
+    "type": "m3u",
+    "url": "https://pastebin.com/raw/crxn9FRx",
+    "priority": 28,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "bitly_Latinotv",
+    "name": "Latino TV",
+    "type": "m3u",
+    "url": "http://bit.ly/_Latinotv",
+    "priority": 29,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": false,
+      "headers": {}
+    }
+  },
+  {
+    "id": "pastebin_v0F0E4EK",
+    "name": "Pastebin — v0F0E4EK",
+    "type": "m3u",
+    "url": "https://pastebin.com/raw/v0F0E4EK",
+    "priority": 30,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "bitly_Argentina_tv",
+    "name": "Argentina TV",
+    "type": "m3u",
+    "url": "http://bit.ly/Argentina_tv",
+    "priority": 31,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": false,
+      "headers": {}
+    }
+  },
+  {
+    "id": "mediafire_argentina",
+    "name": "Argentina M3U — MediaFire",
+    "type": "m3u",
+    "url": "https://download2268.mediafire.com/b3ohzbm68xhg/smj0lupk43myc6s/argentina.m3u",
+    "priority": 32,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "bitly_la_mejor",
+    "name": "La Mejor",
+    "type": "m3u",
+    "url": "http://bit.ly/la_mejor",
+    "priority": 33,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": false,
+      "headers": {}
+    }
+  },
+  {
+    "id": "bitly_TVMEX",
+    "name": "TV Mexico",
+    "type": "m3u",
+    "url": "http://bit.ly/_TVMEX",
+    "priority": 34,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": false,
+      "headers": {}
+    }
+  },
+  {
+    "id": "bitly_latinovariado",
+    "name": "Latino Variado",
+    "type": "m3u",
+    "url": "http://bit.ly/_latinovariado",
+    "priority": 35,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": false,
+      "headers": {}
+    }
+  },
+  {
+    "id": "bitly_USA_TV",
+    "name": "USA TV",
+    "type": "m3u",
+    "url": "http://bit.ly/USA-_TV",
+    "priority": 36,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": false,
+      "headers": {}
+    }
+  },
+  {
+    "id": "bitly_variada_tv2",
+    "name": "Variada TV 2",
+    "type": "m3u",
+    "url": "http://bit.ly/variada_tv2",
+    "priority": 37,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": false,
+      "headers": {}
+    }
+  },
+  {
+    "id": "pastebin_vqX9b6Np",
+    "name": "Pastebin — vqX9b6Np",
+    "type": "m3u",
+    "url": "https://pastebin.com/raw/vqX9b6Np",
+    "priority": 38,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "pastebin_vZvGJRkU",
+    "name": "Pastebin — vZvGJRkU",
+    "type": "m3u",
+    "url": "https://pastebin.com/raw/vZvGJRkU",
+    "priority": 39,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "pastebin_gJztaDLA",
+    "name": "Pastebin — gJztaDLA",
+    "type": "m3u",
+    "url": "https://pastebin.com/raw/gJztaDLA",
+    "priority": 40,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "pastebin_TRwHRwSV",
+    "name": "Pastebin — TRwHRwSV",
+    "type": "m3u",
+    "url": "https://pastebin.com/raw/TRwHRwSV",
+    "priority": 41,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "pastebin_dVdZbxZw",
+    "name": "Pastebin — dVdZbxZw",
+    "type": "m3u",
+    "url": "https://pastebin.com/raw/dVdZbxZw",
+    "priority": 42,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "pastebin_k0ViLC0y",
+    "name": "Pastebin — k0ViLC0y",
+    "type": "m3u",
+    "url": "https://pastebin.com/raw/k0ViLC0y",
+    "priority": 43,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "pastebin_C5LnC3YF",
+    "name": "Pastebin — C5LnC3YF",
+    "type": "m3u",
+    "url": "https://pastebin.com/raw/C5LnC3YF",
+    "priority": 44,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "pastebin_3Fy83PkY",
+    "name": "Pastebin — 3Fy83PkY",
+    "type": "m3u",
+    "url": "https://pastebin.com/raw/3Fy83PkY",
+    "priority": 45,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "pastebin_VrjHb7wE",
+    "name": "Pastebin — VrjHb7wE",
+    "type": "m3u",
+    "url": "https://pastebin.com/raw/VrjHb7wE",
+    "priority": 46,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "pastebin_JGMW7nJf",
+    "name": "Pastebin — JGMW7nJf",
+    "type": "m3u",
+    "url": "https://pastebin.com/raw/JGMW7nJf",
+    "priority": 47,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "pastebin_8yaR4WES",
+    "name": "Pastebin — 8yaR4WES",
+    "type": "m3u",
+    "url": "https://pastebin.com/raw/8yaR4WES",
+    "priority": 48,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "pastebin_8yaR4WE",
+    "name": "Pastebin — 8yaR4WE",
+    "type": "m3u",
+    "url": "https://pastebin.com/raw/8yaR4WE",
+    "priority": 49,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "pastebin_aS8PtdK7",
+    "name": "Pastebin — aS8PtdK7",
+    "type": "m3u",
+    "url": "https://pastebin.com/raw/aS8PtdK7",
+    "priority": 50,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "pastebin_eicWwntx",
+    "name": "Pastebin — eicWwntx",
+    "type": "m3u",
+    "url": "https://pastebin.com/raw/eicWwntx",
+    "priority": 51,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "zonictv_streams",
+    "name": "ZonicTV — Streams",
+    "type": "m3u",
+    "url": "https://portal.zonictv.com:9090/streams/mry8s52qqwe",
+    "priority": 52,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": false,
+      "headers": {}
+    }
   }
 ]

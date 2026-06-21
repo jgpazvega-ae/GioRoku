@@ -37,6 +37,7 @@
              itemSpacing="[12, 0]"
              numRows="2"
              rowLabelOffset="[60, -46]"
+             rowFocusAnimationStyle="fixedFocus"
              showRowLabel="true"
              rowLabelColor="#9CA3AF"
              focusedRowLabelColor="#FFFFFF"

@@ -42,7 +42,7 @@
              rowLabelOffset="[60, -46]"
              rowItemImageOffset="[0, 0]"
              focusXOffset="0"
-             rowFocusAnimationStyle="fixedFocusWrap"
+             rowFocusAnimationStyle="fixedFocus"
              showRowLabel="true"
              rowLabelColor="#9CA3AF"
              focusedRowLabelColor="#FFFFFF"

@@ -24,6 +24,7 @@ sub init()
 
     m.overlayVisible = false
     m.isLive         = true
+    m.curName        = ""
 
     m.video.observeField("state", "_onVideoState")
 
@@ -85,6 +86,7 @@ sub _onContent()
     end if
     m.zapName.text = name
 
+    m.curName          = name
     m.bufLabel.text    = "Cargando " + name + "…"
     m.bufLabel.visible = true
 
@@ -109,14 +111,19 @@ sub _onContent()
 end sub
 
 sub _onVideoState()
-    st = m.video.state
+    st   = m.video.state
+    name = ""
+    if m.curName <> invalid then name = m.curName
     if st = "playing" then
         m.bufLabel.visible = false
     else if st = "buffering" then
-        m.bufLabel.text    = "Cargando…"
+        m.bufLabel.text    = "Cargando " + name + "…" + chr(10) + chr(10) + "Si no inicia en unos segundos, pulsa ATRÁS y prueba otro canal."
         m.bufLabel.visible = true
     else if st = "error" then
-        m.bufLabel.text    = "No se pudo reproducir." + chr(10) + "Presiona Atrás para volver."
+        m.bufLabel.text    = "✕ No se pudo reproducir " + name + chr(10) + chr(10) + "Este canal puede estar fuera de línea o no disponible en tu región." + chr(10) + "Pulsa ATRÁS para volver y prueba otro."
+        m.bufLabel.visible = true
+    else if st = "finished" then
+        m.bufLabel.text    = "Transmisión finalizada." + chr(10) + "Pulsa ATRÁS para volver."
         m.bufLabel.visible = true
     end if
 end sub

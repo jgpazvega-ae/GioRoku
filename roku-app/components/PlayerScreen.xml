@@ -11,7 +11,8 @@
 
     <!-- Buffering label -->
     <Label id="bufLabel" text="" font="font:MediumBoldSystemFont" color="#FFFFFF"
-           translation="[760, 510]" width="400" horizAlign="center" visible="false" />
+           translation="[360, 460]" width="1200" horizAlign="center"
+           wrap="true" lineSpacing="6" visible="false" />
 
     <!-- ========== ZAP BANNER (top) ========== -->
     <Rectangle id="zapBg" width="1920" height="160" color="#0A0D14" opacity="0.88"

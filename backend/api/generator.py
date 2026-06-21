@@ -145,6 +145,9 @@ class APIGenerator:
         now = datetime.utcnow().isoformat()
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
+            tables = {r[0] for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchall()}
+            if "epg_programs" not in tables:
+                return {}
             epg: dict = {}
             for row in conn.execute(
                 "SELECT * FROM epg_programs WHERE start_time<=? AND end_time>?", (now, now)

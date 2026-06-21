@@ -29,6 +29,7 @@ class Source(BaseModel):
     priority: int = 10
     is_enabled: bool = True
     trusted: bool = False
+    cable: bool = False
     refresh_interval_hours: int = 24
     last_refresh: Optional[datetime] = None
     last_channel_count: int = 0

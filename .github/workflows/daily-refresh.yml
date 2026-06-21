@@ -1,188 +1,272 @@
-name: Nightly Pipeline
+name: Actualización Diaria de Canales
 
 on:
   schedule:
-    - cron: "0 0 * * *"   # 00:00 UTC every day
-  workflow_dispatch:        # allow manual trigger
+    - cron: "0 12 * * *"   # 06:00 hora México (CDT / UTC−6)
+  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
+  # ─────────────────────────────────────────────────────────────────────────
   fetch:
-    name: Fetch channels
+    name: "1 — Obtener canales"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - name: Restore SQLite cache
+      - name: Restaurar DB anterior (caché)
         uses: actions/cache@v4
         with:
           path: backend/db/iptv.db
           key: iptv-db-${{ github.run_id }}
           restore-keys: iptv-db-
 
-      - name: Install dependencies
-        run: pip install -r backend/requirements.txt
+      - run: pip install -r backend/requirements.txt
 
-      - name: Stage — fetch
+      - name: Obtener canales — fetch
         run: python backend/run_pipeline.py --stage fetch
 
-      - name: Save DB artifact
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: iptv-db-fetch
           path: backend/db/iptv.db
           retention-days: 1
 
+  # ─────────────────────────────────────────────────────────────────────────
   validate:
-    name: Validate streams
+    name: "2 — Validar streams (no-trusted)"
     needs: fetch
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - name: Download DB
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
           name: iptv-db-fetch
           path: backend/db/
 
-      - name: Install dependencies
-        run: pip install -r backend/requirements.txt
+      - run: pip install -r backend/requirements.txt
 
-      - name: Stage — validate
+      - name: Validar streams
         run: python backend/run_pipeline.py --stage validate
 
-      - name: Save DB artifact
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: iptv-db-validate
           path: backend/db/iptv.db
           retention-days: 1
 
+  # ─────────────────────────────────────────────────────────────────────────
   process:
-    name: Deduplicate, classify, enrich
+    name: "3 — Dedup + Clasificar"
     needs: validate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - name: Download DB
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
           name: iptv-db-validate
           path: backend/db/
 
-      - name: Install dependencies
-        run: pip install -r backend/requirements.txt
+      - run: pip install -r backend/requirements.txt
 
-      - name: Stage — deduplicate, classify, enrich
-        run: python backend/run_pipeline.py --stage deduplicate,classify,enrich
+      - name: Deduplicar y clasificar
+        run: python backend/run_pipeline.py --stage deduplicate,classify
 
-      - name: Save DB artifact
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: iptv-db-process
           path: backend/db/iptv.db
           retention-days: 1
 
-  generate:
-    name: Generate JSON API
+  # ─────────────────────────────────────────────────────────────────────────
+  release:
+    name: "4 — Generar + Publicar ZIP"
     needs: process
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - name: Download DB
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
           name: iptv-db-process
           path: backend/db/
 
-      - name: Install dependencies
-        run: pip install -r backend/requirements.txt
+      - run: pip install -r backend/requirements.txt
 
-      - name: Stage — generate
+      - name: Generar API + bundle Roku
         run: python backend/run_pipeline.py --stage generate
 
-      - name: Commit and push API files
+      - name: Construir GioRoku.zip
         run: |
-          git config user.name "GioRoku Bot"
-          git config user.email "bot@gioroku.local"
+          cd roku-app
+          zip -r ../GioRoku.zip . -x "*/.*"
+          cd ..
+          echo "ZIP_KB=$(du -k GioRoku.zip | cut -f1)" >> $GITHUB_ENV
+
+      - name: Generar estadísticas de canales
+        id: stats
+        run: |
+          python3 - <<'PYEOF'
+          import json, sqlite3, os
+          from pathlib import Path
+
+          db = Path("backend/db/iptv.db")
+          with sqlite3.connect(db) as conn:
+              conn.row_factory = sqlite3.Row
+              rows = conn.execute("""
+                  SELECT COALESCE(override_name,name) AS name,
+                         COALESCE(override_country,country) AS country,
+                         COALESCE(override_category,category) AS category,
+                         is_online, is_featured, is_trusted, response_ms, offline_count
+                  FROM channels WHERE COALESCE(override_enabled,is_enabled)=1
+              """).fetchall()
+
+          total   = len(rows)
+          online  = sum(1 for r in rows if r["is_online"])
+          cable   = sum(1 for r in rows if r["is_featured"] and r["is_online"])
+          trusted = sum(1 for r in rows if r["is_trusted"] and r["is_online"])
+          mx      = sum(1 for r in rows if r["country"] == "MX" and r["is_online"])
+          pct     = round(online / total * 100) if total else 0
+
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              f.write(f"total={total}\n")
+              f.write(f"online={online}\n")
+              f.write(f"cable={cable}\n")
+              f.write(f"trusted={trusted}\n")
+              f.write(f"mx={mx}\n")
+              f.write(f"pct={pct}\n")
+
+          print(f"total={total} online={online} cable={cable} trusted={trusted} mx={mx}")
+          PYEOF
+
+      - name: Commit y push
+        run: |
+          git config user.name  "GioRoku Bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/api/ roku-app/data/channels.json
-          git diff --staged --quiet || git commit -m "chore: api update $(date -u '+%Y-%m-%d %H:%M UTC')"
+          git diff --staged --quiet || \
+            git commit -m "chore: canales $(date -u '+%Y-%m-%d %H:%M UTC') — ${{ steps.stats.outputs.online }} online · ${{ steps.stats.outputs.cable }} cable"
           git push
 
-      - name: Channel status summary
+      - name: Publicar Release con ZIP
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "channels-latest"
+          name: "GioRoku — Canales ${{ github.run_number }} (${{ steps.stats.outputs.online }} online)"
+          body: |
+            ## GioRoku — Actualización automática de canales
+
+            | | |
+            |---|---|
+            | **Total canales** | ${{ steps.stats.outputs.total }} |
+            | **En línea** | ${{ steps.stats.outputs.online }} (${{ steps.stats.outputs.pct }}%) |
+            | **Canales de paga (cable)** | ${{ steps.stats.outputs.cable }} |
+            | **Canales MX** | ${{ steps.stats.outputs.mx }} |
+            | **Verificados comunidad** | ${{ steps.stats.outputs.trusted }} |
+
+            ### Instalar en Roku
+            1. Descarga **GioRoku.zip** desde abajo
+            2. Roku → Configuración → Sistema avanzado → Modo desarrollador
+            3. Ingresa la IP de tu Roku en el navegador (p.ej. `http://192.168.1.XXX`)
+            4. En la sección **Install** sube el ZIP
+
+            > Fuentes: iptv-org (verificados por la comunidad desde dentro de cada país)
+          files: GioRoku.zip
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Resumen en GitHub Actions
         if: always()
         run: |
           python3 - <<'PYEOF'
-          import json, sqlite3, sys
+          import json, sqlite3, os
           from pathlib import Path
 
           db = Path("backend/db/iptv.db")
           if not db.exists():
-              sys.exit(0)
+              print("Sin DB")
+              exit(0)
 
           with sqlite3.connect(db) as conn:
               conn.row_factory = sqlite3.Row
               rows = conn.execute("""
-                  SELECT name, country, category, is_online, response_ms, offline_count
-                  FROM channels WHERE is_enabled=1
-                  ORDER BY is_online DESC, response_ms ASC NULLS LAST, name
+                  SELECT COALESCE(override_name,name) AS name,
+                         COALESCE(override_country,country) AS country,
+                         COALESCE(override_category,category) AS category,
+                         is_online, is_featured, is_trusted, response_ms, offline_count
+                  FROM channels WHERE COALESCE(override_enabled,is_enabled)=1
+                  ORDER BY is_featured DESC, is_online DESC,
+                           CASE WHEN COALESCE(override_country,country)='MX' THEN 0 ELSE 1 END,
+                           response_ms ASC NULLS LAST, name
               """).fetchall()
 
-          total  = len(rows)
-          online = sum(1 for r in rows if r["is_online"])
-          pct    = round(online / total * 100) if total else 0
+          total   = len(rows)
+          online  = sum(1 for r in rows if r["is_online"])
+          cable   = sum(1 for r in rows if r["is_featured"] and r["is_online"])
+          trusted = sum(1 for r in rows if r["is_trusted"] and r["is_online"])
+          mx      = sum(1 for r in rows if r["country"] == "MX" and r["is_online"])
+          pct     = round(online / total * 100) if total else 0
 
-          SUMMARY = Path(
-              __import__("os").environ.get("GITHUB_STEP_SUMMARY", "/dev/stdout")
-          )
+          SUMMARY = Path(os.environ.get("GITHUB_STEP_SUMMARY", "/dev/stdout"))
           lines = [
-              "## 📡 GioRoku — Pipeline nocturno\n",
-              f"| | |", f"|---|---|",
+              "## GioRoku — Pipeline diario\n",
+              "| | |", "|---|---|",
               f"| **Total** | {total} |",
-              f"| **✅ En línea** | {online} |",
-              f"| **❌ Fuera de línea** | {total-online} |",
-              f"| **Disponibilidad** | **{pct}%** |", "",
+              f"| **En línea** | {online} ({pct}%) |",
+              f"| **Cable / Paga** | {cable} |",
+              f"| **Canales MX** | {mx} |",
+              f"| **Verificados (comunidad)** | {trusted} |", "",
           ]
-          on_rows = [r for r in rows if r["is_online"]]
-          if on_rows:
-              lines += [f"### ✅ Funcionales ({len(on_rows)})\n",
-                        "| Canal | País | ms |", "|---|---|---|"]
-              lines += [f"| {r['name']} | {r['country'] or '—'} | {r['response_ms'] or '—'} |"
-                        for r in on_rows]
+
+          # Cable channels section
+          cable_rows = [r for r in rows if r["is_featured"] and r["is_online"]]
+          if cable_rows:
+              lines += [f"### Canales de paga en línea ({len(cable_rows)})\n",
+                        "| Canal | País | Categoría | ms |", "|---|---|---|---|"]
+              lines += [f"| {r['name']} | {r['country'] or '—'} | {r['category'] or '—'} | {r['response_ms'] or '—'} |"
+                        for r in cable_rows[:100]]
+              if len(cable_rows) > 100:
+                  lines.append(f"_...y {len(cable_rows)-100} más_")
               lines.append("")
-          off_rows = [r for r in rows if not r["is_online"]]
+
+          # MX online
+          mx_rows = [r for r in rows if r["country"] == "MX" and r["is_online"] and not r["is_featured"]]
+          if mx_rows:
+              lines += [f"### Canales MX gratuitos en línea ({len(mx_rows)})\n",
+                        "| Canal | Categoría | ms |", "|---|---|---|"]
+              lines += [f"| {r['name']} | {r['category'] or '—'} | {r['response_ms'] or '—'} |"
+                        for r in mx_rows[:50]]
+              lines.append("")
+
+          # Offline
+          off_rows = [r for r in rows if not r["is_online"] and not r["is_trusted"]]
           if off_rows:
-              lines += [f"<details><summary>❌ Fuera de línea ({len(off_rows)})</summary>\n",
+              lines += [f"<details><summary>Fuera de línea no-trusted ({len(off_rows)})</summary>\n",
                         "| Canal | País | Fallos |", "|---|---|---|"]
               lines += [f"| {r['name']} | {r['country'] or '—'} | {r['offline_count'] or 0} |"
-                        for r in off_rows]
-              lines += ["</details>", ""]
+                        for r in off_rows[:200]]
+              lines.append("</details>")
+          lines.append("")
           lines.append("> [Ver estado en vivo](https://jgpazvega-ae.github.io/GioRoku/status.html)")
+
           SUMMARY.write_text("\n".join(lines), encoding="utf-8")
-          print(f"Summary written: {online}/{total} ({pct}%)")
+          print(f"Resumen: {online}/{total} online — {cable} cable — {mx} MX")
           PYEOF

@@ -115,8 +115,10 @@ class APIGenerator:
                 FROM channels
                 WHERE COALESCE(override_enabled,is_enabled)=1
                 ORDER BY
-                    CASE WHEN COALESCE(override_country,country) IN ('MX','AR','CO','CL','VE','PE') THEN 0 ELSE 1 END,
-                    CASE WHEN COALESCE(override_country,country) = 'MX' THEN 0 ELSE 1 END,
+                    is_featured DESC,
+                    CASE WHEN COALESCE(override_country,country) = 'MX'                            THEN 0
+                         WHEN COALESCE(override_country,country) IN ('AR','CO','CL','VE','PE','UY','PY','EC','BO') THEN 1
+                         ELSE 2 END,
                     is_online DESC, response_ms ASC NULLS LAST, name
             """).fetchall()
         result = []

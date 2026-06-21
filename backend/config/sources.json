@@ -1007,11 +1007,155 @@
     "type": "m3u",
     "url": "https://raw.githubusercontent.com/gadgethacks/mx-iptv/main/playlist.m3u8",
     "priority": 2,
-    "is_enabled": true,
+    "is_enabled": false,
     "trusted": true,
     "refresh_interval_hours": 24,
     "options": {
       "timeout_seconds": 45,
+      "encoding": "utf-8",
+      "user_agent": "Mozilla/5.0 (SmartTV)",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "iptvorg_sports",
+    "name": "iptv-org — Deportes (ESPN, Fox Sports, TUDN…)",
+    "type": "m3u",
+    "url": "https://iptv-org.github.io/iptv/categories/sports.m3u",
+    "priority": 1,
+    "is_enabled": true,
+    "trusted": true,
+    "cable": true,
+    "refresh_interval_hours": 6,
+    "options": {
+      "timeout_seconds": 60,
+      "encoding": "utf-8",
+      "user_agent": "Mozilla/5.0 (SmartTV)",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "iptvorg_news",
+    "name": "iptv-org — Noticias (CNN, BBC, Fox, Milenio…)",
+    "type": "m3u",
+    "url": "https://iptv-org.github.io/iptv/categories/news.m3u",
+    "priority": 1,
+    "is_enabled": true,
+    "trusted": true,
+    "cable": true,
+    "refresh_interval_hours": 6,
+    "options": {
+      "timeout_seconds": 60,
+      "encoding": "utf-8",
+      "user_agent": "Mozilla/5.0 (SmartTV)",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "iptvorg_movies",
+    "name": "iptv-org — Películas (HBO, Cinemax, Paramount…)",
+    "type": "m3u",
+    "url": "https://iptv-org.github.io/iptv/categories/movies.m3u",
+    "priority": 1,
+    "is_enabled": true,
+    "trusted": true,
+    "cable": true,
+    "refresh_interval_hours": 6,
+    "options": {
+      "timeout_seconds": 60,
+      "encoding": "utf-8",
+      "user_agent": "Mozilla/5.0 (SmartTV)",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "iptvorg_entertainment",
+    "name": "iptv-org — Entretenimiento Cable (Discovery, History, NatGeo…)",
+    "type": "m3u",
+    "url": "https://iptv-org.github.io/iptv/categories/entertainment.m3u",
+    "priority": 1,
+    "is_enabled": true,
+    "trusted": true,
+    "cable": true,
+    "refresh_interval_hours": 6,
+    "options": {
+      "timeout_seconds": 60,
+      "encoding": "utf-8",
+      "user_agent": "Mozilla/5.0 (SmartTV)",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "iptvorg_kids",
+    "name": "iptv-org — Infantil Cable (Disney, Nick, Cartoon Network…)",
+    "type": "m3u",
+    "url": "https://iptv-org.github.io/iptv/categories/kids.m3u",
+    "priority": 1,
+    "is_enabled": true,
+    "trusted": true,
+    "cable": true,
+    "refresh_interval_hours": 6,
+    "options": {
+      "timeout_seconds": 60,
+      "encoding": "utf-8",
+      "user_agent": "Mozilla/5.0 (SmartTV)",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "iptvorg_music",
+    "name": "iptv-org — Música Cable (MTV, VH1, Bandamax…)",
+    "type": "m3u",
+    "url": "https://iptv-org.github.io/iptv/categories/music.m3u",
+    "priority": 1,
+    "is_enabled": true,
+    "trusted": true,
+    "cable": true,
+    "refresh_interval_hours": 6,
+    "options": {
+      "timeout_seconds": 60,
+      "encoding": "utf-8",
+      "user_agent": "Mozilla/5.0 (SmartTV)",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "iptvorg_documentary",
+    "name": "iptv-org — Documentales Cable (Discovery, NatGeo, History…)",
+    "type": "m3u",
+    "url": "https://iptv-org.github.io/iptv/categories/documentary.m3u",
+    "priority": 1,
+    "is_enabled": true,
+    "trusted": true,
+    "cable": true,
+    "refresh_interval_hours": 6,
+    "options": {
+      "timeout_seconds": 60,
+      "encoding": "utf-8",
+      "user_agent": "Mozilla/5.0 (SmartTV)",
+      "verify_ssl": true,
+      "headers": {}
+    }
+  },
+  {
+    "id": "iptvorg_auto",
+    "name": "iptv-org — Automovilismo Cable (F1, NASCAR, Rally…)",
+    "type": "m3u",
+    "url": "https://iptv-org.github.io/iptv/categories/auto.m3u",
+    "priority": 2,
+    "is_enabled": true,
+    "trusted": true,
+    "cable": true,
+    "refresh_interval_hours": 12,
+    "options": {
+      "timeout_seconds": 60,
       "encoding": "utf-8",
       "user_agent": "Mozilla/5.0 (SmartTV)",
       "verify_ssl": true,

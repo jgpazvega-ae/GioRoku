@@ -55,13 +55,17 @@ class Deduplicator:
             if "is_trusted" not in cols:
                 conn.execute("ALTER TABLE channels ADD COLUMN is_trusted INTEGER DEFAULT 0")
 
-    def _trusted_source_ids(self) -> set[str]:
+    def _source_flags(self) -> tuple[set[str], set[str]]:
+        """Returns (trusted_ids, cable_ids)."""
         path = self.config_dir / "sources.json"
         if not path.exists():
-            return set()
+            return set(), set()
         import json as _json
         data = _json.loads(path.read_text())
-        return {s["id"] for s in data if s.get("trusted") and s.get("is_enabled", True)}
+        enabled = [s for s in data if s.get("is_enabled", True)]
+        trusted = {s["id"] for s in enabled if s.get("trusted")}
+        cable   = {s["id"] for s in enabled if s.get("cable")}
+        return trusted, cable
 
     def run(self) -> int:
         raw = self._load_raw()
@@ -119,15 +123,18 @@ class Deduplicator:
             return [dict(r) for r in conn.execute("SELECT * FROM raw_channels").fetchall()]
 
     def _save(self, channels: list[dict]):
-        trusted = self._trusted_source_ids()
+        trusted, cable = self._source_flags()
         with sqlite3.connect(self.db_path) as conn:
             conn.execute("DELETE FROM channels")
             for ch in channels:
-                is_trusted = 1 if ch.get("source_id") in trusted else 0
+                src = ch.get("source_id")
+                is_trusted  = 1 if src in trusted else 0
+                is_featured = 1 if src in cable   else 0
                 conn.execute(
                     """INSERT OR REPLACE INTO channels
-                       (id,name,logo,stream_url,backup_urls,epg_id,language,source_id,source_priority,is_trusted,is_online)
-                       VALUES(?,?,?,?,?,?,?,?,?,?,?)""",
+                       (id,name,logo,stream_url,backup_urls,epg_id,language,
+                        source_id,source_priority,is_trusted,is_featured,is_online)
+                       VALUES(?,?,?,?,?,?,?,?,?,?,?,?)""",
                     (
                         ch["id"],
                         ch.get("tvg_name") or ch.get("id", "Unknown"),
@@ -136,9 +143,10 @@ class Deduplicator:
                         ch.get("backup_urls", "[]"),
                         ch.get("tvg_id"),
                         ch.get("language", "es"),
-                        ch.get("source_id"),
+                        src,
                         ch.get("source_priority", 10),
                         is_trusted,
+                        is_featured,
                         1,
                     ),
                 )

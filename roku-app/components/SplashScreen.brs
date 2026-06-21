@@ -28,7 +28,7 @@ sub _startLoad()
     m.statusLabel.text  = "Conectando…"
     m.progressBar.width = 120
     m.loadTask = createObject("roSGNode", "LoadTask")
-    m.loadTask.baseUrl = "https://jgpazvega-ae.github.io/GioRoku/api/v1"
+    m.loadTask.baseUrl = "https://raw.githubusercontent.com/jgpazvega-ae/GioRoku/main/docs/api/v1"
     m.loadTask.observeField("taskState", "_onTaskDone")
     m.loadTask.control = "RUN"
 end sub

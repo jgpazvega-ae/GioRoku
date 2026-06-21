@@ -249,7 +249,7 @@ sub _onReloadReq()
     m.settings.reloadState = "loading"
 
     m.loadTask = createObject("roSGNode", "LoadTask")
-    m.loadTask.baseUrl = "https://jgpazvega-ae.github.io/GioRoku/api/v1"
+    m.loadTask.baseUrl = "https://raw.githubusercontent.com/jgpazvega-ae/GioRoku/main/docs/api/v1"
     m.loadTask.observeField("taskState", "_onReloadDone")
     m.loadTask.control = "RUN"
 end sub

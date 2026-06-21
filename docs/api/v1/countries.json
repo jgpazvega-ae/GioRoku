@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-21T04:26:35Z",
+  "generatedAt": "2026-06-21T04:29:31Z",
   "countries": [
     {
       "code": "MX",
@@ -8,7 +8,7 @@
       "flag": "MX",
       "sortOrder": 1,
       "keywords": [],
-      "channelCount": 0
+      "channelCount": 47
     },
     {
       "code": "AR",
@@ -17,7 +17,7 @@
       "flag": "AR",
       "sortOrder": 2,
       "keywords": [],
-      "channelCount": 0
+      "channelCount": 7
     },
     {
       "code": "CO",
@@ -26,7 +26,7 @@
       "flag": "CO",
       "sortOrder": 3,
       "keywords": [],
-      "channelCount": 0
+      "channelCount": 9
     },
     {
       "code": "CL",
@@ -35,7 +35,7 @@
       "flag": "CL",
       "sortOrder": 4,
       "keywords": [],
-      "channelCount": 0
+      "channelCount": 19
     },
     {
       "code": "PE",
@@ -44,7 +44,7 @@
       "flag": "PE",
       "sortOrder": 5,
       "keywords": [],
-      "channelCount": 0
+      "channelCount": 6
     },
     {
       "code": "UY",
@@ -53,7 +53,7 @@
       "flag": "UY",
       "sortOrder": 6,
       "keywords": [],
-      "channelCount": 0
+      "channelCount": 1
     },
     {
       "code": "PY",
@@ -62,7 +62,7 @@
       "flag": "PY",
       "sortOrder": 7,
       "keywords": [],
-      "channelCount": 0
+      "channelCount": 7
     },
     {
       "code": "EC",
@@ -71,7 +71,7 @@
       "flag": "EC",
       "sortOrder": 8,
       "keywords": [],
-      "channelCount": 0
+      "channelCount": 8
     },
     {
       "code": "BO",
@@ -80,7 +80,7 @@
       "flag": "BO",
       "sortOrder": 9,
       "keywords": [],
-      "channelCount": 0
+      "channelCount": 4
     },
     {
       "code": "VE",
@@ -89,7 +89,7 @@
       "flag": "VE",
       "sortOrder": 10,
       "keywords": [],
-      "channelCount": 0
+      "channelCount": 4
     },
     {
       "code": "CA",
@@ -98,7 +98,7 @@
       "flag": "CA",
       "sortOrder": 11,
       "keywords": [],
-      "channelCount": 0
+      "channelCount": 13
     },
     {
       "code": "US_ES",
@@ -107,7 +107,7 @@
       "flag": "US",
       "sortOrder": 12,
       "keywords": [],
-      "channelCount": 0
+      "channelCount": 18
     },
     {
       "code": "INTL",
@@ -116,7 +116,7 @@
       "flag": "--",
       "sortOrder": 99,
       "keywords": [],
-      "channelCount": 0
+      "channelCount": 12368
     }
   ]
 }

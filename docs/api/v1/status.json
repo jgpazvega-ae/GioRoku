@@ -1,11 +1,1 @@
-{
- "generatedAt": "2026-06-21T04:21:29Z",
- "pipelineVersion": "2.0.0",
- "stats": {
-  "totalChannels": 123,
-  "onlineChannels": 18,
-  "offlineChannels": 105,
-  "totalCountries": 4,
-  "totalCategories": 7
- }
-}
+{"generatedAt":"2026-06-21T18:41:00.014065Z","pipelineVersion":"1.0.0","stats":{"totalChannels":7414,"onlineChannels":474,"offlineChannels":6940,"totalCountries":13,"totalCategories":12,"lastValidationRun":"2026-06-21T18:41:00.014065Z"}}

@@ -24,12 +24,12 @@ sub _onRowData()
     end for
 
     if not hasContent then
-        m.emptyMsg.text    = "Aún no hay contenido." + chr(10) + "Importa una lista M3U desde la herramienta web."
+        m.emptyMsg.text    = "No hay contenido disponible." + chr(10) + "Intenta recargar los canales desde Configuración."
         m.emptyMsg.visible = true
         m.heroTitle.text   = "Bienvenido a GioRoku"
         m.heroBadge.text   = ""
         m.heroMeta.text    = "Tu televisión latina"
-        m.heroDesc.text    = "Importa tu lista de canales desde el portal web para empezar a ver TV en vivo."
+        m.heroDesc.text    = "Recarga los canales desde Configuración para restaurar el listado."
     else
         m.emptyMsg.visible = false
         _updateHeroFromIndex(0, 0)

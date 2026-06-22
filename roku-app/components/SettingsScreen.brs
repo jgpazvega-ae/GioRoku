@@ -30,7 +30,7 @@ sub _showInfo(idx as integer)
     else if idx = 2 then
         m.infoText.text = "Recargar canales" + chr(10) + chr(10) + "Restaura la lista de canales latinos incluida en la app." + chr(10) + "Útil si la vista quedó en un estado inesperado."
     else if idx = 3 then
-        m.infoText.text = "GioRoku v2.0" + chr(10) + "Tu televisión latina en Roku." + chr(10) + chr(10) + "Streams de canales desde GitHub Pages." + chr(10) + "Películas de dominio público (Internet Archive)." + chr(10) + chr(10) + "github.com/jgpazvega-ae/GioRoku"
+        m.infoText.text = "GioRoku v2.0" + chr(10) + "Tu televisión latina en Roku." + chr(10) + chr(10) + "408 canales LATAM incluidos en la app." + chr(10) + "Películas de dominio público (Internet Archive)." + chr(10) + chr(10) + "github.com/jgpazvega-ae/GioRoku"
     end if
 end sub
 
@@ -55,9 +55,9 @@ sub _onReloadState()
         n = m.top.reloadCount
         m.infoText.text = "Canales recargados." + chr(10) + n.toStr() + " canales disponibles."
     else if st = "error" then
-        m.infoText.text = "Error al recargar." + chr(10) + "Verifica tu conexión a internet."
+        m.infoText.text = "Error al restaurar." + chr(10) + "No se pudo leer la lista de canales."
     else if st = "loading" then
-        m.infoText.text = "Descargando canales…"
+        m.infoText.text = "Restaurando canales…"
     end if
 end sub
 

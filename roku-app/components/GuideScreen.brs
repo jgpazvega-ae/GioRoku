@@ -7,7 +7,7 @@ sub init()
     m.guideList.observeField("itemSelected", "_onItemSelected")
 
     m.clockTimer = createObject("roSGNode", "Timer")
-    m.clockTimer.duration = 1
+    m.clockTimer.duration = 30
     m.clockTimer.repeat   = true
     m.clockTimer.observeField("fire", "_tick")
     m.clockTimer.control  = "start"
@@ -25,7 +25,7 @@ sub _onChannelData()
         m.guideList.setFocus(true)
     else
         m.countLabel.text  = "Sin canales"
-        m.emptyMsg.text    = "Aún no hay canales." + chr(10) + "Importa una lista M3U desde la herramienta web."
+        m.emptyMsg.text    = "No hay canales disponibles." + chr(10) + "Intenta recargar desde Configuración."
         m.emptyMsg.visible = true
     end if
 end sub

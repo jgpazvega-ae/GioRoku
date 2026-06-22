@@ -358,7 +358,7 @@ sub _prepareHome()
                 chMeta = _str(ch, "countryLabel")
                 chCat  = _str(ch, "categoryLabel")
                 if chMeta <> "" and chCat <> "" then it.description = chMeta + " · " + chCat else it.description = chMeta + chCat
-                it.addFields({chId: id, isLive: true})
+                it.addFields({chId: id, isLive: true, backupUrls: _backupUrls(ch)})
             end if
         end for
         if row.getChildCount() = 0 then root.removeChild(row)
@@ -378,7 +378,7 @@ sub _prepareHome()
         chMeta = _str(ch, "countryLabel")
         chCat  = _str(ch, "categoryLabel")
         if chMeta <> "" and chCat <> "" then it.description = chMeta + " · " + chCat else it.description = chMeta + chCat
-        it.addFields({chId: _str(ch, "id"), isLive: true})
+        it.addFields({chId: _str(ch, "id"), isLive: true, backupUrls: _backupUrls(ch)})
         n = n + 1
     end for
 
@@ -413,7 +413,7 @@ sub _prepareHome()
                 chMeta = _str(ch, "countryLabel")
                 chCat  = _str(ch, "categoryLabel")
                 if chMeta <> "" and chCat <> "" then it.description = chMeta + " · " + chCat else it.description = chMeta + chCat
-                it.addFields({chId: id, isLive: true})
+                it.addFields({chId: id, isLive: true, backupUrls: _backupUrls(ch)})
             end if
         end for
         if row4.getChildCount() = 0 then root.removeChild(row4)
@@ -558,7 +558,7 @@ sub _prepareFavorites()
             else
                 it.description = meta + cat
             end if
-            it.addFields({chId: id, chLive: true, isLive: true})
+            it.addFields({chId: id, chLive: true, isLive: true, backupUrls: _backupUrls(ch)})
         end if
     end for
     m.favorites.channelData = content

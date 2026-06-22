@@ -27,7 +27,7 @@ sub _onChannelData()
         m.chanList.setFocus(true)
     else
         m.countLabel.text  = "Sin canales"
-        m.emptyMsg.text    = "Aún no hay canales." + chr(10) + "Importa una lista M3U desde la herramienta web."
+        m.emptyMsg.text    = "No hay canales disponibles." + chr(10) + "Intenta recargar desde Configuración."
         m.emptyMsg.visible = true
     end if
 end sub

@@ -38,7 +38,7 @@ sub init()
     m.zapTimer.observeField("fire", "_hideZap")
 
     m.errorTimer = createObject("roSGNode", "Timer")
-    m.errorTimer.duration = 12
+    m.errorTimer.duration = 30
     m.errorTimer.repeat   = false
     m.errorTimer.observeField("fire", "_onErrorTimeout")
 
@@ -135,11 +135,13 @@ end sub
 sub _playUrl(c as object, url as string)
     if url = "" then return
     c.url = url
-    c.HttpSendClientCertificates = false
-    c.HttpHeaders = [
-        "User-Agent: VLC/3.0.20 LibVLC/3.0.20",
-        "Connection: keep-alive"
-    ]
+    ' Roku ContentNode requires an roAssociativeArray for HttpHeaders — an array
+    ' of strings is silently ignored by the Video node. LATAM panel servers
+    ' (port 8000/29000/45000) block Roku's default UA; VLC UA is whitelisted.
+    c.HttpHeaders = {
+        "User-Agent": "VLC/3.0.20 LibVLC/3.0.20",
+        "Connection": "keep-alive"
+    }
     m.video.content = invalid
     m.video.content = c
     m.video.control = "play"

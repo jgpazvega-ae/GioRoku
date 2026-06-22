@@ -73,6 +73,34 @@ function _pad3(n as integer) as string
     return s
 end function
 
+function _countryLabel(country as string) as string
+    if country = "MX"    then return "México"
+    if country = "CL"    then return "Chile"
+    if country = "PE"    then return "Perú"
+    if country = "AR"    then return "Argentina"
+    if country = "CO"    then return "Colombia"
+    if country = "INTL"  then return "Internacional"
+    if country = "US_ES" then return "EE.UU. en Español"
+    if country = "EC"    then return "Ecuador"
+    if country = "BO"    then return "Bolivia"
+    if country = "VE"    then return "Venezuela"
+    return country
+end function
+
+function _countryColor(country as string) as string
+    if country = "MX"    then return "#16A34A"
+    if country = "CL"    then return "#2563EB"
+    if country = "PE"    then return "#DC2626"
+    if country = "AR"    then return "#38BDF8"
+    if country = "CO"    then return "#F59E0B"
+    if country = "INTL"  then return "#8B5CF6"
+    if country = "US_ES" then return "#7C3AED"
+    if country = "EC"    then return "#FBBF24"
+    if country = "BO"    then return "#EF4444"
+    if country = "VE"    then return "#FB923C"
+    return "#374151"
+end function
+
 function _categoryColor(cat as string) as string
     cat = lcase(cat)
     if cat = "news"          then return "#EF4444"

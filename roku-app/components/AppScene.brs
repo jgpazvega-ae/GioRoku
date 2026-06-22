@@ -423,35 +423,67 @@ sub _prepareHome()
 end sub
 
 sub _prepareLiveTV()
-    ' Do NOT call _buildChannelNodes() here — it builds 1,794 extra nodes and
-    ' freezes the render thread at startup. Channel nodes are built lazily in
-    ' _startPlayer() only when the user actually plays something.
+    ' Build a RowList-compatible tree grouped by country (Pluto TV / Samsung TV Plus style).
+    ' root → country rows → channel items. _buildChannelNodes() stays flat for Up/Down
+    ' channel-step in the player.
     if m.liveTVContent = invalid then
+        countryOrder = ["INTL", "MX", "CL", "PE", "AR", "CO", "US_ES", "EC", "BO", "VE"]
+        groups = {}
+        for each ctry in countryOrder
+            groups[ctry] = []
+        end for
+
+        for each ch in m.channels
+            ctry = _str(ch, "country")
+            if groups.DoesExist(ctry) then
+                groups[ctry].push(ch)
+            else
+                if not groups.DoesExist("OTHER") then groups["OTHER"] = []
+                groups["OTHER"].push(ch)
+            end if
+        end for
+
         content = createObject("roSGNode", "ContentNode")
         n = 0
-        for each ch in m.channels
-            n = n + 1
-            it = content.createChild("ContentNode")
-            it.title        = _displayName(ch)
-            it.hdPosterUrl  = _str(ch, "logo")
-            it.url          = _str(ch, "streamUrl")
-            it.streamFormat = "hls"
-            it.live         = true
-            meta = _str(ch, "countryLabel")
-            cat  = _str(ch, "categoryLabel")
-            if meta <> "" and cat <> "" then
-                it.description = meta + " · " + cat
-            else
-                it.description = meta + cat
-            end if
-            online = true
-            if type(ch) = "roAssociativeArray" and ch.DoesExist("isOnline") then
-                online = (ch.isOnline = true)
-            end if
-            it.addFields({chNum: _pad3(n), chId: _str(ch, "id"), chLive: online, isLive: true, backupUrls: _backupUrls(ch)})
-        end for
-        m.liveTVContent = content
 
+        for each ctry in countryOrder
+            arr = groups[ctry]
+            if arr.count() > 0 then
+                row = content.createChild("ContentNode")
+                row.title = _countryLabel(ctry)
+                for each ch in arr
+                    n = n + 1
+                    it = row.createChild("ContentNode")
+                    it.title        = _displayName(ch)
+                    it.hdPosterUrl  = _str(ch, "logo")
+                    it.url          = _str(ch, "streamUrl")
+                    it.streamFormat = "hls"
+                    it.live         = true
+                    online = true
+                    if type(ch) = "roAssociativeArray" and ch.DoesExist("isOnline") then
+                        online = (ch.isOnline = true)
+                    end if
+                    it.addFields({chId: _str(ch, "id"), chNum: _pad3(n), chLive: online, isLive: true, backupUrls: _backupUrls(ch), chColor: _countryColor(ctry)})
+                end for
+            end if
+        end for
+
+        if groups.DoesExist("OTHER") and groups["OTHER"].count() > 0 then
+            row = content.createChild("ContentNode")
+            row.title = "Otros"
+            for each ch in groups["OTHER"]
+                n = n + 1
+                it = row.createChild("ContentNode")
+                it.title        = _displayName(ch)
+                it.hdPosterUrl  = _str(ch, "logo")
+                it.url          = _str(ch, "streamUrl")
+                it.streamFormat = "hls"
+                it.live         = true
+                it.addFields({chId: _str(ch, "id"), chNum: _pad3(n), isLive: true, backupUrls: _backupUrls(ch), chColor: "#374151"})
+            end for
+        end if
+
+        m.liveTVContent = content
     end if
     m.livetv.channelData = m.liveTVContent
 end sub

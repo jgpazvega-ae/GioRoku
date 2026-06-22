@@ -22,13 +22,19 @@
            horizAlign="right" width="1880" translation="[0, 54]" />
     <Rectangle width="1920" height="2" color="#2D3748" translation="[0, 76]" />
 
-    <!-- Channel list -->
-    <MarkupList id="chanList"
-                translation="[0, 78]"
-                itemSize="[1824, 80]"
-                itemSpacing="[0, 2]"
-                numRows="12"
-                itemComponentName="LiveTVRow" />
+    <!-- Channel grid (Pluto TV / Samsung TV Plus style) -->
+    <RowList id="chanList"
+             translation="[0, 120]"
+             itemSize="[240, 150]"
+             itemSpacing="[12, 0]"
+             numRows="4"
+             rowLabelOffset="[60, -40]"
+             focusXOffset="0"
+             rowFocusAnimationStyle="fixedFocus"
+             showRowLabel="true"
+             rowLabelColor="#9CA3AF"
+             focusedRowLabelColor="#FFFFFF"
+             itemComponentName="ChannelCard" />
 
     <!-- Empty state -->
     <Label id="emptyMsg" text="" font="font:SmallSystemFont" color="#6B7280"

@@ -28,7 +28,7 @@
 
     <Rectangle id="sel2" width="288" height="56" color="#1A1F2E" translation="[6, 246]" opacity="0" />
     <Rectangle id="bar2" width="4"   height="56" color="#CC1F1F" translation="[0, 246]"  opacity="0" />
-    <Label id="lbl2" text="Películas"      font="font:SmallBoldSystemFont" color="#9CA3AF" translation="[30, 260]" />
+    <Label id="lbl2" text="En Inglés"      font="font:SmallBoldSystemFont" color="#9CA3AF" translation="[30, 260]" />
 
     <Rectangle id="sel3" width="288" height="56" color="#1A1F2E" translation="[6, 314]" opacity="0" />
     <Rectangle id="bar3" width="4"   height="56" color="#CC1F1F" translation="[0, 314]"  opacity="0" />

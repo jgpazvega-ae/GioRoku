@@ -84,6 +84,15 @@ function _countryLabel(country as string) as string
     if country = "EC"    then return "Ecuador"
     if country = "BO"    then return "Bolivia"
     if country = "VE"    then return "Venezuela"
+    if country = "US"    then return "Estados Unidos"
+    if country = "UK"    then return "Reino Unido"
+    if country = "CA"    then return "Canadá"
+    if country = "AU"    then return "Australia"
+    if country = "DE"    then return "Alemania"
+    if country = "FR"    then return "Francia"
+    if country = "JP"    then return "Japón"
+    if country = "TR"    then return "Turquía"
+    if country = "CN"    then return "China"
     return country
 end function
 

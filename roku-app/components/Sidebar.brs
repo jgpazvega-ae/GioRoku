@@ -37,7 +37,7 @@ end sub
 
 function onKeyEvent(key as string, press as boolean) as boolean
     if not press then return false
-    dests = ["home", "livetv", "movies", "favorites", "search", "settings"]
+    dests = ["home", "livetv", "english", "favorites", "search", "settings"]
     if key = "up" then
         m.focusIdx = (m.focusIdx - 1 + 6) mod 6
         _updateUI()

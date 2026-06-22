@@ -8,7 +8,7 @@
     <HomeScreen     id="home"      visible="false" />
     <LiveTVScreen   id="livetv"    visible="false" />
     <GuideScreen    id="guide"     visible="false" />
-    <MoviesScreen   id="movies"    visible="false" />
+    <EnglishScreen  id="english"   visible="false" />
     <FavScreen      id="favorites" visible="false" />
     <SearchScreen   id="search"    visible="false" />
     <SettingsScreen id="settings"  visible="false" />

@@ -3,19 +3,19 @@ sub init()
     m.home      = m.top.findNode("home")
     m.livetv    = m.top.findNode("livetv")
     m.guide     = m.top.findNode("guide")
-    m.movies    = m.top.findNode("movies")
+    m.english   = m.top.findNode("english")
     m.favorites = m.top.findNode("favorites")
     m.search    = m.top.findNode("search")
     m.settings  = m.top.findNode("settings")
     m.sidebar   = m.top.findNode("sidebar")
     m.player    = m.top.findNode("player")
 
-    m.channels      = []
-    m.allMovies     = []
+    m.channels       = []
     m.currentScreen  = "splash"
     m.sidebarOpen    = false
     m.channelNodes   = invalid
     m.liveTVContent  = invalid
+    m.englishContent = invalid
     m.guideContent   = invalid
 
     m.home.observeField("navigate",        "_onNavigate")
@@ -27,8 +27,8 @@ sub init()
     m.guide.observeField("navigate",       "_onNavigate")
     m.guide.observeField("playItem",       "_onPlayItem")
 
-    m.movies.observeField("navigate",      "_onNavigate")
-    m.movies.observeField("playItem",      "_onPlayItem")
+    m.english.observeField("navigate",     "_onNavigate")
+    m.english.observeField("playItem",     "_onPlayItem")
 
     m.favorites.observeField("navigate",   "_onNavigate")
     m.favorites.observeField("playItem",   "_onPlayItem")
@@ -49,42 +49,38 @@ sub init()
     m.homeList     = m.home.findNode("rowList")
     m.livetvList   = m.livetv.findNode("chanList")
     m.guideList    = m.guide.findNode("guideList")
-    m.moviesList   = m.movies.findNode("rowList")
+    m.englishList  = m.english.findNode("chanList")
     m.favList      = m.favorites.findNode("favList")
     m.searchKbd    = m.search.findNode("kbd")
     m.settingsList = m.settings.findNode("settingsList")
 
     ' --- Bulletproof startup --------------------------------------------
-    ' Load bundled channels + movies SYNCHRONOUSLY on the render thread and
-    ' go straight to Home. No Task, no Timer, no cross-component observer —
+    ' Load bundled channels SYNCHRONOUSLY on the render thread and go
+    ' straight to LiveTV. No Task, no Timer, no cross-component observer —
     ' those were silently failing to fire on this device and leaving the
     ' splash stuck on "Conectando…".
-    m.channels  = _readBundled("pkg:/data/channels.json", "channels")
-    m.allMovies = _readBundled("pkg:/data/movies.json",   "movies")
+    m.channels = _readBundled("pkg:/data/channels.json", "channels")
     _navigateTo("livetv")
 
     ' Re-assert focus AFTER the first render. Setting focus synchronously inside
     ' init() runs before the Scene is attached/rendered, so on real hardware the
     ' MarkupList never actually captures the remote — the list looks focused but
     ' every key press is ignored (frozen controls). A one-shot Timer fires after
-    ' the render pass, when setFocus() reliably sticks. (Previously the network
-    ' refresh task happened to re-assign focus post-render, hiding this bug.)
+    ' the render pass, when setFocus() reliably sticks.
     m.focusTimer = createObject("roSGNode", "Timer")
     m.focusTimer.duration = 0.3
     m.focusTimer.repeat   = false
     m.focusTimer.observeField("fire", "_onFocusTimer")
     m.focusTimer.control  = "start"
 
-    ' Background refresh — fetches the same roku-app/data/channels.json from
-    ' GitHub (updated daily by the pipeline). Bundled channels already show while
-    ' the fetch runs; on success the active screen refreshes transparently.
-    ' If the network is unavailable the bundled list stays in use — no error shown.
+    ' Background refresh — fetches roku-app/data/channels.json from GitHub
+    ' (updated by the CI pipeline). Bundled channels already show while the
+    ' fetch runs; on success the active screen refreshes transparently.
     m.refreshTask = createObject("roSGNode", "RefreshTask")
     m.refreshTask.observeField("status", "_onRefreshDone")
     m.refreshTask.control = "run"
 
-    ' Repeat the refresh every 15 minutes so the channel list stays current
-    ' without requiring a manual reload from Settings.
+    ' Repeat the refresh every 15 minutes so the channel list stays current.
     m.refreshTimer = createObject("roSGNode", "Timer")
     m.refreshTimer.duration = 900
     m.refreshTimer.repeat   = true
@@ -93,7 +89,6 @@ sub init()
 end sub
 
 sub _onFocusTimer()
-    ' Land focus on the current screen's primary control after first render.
     _focusScreen(m.currentScreen)
 end sub
 
@@ -117,7 +112,7 @@ sub _navigateTo(screen as string)
     if screen = "" or screen = "none" then return
 
     ' Hide every screen
-    ids = ["home","livetv","guide","movies","favorites","search","settings","splash"]
+    ids = ["home","livetv","guide","english","favorites","search","settings","splash"]
     for each id in ids
         n = m.top.findNode(id)
         if n <> invalid then n.visible = false
@@ -142,9 +137,9 @@ sub _navigateTo(screen as string)
         m.guide.visible = true
         _prepareGuide()
 
-    else if screen = "movies" then
-        m.movies.visible = true
-        _prepareMovies()
+    else if screen = "english" then
+        m.english.visible = true
+        _prepareEnglish()
         m.sidebar.activeItem = 2
 
     else if screen = "favorites" then
@@ -173,8 +168,8 @@ sub _focusScreen(screen as string)
         if m.livetvList <> invalid then m.livetvList.setFocus(true)
     else if screen = "guide" then
         if m.guideList <> invalid then m.guideList.setFocus(true)
-    else if screen = "movies" then
-        if m.moviesList <> invalid then m.moviesList.setFocus(true)
+    else if screen = "english" then
+        if m.englishList <> invalid then m.englishList.setFocus(true)
     else if screen = "favorites" then
         if m.favList <> invalid then m.favList.setFocus(true)
     else if screen = "search" then
@@ -185,7 +180,7 @@ sub _focusScreen(screen as string)
 end sub
 
 sub _onNavigate()
-    allScreens = [m.home, m.livetv, m.guide, m.movies, m.favorites, m.search, m.settings]
+    allScreens = [m.home, m.livetv, m.guide, m.english, m.favorites, m.search, m.settings]
     for each s in allScreens
         if s <> invalid then
             nav = s.navigate
@@ -224,7 +219,7 @@ end sub
 ' ===================== PLAYBACK =====================
 
 sub _onPlayItem()
-    allScreens = [m.home, m.livetv, m.guide, m.movies, m.favorites, m.search]
+    allScreens = [m.home, m.livetv, m.guide, m.english, m.favorites, m.search]
     for each s in allScreens
         if s <> invalid and s.playItem <> invalid then
             item = s.playItem
@@ -270,34 +265,16 @@ sub _onSearchQuery()
         chRow.title = "Canales"
         n = 0
         for each ch in m.channels
-            if n >= 40 then exit for
+            if n >= 60 then exit for
             hay = lcase(_displayName(ch) + " " + _str(ch, "categoryLabel") + " " + _str(ch, "countryLabel"))
             if instr(1, hay, q) > 0 then
                 it = chRow.createChild("ContentNode")
-                it.title       = _displayName(ch)
-                it.hdPosterUrl = _str(ch, "logo")
-                it.url         = _str(ch, "streamUrl")
+                it.title        = _displayName(ch)
+                it.hdPosterUrl  = _str(ch, "logo")
+                it.url          = _str(ch, "streamUrl")
                 it.streamFormat = "hls"
-                it.live        = true
+                it.live         = true
                 it.addFields({chId: _str(ch, "id"), isLive: true, backupUrls: _backupUrls(ch), chColor: _categoryColor(_str(ch, "category"))})
-                n = n + 1
-            end if
-        end for
-
-        mvRow = root.createChild("ContentNode")
-        mvRow.title = "Películas"
-        n = 0
-        for each mv in m.allMovies
-            if n >= 20 then exit for
-            hay = lcase(_str(mv, "title") + " " + _str(mv, "genre"))
-            if instr(1, hay, q) > 0 then
-                it = mvRow.createChild("ContentNode")
-                it.title       = _str(mv, "title")
-                it.hdPosterUrl = _str(mv, "poster")
-                it.url         = _str(mv, "streamUrl")
-                it.streamFormat = "mp4"
-                it.live        = false
-                it.addFields({isLive: false})
                 n = n + 1
             end if
         end for
@@ -312,19 +289,16 @@ sub _onReloadReq()
     m.settings.reloadReq   = false
     m.settings.reloadState = "loading"
 
-    ' Re-read the bundled, pre-filtered LATAM channel list shipped in the app.
-    ' We intentionally do NOT fetch from the public API here: it is regenerated
-    ' daily with thousands of non-LATAM channels. The bundled list is the
-    ' curated, name-cleaned source of truth, so "Recargar canales" simply
-    ' restores it (useful if recents/favorites left the view in an odd state).
-    m.channels      = _readBundled("pkg:/data/channels.json", "channels")
-    m.channelNodes  = invalid
-    m.liveTVContent = invalid
-    m.guideContent  = invalid
-    if m.currentScreen = "home"      then _prepareHome()
-    if m.currentScreen = "livetv"   then _prepareLiveTV()
-    if m.currentScreen = "guide"    then _prepareGuide()
-    if m.currentScreen = "favorites" then _prepareFavorites()
+    m.channels       = _readBundled("pkg:/data/channels.json", "channels")
+    m.channelNodes   = invalid
+    m.liveTVContent  = invalid
+    m.englishContent = invalid
+    m.guideContent   = invalid
+    if m.currentScreen = "home"       then _prepareHome()
+    if m.currentScreen = "livetv"     then _prepareLiveTV()
+    if m.currentScreen = "english"    then _prepareEnglish()
+    if m.currentScreen = "guide"      then _prepareGuide()
+    if m.currentScreen = "favorites"  then _prepareFavorites()
 
     m.settings.reloadCount = m.channels.count()
     m.settings.reloadState = "done"
@@ -355,13 +329,15 @@ sub _onRefreshDone()
 
     if channels = invalid or channels.count() < 10 then return
 
-    m.channels      = channels
-    m.channelNodes  = invalid
-    m.liveTVContent = invalid
-    m.guideContent  = invalid
+    m.channels       = channels
+    m.channelNodes   = invalid
+    m.liveTVContent  = invalid
+    m.englishContent = invalid
+    m.guideContent   = invalid
 
     if m.currentScreen = "home"       then _prepareHome()
     if m.currentScreen = "livetv"     then _prepareLiveTV()
+    if m.currentScreen = "english"    then _prepareEnglish()
     if m.currentScreen = "guide"      then _prepareGuide()
     if m.currentScreen = "favorites"  then _prepareFavorites()
 
@@ -378,11 +354,11 @@ function _buildChannelNodes() as object
         if n >= 3000 then exit for
         n = n + 1
         it = root.createChild("ContentNode")
-        it.title       = _displayName(ch)
-        it.hdPosterUrl = _str(ch, "logo")
-        it.url         = _str(ch, "streamUrl")
+        it.title        = _displayName(ch)
+        it.hdPosterUrl  = _str(ch, "logo")
+        it.url          = _str(ch, "streamUrl")
         it.streamFormat = "hls"
-        it.live        = true
+        it.live         = true
         it.addFields({chId: _str(ch, "id"), chNum: _pad3(n), isLive: true, backupUrls: _backupUrls(ch)})
     end for
     m.channelNodes = root
@@ -400,13 +376,13 @@ sub _prepareHome()
             ch = _findChannel(id)
             if ch <> invalid then
                 it = row.createChild("ContentNode")
-                it.title       = _displayName(ch)
-                it.hdPosterUrl = _str(ch, "logo")
-                it.url         = _str(ch, "streamUrl")
+                it.title        = _displayName(ch)
+                it.hdPosterUrl  = _str(ch, "logo")
+                it.url          = _str(ch, "streamUrl")
                 it.streamFormat = "hls"
-                it.live        = true
-                chMeta = _str(ch, "countryLabel")
-                chCat  = _str(ch, "categoryLabel")
+                it.live         = true
+                chMeta = _countryLabel(_str(ch, "country"))
+                chCat  = _str(ch, "category")
                 if chMeta <> "" and chCat <> "" then it.description = chMeta + " · " + chCat else it.description = chMeta + chCat
                 it.addFields({chId: id, isLive: true, backupUrls: _backupUrls(ch)})
             end if
@@ -419,33 +395,51 @@ sub _prepareHome()
     n = 0
     for each ch in m.channels
         if n >= 120 then exit for
-        it = row2.createChild("ContentNode")
-        it.title       = _displayName(ch)
-        it.hdPosterUrl = _str(ch, "logo")
-        it.url         = _str(ch, "streamUrl")
-        it.streamFormat = "hls"
-        it.live        = true
-        chMeta = _str(ch, "countryLabel")
-        chCat  = _str(ch, "categoryLabel")
-        if chMeta <> "" and chCat <> "" then it.description = chMeta + " · " + chCat else it.description = chMeta + chCat
-        it.addFields({chId: _str(ch, "id"), isLive: true, backupUrls: _backupUrls(ch)})
-        n = n + 1
+        lang = ""
+        if type(ch) = "roAssociativeArray" and ch.DoesExist("language") then
+            if ch.language <> invalid then lang = ch.language
+        end if
+        if lang = "en" then
+            ' skip english channels from LATAM row
+        else
+            it = row2.createChild("ContentNode")
+            it.title        = _displayName(ch)
+            it.hdPosterUrl  = _str(ch, "logo")
+            it.url          = _str(ch, "streamUrl")
+            it.streamFormat = "hls"
+            it.live         = true
+            chMeta = _countryLabel(_str(ch, "country"))
+            chCat  = _str(ch, "category")
+            if chMeta <> "" and chCat <> "" then it.description = chMeta + " · " + chCat else it.description = chMeta + chCat
+            it.addFields({chId: _str(ch, "id"), isLive: true, backupUrls: _backupUrls(ch)})
+            n = n + 1
+        end if
     end for
 
     row3 = root.createChild("ContentNode")
-    row3.title = "Películas"
+    row3.title = "En Inglés"
     n = 0
-    for each mv in m.allMovies
+    for each ch in m.channels
         if n >= 30 then exit for
-        it = row3.createChild("ContentNode")
-        it.title       = _str(mv, "title")
-        it.hdPosterUrl = _str(mv, "poster")
-        it.url         = _str(mv, "streamUrl")
-        it.streamFormat = "mp4"
-        it.live        = false
-        it.addFields({isLive: false, mvYear: _str(mv, "year"), mvGenre: _str(mv, "genre")})
-        n = n + 1
+        lang = ""
+        if type(ch) = "roAssociativeArray" and ch.DoesExist("language") then
+            if ch.language <> invalid then lang = ch.language
+        end if
+        if lang = "en" then
+            it = row3.createChild("ContentNode")
+            it.title        = _displayName(ch)
+            it.hdPosterUrl  = _str(ch, "logo")
+            it.url          = _str(ch, "streamUrl")
+            it.streamFormat = "hls"
+            it.live         = true
+            chMeta = _countryLabel(_str(ch, "country"))
+            chCat  = _str(ch, "category")
+            if chMeta <> "" and chCat <> "" then it.description = chMeta + " · " + chCat else it.description = chMeta + chCat
+            it.addFields({chId: _str(ch, "id"), isLive: true, backupUrls: _backupUrls(ch)})
+            n = n + 1
+        end if
     end for
+    if row3.getChildCount() = 0 then root.removeChild(row3)
 
     favIds = _getFavorites()
     if favIds.count() > 0 then
@@ -455,13 +449,13 @@ sub _prepareHome()
             ch = _findChannel(id)
             if ch <> invalid then
                 it = row4.createChild("ContentNode")
-                it.title       = _displayName(ch)
-                it.hdPosterUrl = _str(ch, "logo")
-                it.url         = _str(ch, "streamUrl")
+                it.title        = _displayName(ch)
+                it.hdPosterUrl  = _str(ch, "logo")
+                it.url          = _str(ch, "streamUrl")
                 it.streamFormat = "hls"
-                it.live        = true
-                chMeta = _str(ch, "countryLabel")
-                chCat  = _str(ch, "categoryLabel")
+                it.live         = true
+                chMeta = _countryLabel(_str(ch, "country"))
+                chCat  = _str(ch, "category")
                 if chMeta <> "" and chCat <> "" then it.description = chMeta + " · " + chCat else it.description = chMeta + chCat
                 it.addFields({chId: id, isLive: true, backupUrls: _backupUrls(ch)})
             end if
@@ -477,29 +471,72 @@ sub _prepareLiveTV()
         content = createObject("roSGNode", "ContentNode")
         n = 0
         for each ch in m.channels
-            n = n + 1
-            it = content.createChild("ContentNode")
-            it.title        = _displayName(ch)
-            it.hdPosterUrl  = _str(ch, "logo")
-            it.url          = _str(ch, "streamUrl")
-            it.streamFormat = "hls"
-            it.live         = true
-            meta = _str(ch, "countryLabel")
-            cat  = _str(ch, "categoryLabel")
-            if meta <> "" and cat <> "" then
-                it.description = meta + " · " + cat
+            ' English channels go to the En Inglés section, not LiveTV
+            lang = ""
+            if type(ch) = "roAssociativeArray" and ch.DoesExist("language") then
+                if ch.language <> invalid then lang = ch.language
+            end if
+            if lang = "en" then
+                ' skip
             else
-                it.description = meta + cat
+                n = n + 1
+                it = content.createChild("ContentNode")
+                it.title        = _displayName(ch)
+                it.hdPosterUrl  = _str(ch, "logo")
+                it.url          = _str(ch, "streamUrl")
+                it.streamFormat = "hls"
+                it.live         = true
+                meta = _countryLabel(_str(ch, "country"))
+                cat  = _str(ch, "category")
+                if meta <> "" and cat <> "" then
+                    it.description = meta + " · " + cat
+                else
+                    it.description = meta + cat
+                end if
+                online = true
+                if type(ch) = "roAssociativeArray" and ch.DoesExist("isOnline") then
+                    online = (ch.isOnline = true)
+                end if
+                it.addFields({chNum: _pad3(n), chId: _str(ch, "id"), chLive: online, isLive: true, backupUrls: _backupUrls(ch)})
             end if
-            online = true
-            if type(ch) = "roAssociativeArray" and ch.DoesExist("isOnline") then
-                online = (ch.isOnline = true)
-            end if
-            it.addFields({chNum: _pad3(n), chId: _str(ch, "id"), chLive: online, isLive: true, backupUrls: _backupUrls(ch)})
         end for
         m.liveTVContent = content
     end if
     m.livetv.channelData = m.liveTVContent
+end sub
+
+sub _prepareEnglish()
+    if m.englishContent = invalid then
+        content = createObject("roSGNode", "ContentNode")
+        n = 0
+        for each ch in m.channels
+            lang = ""
+            if type(ch) = "roAssociativeArray" and ch.DoesExist("language") then
+                if ch.language <> invalid then lang = ch.language
+            end if
+            if lang = "en" then
+                n = n + 1
+                it = content.createChild("ContentNode")
+                it.title        = _displayName(ch)
+                it.hdPosterUrl  = _str(ch, "logo")
+                it.url          = _str(ch, "streamUrl")
+                it.streamFormat = "hls"
+                it.live         = true
+                meta = _countryLabel(_str(ch, "country"))
+                cat  = _str(ch, "category")
+                if meta <> "" and cat <> "" then
+                    it.description = meta + " · " + cat
+                else
+                    it.description = meta + cat
+                end if
+                online = true
+                if ch.DoesExist("isOnline") then online = (ch.isOnline = true)
+                it.addFields({chNum: _pad3(n), chId: _str(ch, "id"), chLive: online, isLive: true, backupUrls: _backupUrls(ch)})
+            end if
+        end for
+        m.englishContent = content
+    end if
+    m.english.channelData = m.englishContent
 end sub
 
 sub _prepareGuide()
@@ -507,10 +544,11 @@ sub _prepareGuide()
         content = createObject("roSGNode", "ContentNode")
         n = 0
         for each ch in m.channels
+            ' Guide shows all channels (both LATAM and English)
             n = n + 1
             it = content.createChild("ContentNode")
-            meta = _str(ch, "countryLabel")
-            cat  = _str(ch, "categoryLabel")
+            meta = _countryLabel(_str(ch, "country"))
+            cat  = _str(ch, "category")
             q    = ucase(_str(ch, "quality"))
             if cat <> "" then meta = meta + "  ·  " + cat
             if q <> "" then meta = meta + "  ·  " + q
@@ -531,58 +569,6 @@ sub _prepareGuide()
     m.guide.channelData = m.guideContent
 end sub
 
-sub _prepareMovies()
-    root   = createObject("roSGNode", "ContentNode")
-    genres = ["Comedia","Drama","Terror","Clásico","Aventura","Cine mudo","Ciencia ficción","Western","Romance","Acción","Crimen","Cine negro","Bélica","Animación","Misterio","Musical","Suspenso"]
-
-    if m.allMovies.count() > 0 then
-        pop = root.createChild("ContentNode")
-        pop.title = "Populares"
-        n = 0
-        for each mv in m.allMovies
-            if n >= 20 then exit for
-            it = pop.createChild("ContentNode")
-            it.title       = _str(mv, "title")
-            it.hdPosterUrl = _str(mv, "poster")
-            it.url         = _str(mv, "streamUrl")
-            it.streamFormat = "mp4"
-            it.live        = false
-            it.addFields({isLive: false, mvYear: _str(mv, "year"), mvGenre: _str(mv, "genre")})
-            n = n + 1
-        end for
-    end if
-
-    grouped = {}
-    for each mv in m.allMovies
-        g = _str(mv, "genre")
-        for each genre in genres
-            if lcase(g) = lcase(genre) then
-                if not grouped.DoesExist(genre) then grouped[genre] = []
-                grouped[genre].push(mv)
-                exit for
-            end if
-        end for
-    end for
-
-    for each genre in genres
-        if grouped.DoesExist(genre) and grouped[genre].count() > 0 then
-            row = root.createChild("ContentNode")
-            row.title = genre
-            for each mv in grouped[genre]
-                it = row.createChild("ContentNode")
-                it.title       = _str(mv, "title")
-                it.hdPosterUrl = _str(mv, "poster")
-                it.url         = _str(mv, "streamUrl")
-                it.streamFormat = "mp4"
-                it.live        = false
-                it.addFields({isLive: false, mvYear: _str(mv, "year"), mvGenre: _str(mv, "genre")})
-            end for
-        end if
-    end for
-
-    m.movies.rowData = root
-end sub
-
 sub _prepareFavorites()
     content = createObject("roSGNode", "ContentNode")
     favIds  = _getFavorites()
@@ -590,13 +576,13 @@ sub _prepareFavorites()
         ch = _findChannel(id)
         if ch <> invalid then
             it = content.createChild("ContentNode")
-            it.title       = _displayName(ch)
-            it.hdPosterUrl = _str(ch, "logo")
-            it.url         = _str(ch, "streamUrl")
+            it.title        = _displayName(ch)
+            it.hdPosterUrl  = _str(ch, "logo")
+            it.url          = _str(ch, "streamUrl")
             it.streamFormat = "hls"
-            it.live        = true
-            meta = _str(ch, "countryLabel")
-            cat  = _str(ch, "categoryLabel")
+            it.live         = true
+            meta = _countryLabel(_str(ch, "country"))
+            cat  = _str(ch, "category")
             if meta <> "" and cat <> "" then
                 it.description = meta + " · " + cat
             else
@@ -617,7 +603,6 @@ function _findChannel(id as string) as dynamic
     return invalid
 end function
 
-' Extract the backup URL list from a channel record (empty array if none).
 function _backupUrls(ch as object) as object
     if type(ch) = "roAssociativeArray" and ch.DoesExist("backupUrls") and ch.backupUrls <> invalid then
         return ch.backupUrls
@@ -628,13 +613,10 @@ end function
 function onKeyEvent(key as string, press as boolean) as boolean
     if not press then return false
     if m.player.visible then return false
-    ' Left arrow at scene level (fallback for screens that don't consume it)
     if key = "left" and not m.sidebarOpen then
         _openSidebar()
         return true
     end if
-    ' Back at scene level — fires when Home screen's onKeyEvent doesn't consume Back
-    ' (extra safety net in case Back bubbles past all screens)
     if key = "back" and not m.sidebarOpen and (m.currentScreen = "home" or m.currentScreen = "livetv") then
         _openSidebar()
         return true

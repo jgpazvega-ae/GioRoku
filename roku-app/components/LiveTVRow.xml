@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="LiveTVRow" extends="Group">
+  <interface>
+    <field id="itemContent"  type="node"  onChange="_render" />
+    <field id="focusPercent" type="float" onChange="_onFocus" />
+    <field id="width"        type="float" />
+    <field id="height"       type="float" />
+  </interface>
+  <children>
+    <!-- Focus highlight -->
+    <Rectangle id="rowFocus" width="1824" height="76" color="#1A1F2E" opacity="0" />
+    <Rectangle id="rowBar"   width="4"    height="76" color="#CC1F1F" opacity="0" />
+    <!-- Channel-number block -->
+    <Rectangle id="numBg" width="80" height="48" color="#CC1F1F" translation="[14, 14]" />
+    <Label id="num" text="" font="font:MediumBoldSystemFont" color="#FFFFFF"
+           horizAlign="center" vertAlign="center" width="80" height="48" translation="[14, 14]" />
+    <!-- Name + meta -->
+    <Label id="name" text="" font="font:MediumBoldSystemFont" color="#FFFFFF"
+           translation="[114, 10]" width="1300" />
+    <Label id="meta" text="" font="font:SmallSystemFont" color="#9CA3AF"
+           translation="[114, 46]" width="1300" />
+    <!-- Live badge, right side -->
+    <Label id="live" text="" font="font:SmallBoldSystemFont" color="#CC1F1F"
+           horizAlign="right" width="1800" translation="[0, 28]" />
+  </children>
+  <script type="text/brightscript" uri="pkg:/components/LiveTVRow.brs" />
+</component>

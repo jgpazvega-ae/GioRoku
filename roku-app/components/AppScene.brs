@@ -75,11 +75,13 @@ sub init()
     m.focusTimer.observeField("fire", "_onFocusTimer")
     m.focusTimer.control  = "start"
 
-    ' NOTE: No automatic network refresh. The bundled channels.json is the
-    ' curated, LATAM-only, name-cleaned source of truth shipped inside the ZIP.
-    ' The public GitHub Pages API is regenerated daily and may contain 12,000+
-    ' unfiltered international channels, so we deliberately do NOT pull from it
-    ' at startup — doing so previously replaced the clean list with garbage.
+    ' Background refresh — fetches the same roku-app/data/channels.json from
+    ' GitHub (updated daily by the pipeline). Bundled channels already show while
+    ' the fetch runs; on success the active screen refreshes transparently.
+    ' If the network is unavailable the bundled list stays in use — no error shown.
+    m.refreshTask = createObject("roSGNode", "RefreshTask")
+    m.refreshTask.observeField("status", "_onRefreshDone")
+    m.refreshTask.control = "run"
 end sub
 
 sub _onFocusTimer()
@@ -318,6 +320,38 @@ sub _onReloadReq()
 
     m.settings.reloadCount = m.channels.count()
     m.settings.reloadState = "done"
+end sub
+
+' ===================== BACKGROUND REFRESH =====================
+
+sub _onRefreshDone()
+    if m.refreshTask.status <> "ok" then return
+    raw = m.refreshTask.result
+    if raw = "" or raw = invalid then return
+
+    d = parseJSON(raw)
+    if d = invalid then return
+
+    channels = invalid
+    if type(d) = "roArray" then
+        channels = d
+    else if type(d) = "roAssociativeArray" and d.DoesExist("channels") then
+        channels = d.channels
+    end if
+
+    if channels = invalid or channels.count() < 10 then return
+
+    m.channels      = channels
+    m.channelNodes  = invalid
+    m.liveTVContent = invalid
+    m.guideContent  = invalid
+
+    if m.currentScreen = "home"       then _prepareHome()
+    if m.currentScreen = "livetv"     then _prepareLiveTV()
+    if m.currentScreen = "guide"      then _prepareGuide()
+    if m.currentScreen = "favorites"  then _prepareFavorites()
+
+    m.settings.reloadCount = channels.count()
 end sub
 
 ' ===================== DATA BUILDERS =====================

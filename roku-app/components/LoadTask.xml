@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<component name="LoadTask" extends="Task">
-  <interface>
-    <field id="baseUrl"    type="string"     value="" />
-    <field id="result"     type="assocarray" />
-    <field id="taskState"  type="string"     value="idle" />
-  </interface>
-  <script type="text/brightscript" uri="pkg:/components/LoadTask.brs" />
-</component>

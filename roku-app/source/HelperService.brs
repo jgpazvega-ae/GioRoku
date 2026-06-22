@@ -72,3 +72,16 @@ function _pad3(n as integer) as string
     end while
     return s
 end function
+
+function _categoryColor(cat as string) as string
+    cat = lcase(cat)
+    if cat = "news"          then return "#EF4444"
+    if cat = "sports"        then return "#10B981"
+    if cat = "movies"        then return "#8B5CF6"
+    if cat = "music"         then return "#EC4899"
+    if cat = "kids"          then return "#F59E0B"
+    if cat = "documentary"   then return "#14B8A6"
+    if cat = "lifestyle"     then return "#6366F1"
+    if cat = "entertainment" then return "#3B82F6"
+    return "#374151"
+end function

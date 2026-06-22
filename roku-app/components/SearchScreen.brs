@@ -54,8 +54,10 @@ sub _onResults()
             newItem.streamFormat = item.streamFormat
             newItem.live        = item.live
             newItem.description = row.title
-            if item.hasField("chId")  then newItem.addFields({chId:   item.chId})
-            if item.hasField("isLive") then newItem.addFields({isLive: item.isLive, chLive: item.isLive})
+            if item.hasField("chId")       then newItem.addFields({chId:       item.chId})
+            if item.hasField("isLive")     then newItem.addFields({isLive:     item.isLive, chLive: item.isLive})
+            if item.hasField("backupUrls") then newItem.addFields({backupUrls: item.backupUrls})
+            if item.hasField("chColor")    then newItem.addFields({chColor:    item.chColor})
         end for
     end for
 

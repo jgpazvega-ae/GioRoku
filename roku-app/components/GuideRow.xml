@@ -14,8 +14,12 @@
     <Rectangle id="numBg" width="80" height="48" color="#CC1F1F" translation="[14, 14]" />
     <Label id="num" text="" font="font:MediumBoldSystemFont" color="#FFFFFF"
            horizAlign="center" vertAlign="center" width="80" height="48" translation="[14, 14]" />
-    <!-- Logo -->
+    <!-- Logo (real) + colored fallback when no logo URL -->
     <Poster id="logo" width="108" height="60" translation="[108, 10]" />
+    <Rectangle id="logoFallback" width="108" height="60" translation="[108, 10]" visible="false" />
+    <Label id="logoInit" text="" font="font:MediumBoldSystemFont" color="#FFFFFF"
+           horizAlign="center" vertAlign="center" width="108" height="60"
+           translation="[108, 10]" visible="false" />
     <!-- Name + meta -->
     <Label id="name" text="" font="font:MediumBoldSystemFont" color="#FFFFFF"
            translation="[234, 10]" width="1100" />

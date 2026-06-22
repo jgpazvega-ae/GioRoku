@@ -269,7 +269,7 @@ sub _onSearchQuery()
                 it.url         = _str(ch, "streamUrl")
                 it.streamFormat = "hls"
                 it.live        = true
-                it.addFields({chId: _str(ch, "id"), isLive: true})
+                it.addFields({chId: _str(ch, "id"), isLive: true, backupUrls: _backupUrls(ch), chColor: _categoryColor(_str(ch, "category"))})
                 n = n + 1
             end if
         end for
@@ -368,7 +368,7 @@ sub _prepareHome()
     row2.title = "TV en Vivo"
     n = 0
     for each ch in m.channels
-        if n >= 60 then exit for
+        if n >= 120 then exit for
         it = row2.createChild("ContentNode")
         it.title       = _displayName(ch)
         it.hdPosterUrl = _str(ch, "logo")
@@ -429,9 +429,7 @@ sub _prepareLiveTV()
     if m.liveTVContent = invalid then
         content = createObject("roSGNode", "ContentNode")
         n = 0
-        LIVE_LIMIT = 200
         for each ch in m.channels
-            if n >= LIVE_LIMIT then exit for
             n = n + 1
             it = content.createChild("ContentNode")
             it.title        = _displayName(ch)
@@ -480,7 +478,7 @@ sub _prepareGuide()
             it.url          = _str(ch, "streamUrl")
             it.streamFormat = "hls"
             it.live         = true
-            it.addFields({chNum: _pad3(n), chLive: online, chId: _str(ch, "id"), isLive: true})
+            it.addFields({chNum: _pad3(n), chLive: online, chId: _str(ch, "id"), isLive: true, backupUrls: _backupUrls(ch), chColor: _categoryColor(_str(ch, "category"))})
         end for
         m.guideContent = content
     end if
@@ -558,7 +556,7 @@ sub _prepareFavorites()
             else
                 it.description = meta + cat
             end if
-            it.addFields({chId: id, chLive: true, isLive: true, backupUrls: _backupUrls(ch)})
+            it.addFields({chId: id, chLive: true, isLive: true, backupUrls: _backupUrls(ch), chColor: _categoryColor(_str(ch, "category"))})
         end if
     end for
     m.favorites.channelData = content

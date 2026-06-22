@@ -195,6 +195,15 @@ sub _onStallCheck()
         m.stallTimer.control = "stop"
         return
     end if
+    ' Some HLS streams play audio while Roku still reports "buffering" state.
+    ' If the playback position is advancing the stream IS playing — hide the
+    ' loading overlay so the video is visible.
+    pos = m.video.position
+    if type(pos) = "Float" and pos > 0.5 then
+        m.bufLabel.visible   = false
+        m.stallTimer.control = "stop"
+        return
+    end if
     pct  = m.video.bufferPercentage
     name = ""
     if m.curName <> invalid then name = m.curName

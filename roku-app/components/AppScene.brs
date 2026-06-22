@@ -82,6 +82,14 @@ sub init()
     m.refreshTask = createObject("roSGNode", "RefreshTask")
     m.refreshTask.observeField("status", "_onRefreshDone")
     m.refreshTask.control = "run"
+
+    ' Repeat the refresh every 15 minutes so the channel list stays current
+    ' without requiring a manual reload from Settings.
+    m.refreshTimer = createObject("roSGNode", "Timer")
+    m.refreshTimer.duration = 900
+    m.refreshTimer.repeat   = true
+    m.refreshTimer.observeField("fire", "_onRefreshTimer")
+    m.refreshTimer.control  = "start"
 end sub
 
 sub _onFocusTimer()
@@ -323,6 +331,12 @@ sub _onReloadReq()
 end sub
 
 ' ===================== BACKGROUND REFRESH =====================
+
+sub _onRefreshTimer()
+    m.refreshTask = createObject("roSGNode", "RefreshTask")
+    m.refreshTask.observeField("status", "_onRefreshDone")
+    m.refreshTask.control = "run"
+end sub
 
 sub _onRefreshDone()
     if m.refreshTask.status <> "ok" then return

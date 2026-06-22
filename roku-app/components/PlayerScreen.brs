@@ -64,7 +64,7 @@ sub _onContent()
 
     _playUrl(c, m.primaryUrl)
 
-    m.isLive = (c.streamFormat = "hls")
+    if c.hasField("isLive") then m.isLive = c.isLive else m.isLive = (c.streamFormat = "hls")
 
     ' Fill zap banner
     num  = ""

@@ -311,8 +311,10 @@ sub _onReloadReq()
     m.channelNodes  = invalid
     m.liveTVContent = invalid
     m.guideContent  = invalid
-    if m.currentScreen = "home"   then _prepareHome()
-    if m.currentScreen = "livetv" then _prepareLiveTV()
+    if m.currentScreen = "home"      then _prepareHome()
+    if m.currentScreen = "livetv"   then _prepareLiveTV()
+    if m.currentScreen = "guide"    then _prepareGuide()
+    if m.currentScreen = "favorites" then _prepareFavorites()
 
     m.settings.reloadCount = m.channels.count()
     m.settings.reloadState = "done"
@@ -479,7 +481,11 @@ sub _prepareLiveTV()
                 it.url          = _str(ch, "streamUrl")
                 it.streamFormat = "hls"
                 it.live         = true
-                it.addFields({chId: _str(ch, "id"), chNum: _pad3(n), isLive: true, backupUrls: _backupUrls(ch), chColor: "#374151"})
+                online = true
+                if type(ch) = "roAssociativeArray" and ch.DoesExist("isOnline") then
+                    online = (ch.isOnline = true)
+                end if
+                it.addFields({chId: _str(ch, "id"), chNum: _pad3(n), chLive: online, isLive: true, backupUrls: _backupUrls(ch), chColor: "#374151"})
             end for
         end if
 

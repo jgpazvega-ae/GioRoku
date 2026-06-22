@@ -198,23 +198,29 @@ sub _onStallCheck()
     pct  = m.video.bufferPercentage
     name = ""
     if m.curName <> invalid then name = m.curName
-    ' Update displayed percentage
+    ' Update displayed percentage (only when field is available)
     m.bufLabel.text = "Cargando " + name + "…"
-    if pct > 0 then m.bufLabel.text = m.bufLabel.text + " (" + pct.toStr() + "%)"
-    ' Detect stall: buffer not advancing for 2 consecutive ticks (8 s)
-    if pct = m.lastBufPct then
-        m.stallCount = m.stallCount + 1
-        if m.stallCount >= 2 then
-            m.stallTimer.control = "stop"
-            m.errorTimer.control = "stop"
-            m.video.control      = "stop"
-            _onPlaybackFailed(name)
-            return
-        end if
-    else
-        m.stallCount = 0
+    if type(pct) = "Integer" and pct > 0 then
+        m.bufLabel.text = m.bufLabel.text + " (" + pct.toStr() + "%)"
     end if
-    m.lastBufPct = pct
+    ' Stall detection only works when bufferPercentage is supported by the device.
+    ' On older firmware it returns invalid — skip stall logic entirely in that case
+    ' to avoid false timeouts on streams that legitimately buffer slowly.
+    if type(pct) = "Integer" then
+        if pct = m.lastBufPct then
+            m.stallCount = m.stallCount + 1
+            if m.stallCount >= 2 then
+                m.stallTimer.control = "stop"
+                m.errorTimer.control = "stop"
+                m.video.control      = "stop"
+                _onPlaybackFailed(name)
+                return
+            end if
+        else
+            m.stallCount = 0
+        end if
+        m.lastBufPct = pct
+    end if
 end sub
 
 ' Failover ladder: try each backup URL, then one plain retry of the primary,

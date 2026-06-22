@@ -63,11 +63,28 @@ sub init()
     m.allMovies = _readBundled("pkg:/data/movies.json",   "movies")
     _navigateTo("livetv")
 
+    ' Re-assert focus AFTER the first render. Setting focus synchronously inside
+    ' init() runs before the Scene is attached/rendered, so on real hardware the
+    ' MarkupList never actually captures the remote — the list looks focused but
+    ' every key press is ignored (frozen controls). A one-shot Timer fires after
+    ' the render pass, when setFocus() reliably sticks. (Previously the network
+    ' refresh task happened to re-assign focus post-render, hiding this bug.)
+    m.focusTimer = createObject("roSGNode", "Timer")
+    m.focusTimer.duration = 0.3
+    m.focusTimer.repeat   = false
+    m.focusTimer.observeField("fire", "_onFocusTimer")
+    m.focusTimer.control  = "start"
+
     ' NOTE: No automatic network refresh. The bundled channels.json is the
     ' curated, LATAM-only, name-cleaned source of truth shipped inside the ZIP.
     ' The public GitHub Pages API is regenerated daily and may contain 12,000+
     ' unfiltered international channels, so we deliberately do NOT pull from it
     ' at startup — doing so previously replaced the clean list with garbage.
+end sub
+
+sub _onFocusTimer()
+    ' Land focus on the current screen's primary control after first render.
+    _focusScreen(m.currentScreen)
 end sub
 
 

@@ -29,6 +29,8 @@ sub init()
     m.primaryUrl     = ""
     m.backupUrls     = []
     m.urlIndex       = 0
+    m.lastBufPct     = -1
+    m.stallCount     = 0
 
     m.video.observeField("state", "_onVideoState")
 
@@ -38,9 +40,15 @@ sub init()
     m.zapTimer.observeField("fire", "_hideZap")
 
     m.errorTimer = createObject("roSGNode", "Timer")
-    m.errorTimer.duration = 30
+    m.errorTimer.duration = 12
     m.errorTimer.repeat   = false
     m.errorTimer.observeField("fire", "_onErrorTimeout")
+
+    ' Fires every 4 s while buffering — shows progress % and detects stalls
+    m.stallTimer = createObject("roSGNode", "Timer")
+    m.stallTimer.duration = 4
+    m.stallTimer.repeat   = true
+    m.stallTimer.observeField("fire", "_onStallCheck")
 
     m.clockTimer = createObject("roSGNode", "Timer")
     m.clockTimer.duration = 30
@@ -61,6 +69,8 @@ sub _onContent()
     if c.hasField("backupUrls") and c.backupUrls <> invalid then m.backupUrls = c.backupUrls
     m.urlIndex   = 0
     m.retryCount = 0
+    m.lastBufPct = -1
+    m.stallCount = 0
 
     _playUrl(c, m.primaryUrl)
 
@@ -152,21 +162,59 @@ sub _onVideoState()
     name = ""
     if m.curName <> invalid then name = m.curName
     if st = "playing" then
-        m.bufLabel.visible = false
+        m.bufLabel.visible   = false
         m.errorTimer.control = "stop"
-        m.retryCount = 0
+        m.stallTimer.control = "stop"
+        m.retryCount         = 0
+        m.lastBufPct         = -1
+        m.stallCount         = 0
     else if st = "buffering" then
-        m.bufLabel.text    = "Cargando " + name + "…" + chr(10) + chr(10) + "Si no inicia en unos segundos, pulsa ATRÁS y prueba otro canal."
-        m.bufLabel.visible = true
+        pct = m.video.bufferPercentage
+        m.bufLabel.text = "Cargando " + name + "…"
+        if pct > 0 then m.bufLabel.text = m.bufLabel.text + " (" + pct.toStr() + "%)"
+        m.bufLabel.visible   = true
         m.errorTimer.control = "stop"
         m.errorTimer.control = "start"
+        m.stallTimer.control = "stop"
+        m.stallTimer.control = "start"
+        m.lastBufPct         = pct
+        m.stallCount         = 0
     else if st = "error" then
         m.errorTimer.control = "stop"
+        m.stallTimer.control = "stop"
         _onPlaybackFailed(name)
     else if st = "finished" then
+        m.stallTimer.control = "stop"
         m.bufLabel.text    = "Transmisión finalizada." + chr(10) + "Pulsa ATRÁS para volver."
         m.bufLabel.visible = true
     end if
+end sub
+
+sub _onStallCheck()
+    if m.video.state <> "buffering" then
+        m.stallTimer.control = "stop"
+        return
+    end if
+    pct  = m.video.bufferPercentage
+    name = ""
+    if m.curName <> invalid then name = m.curName
+    ' Update displayed percentage
+    m.bufLabel.text = "Cargando " + name + "…"
+    if pct > 0 then m.bufLabel.text = m.bufLabel.text + " (" + pct.toStr() + "%)"
+    ' Detect stall: buffer not advancing for 2 consecutive ticks (8 s)
+    if pct = m.lastBufPct then
+        m.stallCount = m.stallCount + 1
+        if m.stallCount >= 2 then
+            m.stallTimer.control = "stop"
+            m.errorTimer.control = "stop"
+            m.video.control      = "stop"
+            _onPlaybackFailed(name)
+            return
+        end if
+    else
+        m.stallCount = 0
+    end if
+    m.lastBufPct = pct
 end sub
 
 ' Failover ladder: try each backup URL, then one plain retry of the primary,
@@ -302,7 +350,9 @@ sub _tick()
 end sub
 
 sub _stopPlayer()
-    m.video.control = "stop"
+    m.video.control      = "stop"
+    m.errorTimer.control = "stop"
+    m.stallTimer.control = "stop"
     _hideZap()
     _hideInfo()
     m.top.done = true

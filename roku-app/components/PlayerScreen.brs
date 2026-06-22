@@ -26,6 +26,9 @@ sub init()
     m.isLive         = true
     m.curName        = ""
     m.retryCount     = 0
+    m.primaryUrl     = ""
+    m.backupUrls     = []
+    m.urlIndex       = 0
 
     m.video.observeField("state", "_onVideoState")
 
@@ -51,8 +54,15 @@ sub _onContent()
     c = m.top.content
     if c = invalid then return
 
-    m.video.content = c
-    m.video.control = "play"
+    ' Remember the primary + backup URLs so we can fail over on error.
+    m.primaryUrl = ""
+    if c.hasField("url") and c.url <> invalid then m.primaryUrl = c.url
+    m.backupUrls = []
+    if c.hasField("backupUrls") and c.backupUrls <> invalid then m.backupUrls = c.backupUrls
+    m.urlIndex   = 0
+    m.retryCount = 0
+
+    _playUrl(c, m.primaryUrl)
 
     m.isLive = (c.streamFormat = "hls")
 
@@ -116,6 +126,25 @@ sub _onContent()
     _showZap()
 end sub
 
+' Start playback of a specific URL on the current content node, attaching the
+' HTTP headers that LATAM IPTV "panel" servers require. Roku's default video
+' User-Agent (Roku/DVP-…) is frequently rejected by these panels — the stream
+' hangs on "Cargando…" forever or returns 403. A VLC-style User-Agent, which
+' these servers whitelist, lets the manifest and TS segments load. This is the
+' single most common reason none of the channels played.
+sub _playUrl(c as object, url as string)
+    if url = "" then return
+    c.url = url
+    c.HttpSendClientCertificates = false
+    c.HttpHeaders = [
+        "User-Agent: VLC/3.0.20 LibVLC/3.0.20",
+        "Connection: keep-alive"
+    ]
+    m.video.content = invalid
+    m.video.content = c
+    m.video.control = "play"
+end sub
+
 sub _onVideoState()
     st   = m.video.state
     name = ""
@@ -131,30 +160,51 @@ sub _onVideoState()
         m.errorTimer.control = "start"
     else if st = "error" then
         m.errorTimer.control = "stop"
-        if m.retryCount < 1 then
-            m.retryCount = m.retryCount + 1
-            m.bufLabel.text    = "Reintentando " + name + "…"
-            m.bufLabel.visible = true
-            m.video.control    = "stop"
-            m.video.control    = "play"
-        else
-            m.bufLabel.text    = "✕ No se pudo reproducir " + name + chr(10) + chr(10) + "Este canal puede estar fuera de línea o no disponible en tu región." + chr(10) + "Pulsa ATRÁS para volver y prueba otro."
-            m.bufLabel.visible = true
-        end if
+        _onPlaybackFailed(name)
     else if st = "finished" then
         m.bufLabel.text    = "Transmisión finalizada." + chr(10) + "Pulsa ATRÁS para volver."
         m.bufLabel.visible = true
     end if
 end sub
 
+' Failover ladder: try each backup URL, then one plain retry of the primary,
+' before showing the "no disponible" message.
+sub _onPlaybackFailed(name as string)
+    c = m.top.content
+    if c = invalid then return
+
+    ' 1) Try the next backup URL, if any remain.
+    if m.backupUrls <> invalid and m.urlIndex < m.backupUrls.count() then
+        nextUrl = m.backupUrls[m.urlIndex]
+        m.urlIndex = m.urlIndex + 1
+        m.bufLabel.text    = "Buscando otra señal de " + name + "…"
+        m.bufLabel.visible = true
+        m.video.control    = "stop"
+        _playUrl(c, nextUrl)
+        return
+    end if
+
+    ' 2) One plain retry of the primary URL (transient network blips).
+    if m.retryCount < 1 then
+        m.retryCount = m.retryCount + 1
+        m.bufLabel.text    = "Reintentando " + name + "…"
+        m.bufLabel.visible = true
+        m.video.control    = "stop"
+        _playUrl(c, m.primaryUrl)
+        return
+    end if
+
+    ' 3) Give up with a clear message.
+    m.bufLabel.text    = "✕ No se pudo reproducir " + name + chr(10) + chr(10) + "Este canal puede estar fuera de línea o no disponible en tu región." + chr(10) + "Pulsa ATRÁS para volver y prueba otro."
+    m.bufLabel.visible = true
+end sub
+
 sub _onErrorTimeout()
-    ' Buffering too long — treat as error
-    m.video.control = "stop"
-    m.retryCount = 2  ' skip auto-retry
+    ' Buffering too long — treat as a playback failure and run the failover ladder.
     name = ""
     if m.curName <> invalid then name = m.curName
-    m.bufLabel.text    = "✕ " + name + " no responde." + chr(10) + chr(10) + "Señal no disponible o canal fuera de línea." + chr(10) + "Pulsa ATRÁS para elegir otro canal."
-    m.bufLabel.visible = true
+    m.video.control = "stop"
+    _onPlaybackFailed(name)
 end sub
 
 sub _showZap()

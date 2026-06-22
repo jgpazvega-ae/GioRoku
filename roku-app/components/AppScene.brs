@@ -333,7 +333,7 @@ function _buildChannelNodes() as object
         it.url         = _str(ch, "streamUrl")
         it.streamFormat = "hls"
         it.live        = true
-        it.addFields({chId: _str(ch, "id"), chNum: _pad3(n), isLive: true})
+        it.addFields({chId: _str(ch, "id"), chNum: _pad3(n), isLive: true, backupUrls: _backupUrls(ch)})
     end for
     m.channelNodes = root
     return root
@@ -450,7 +450,7 @@ sub _prepareLiveTV()
             if type(ch) = "roAssociativeArray" and ch.DoesExist("isOnline") then
                 online = (ch.isOnline = true)
             end if
-            it.addFields({chNum: _pad3(n), chId: _str(ch, "id"), chLive: online, isLive: true})
+            it.addFields({chNum: _pad3(n), chId: _str(ch, "id"), chLive: online, isLive: true, backupUrls: _backupUrls(ch)})
         end for
         m.liveTVContent = content
 
@@ -571,6 +571,14 @@ function _findChannel(id as string) as dynamic
         if _str(ch, "id") = id then return ch
     end for
     return invalid
+end function
+
+' Extract the backup URL list from a channel record (empty array if none).
+function _backupUrls(ch as object) as object
+    if type(ch) = "roAssociativeArray" and ch.DoesExist("backupUrls") and ch.backupUrls <> invalid then
+        return ch.backupUrls
+    end if
+    return []
 end function
 
 function onKeyEvent(key as string, press as boolean) as boolean

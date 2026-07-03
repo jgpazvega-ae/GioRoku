@@ -17,7 +17,26 @@ class M3UProvider(BaseProvider):
 
     async def get_channels(self) -> list[RawChannel]:
         content = await self._download()
-        return self._parse(content)
+        return self._filter(self._parse(content))
+
+    def _filter(self, channels: list[RawChannel]) -> list[RawChannel]:
+        langs = {l.lower() for l in self.source.options.filter_languages}
+        groups = [g.lower() for g in self.source.options.filter_groups]
+        if not langs and not groups:
+            return channels
+        kept = []
+        for ch in channels:
+            if langs:
+                # tvg-language may hold several values ("Spanish;English") or be absent
+                ch_langs = {p.strip().lower() for p in (ch.language or "").replace(";", ",").split(",") if p.strip()}
+                if not ch_langs & langs:
+                    continue
+            if groups:
+                g = (ch.group_title or "").lower()
+                if not any(sub in g for sub in groups):
+                    continue
+            kept.append(ch)
+        return kept
 
     async def get_categories(self) -> list[str]:
         channels = await self.get_channels()

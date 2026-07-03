@@ -40,8 +40,8 @@ jobs:
           path: backend/db/iptv.db
           retention-days: 1
 
-  validate:
-    name: Validate streams
+  process:
+    name: Deduplicate and classify
     needs: fetch
     runs-on: ubuntu-latest
     steps:
@@ -61,39 +61,8 @@ jobs:
       - name: Install dependencies
         run: pip install -r backend/requirements.txt
 
-      - name: Stage — validate
-        run: python backend/run_pipeline.py --stage validate
-
-      - name: Save DB artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: iptv-db-validate
-          path: backend/db/iptv.db
-          retention-days: 1
-
-  process:
-    name: Deduplicate, classify, enrich
-    needs: validate
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Download DB
-        uses: actions/download-artifact@v4
-        with:
-          name: iptv-db-validate
-          path: backend/db/
-
-      - name: Install dependencies
-        run: pip install -r backend/requirements.txt
-
-      - name: Stage — deduplicate, classify, enrich
-        run: python backend/run_pipeline.py --stage deduplicate,classify,enrich
+      - name: Stage — deduplicate, classify
+        run: python backend/run_pipeline.py --stage deduplicate,classify
 
       - name: Save DB artifact
         uses: actions/upload-artifact@v4
@@ -102,8 +71,8 @@ jobs:
           path: backend/db/iptv.db
           retention-days: 1
 
-  generate:
-    name: Generate JSON API
+  validate:
+    name: Validate streams
     needs: process
     runs-on: ubuntu-latest
     steps:
@@ -118,6 +87,37 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: iptv-db-process
+          path: backend/db/
+
+      - name: Install dependencies
+        run: pip install -r backend/requirements.txt
+
+      - name: Stage — validate, enrich
+        run: python backend/run_pipeline.py --stage validate,enrich
+
+      - name: Save DB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: iptv-db-validate
+          path: backend/db/iptv.db
+          retention-days: 1
+
+  generate:
+    name: Generate JSON API
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Download DB
+        uses: actions/download-artifact@v4
+        with:
+          name: iptv-db-validate
           path: backend/db/
 
       - name: Install dependencies

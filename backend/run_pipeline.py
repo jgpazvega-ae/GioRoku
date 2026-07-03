@@ -26,7 +26,7 @@ from services.epg_manager import EPGManager
 from api.generator import APIGenerator
 
 console = Console()
-STAGES = ["fetch", "validate", "deduplicate", "classify", "enrich", "generate"]
+STAGES = ["fetch", "deduplicate", "classify", "validate", "enrich", "generate"]
 
 
 @click.command()
@@ -52,21 +52,21 @@ async def _run(stages: list[str], country: str | None, dry_run: bool):
         raw = await Aggregator(base).run()
         console.print(f"[green]{len(raw)} raw channels fetched[/green]")
 
-    if "validate" in stages:
-        console.rule("2 — Validate")
-        results = await StreamValidator(base).validate_all(country)
-        online = sum(1 for r in results if r.is_online)
-        console.print(f"[green]{online}/{len(results)} online[/green]")
-
     if "deduplicate" in stages:
-        console.rule("3 — Deduplicate")
+        console.rule("2 — Deduplicate")
         n = Deduplicator(base).run()
         console.print(f"[green]{n} unique channels[/green]")
 
     if "classify" in stages:
-        console.rule("4 — Classify")
+        console.rule("3 — Classify")
         n = CountryDetector(base).classify_all()
         console.print(f"[green]{n} channels classified[/green]")
+
+    if "validate" in stages:
+        console.rule("4 — Validate")
+        results = await StreamValidator(base).validate_all(country)
+        online = sum(1 for r in results if r.is_online)
+        console.print(f"[green]{online}/{len(results)} online[/green]")
 
     if "enrich" in stages:
         console.rule("5 — Enrich")

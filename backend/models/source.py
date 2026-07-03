@@ -17,6 +17,11 @@ class SourceOptions(BaseModel):
     user_agent: str = "GioRoku/1.0"
     verify_ssl: bool = True
     headers: dict[str, str] = {}
+    # Keep only entries whose tvg-language matches (empty = keep all).
+    # Needed for global playlists like Free-TV where most content is not Spanish.
+    filter_languages: list[str] = []
+    # Keep only entries whose group-title contains one of these substrings (empty = keep all).
+    filter_groups: list[str] = []
 
 
 class Source(BaseModel):

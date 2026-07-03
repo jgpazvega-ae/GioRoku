@@ -82,6 +82,9 @@ class StreamValidator:
             ) as client:
                 try:
                     resp = await client.head(url)
+                    # Many stream servers reject HEAD outright; retry with GET
+                    if resp.status_code in (400, 403, 405):
+                        resp = await client.get(url, headers={"Range": "bytes=0-1023"})
                 except Exception:
                     resp = await client.get(url, headers={"Range": "bytes=0-1023"})
 
@@ -90,6 +93,12 @@ class StreamValidator:
                 ok = resp.status_code < 400 and (
                     any(ct.startswith(v) for v in VALID_CT) or resp.status_code in (200, 206)
                 )
+                # 401/403 usually means geo-blocked for the validator's region
+                # (GitHub Actions runs outside Mexico), not a dead stream — the
+                # channel will typically play fine on the user's home network.
+                if not ok and resp.status_code in (401, 403):
+                    return ValidationResult(channel_id=cid, is_online=True, response_ms=ms,
+                                            http_status=resp.status_code, error="geo-restricted")
                 return ValidationResult(channel_id=cid, is_online=ok, response_ms=ms, http_status=resp.status_code)
         except Exception as e:
             return ValidationResult(channel_id=cid, is_online=False, error=str(e)[:200])

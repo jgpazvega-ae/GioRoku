@@ -82,15 +82,15 @@
       "user_agent": "GioRoku/1.0",
       "verify_ssl": true,
       "headers": {},
-      "filter_languages": ["spa", "es"]
+      "filter_groups": ["mexico", "argentina", "chile", "peru", "venezuela", "paraguay", "costa rica", "dominican republic"]
     },
-    "notes": "Global free-TV playlist (Free-TV/IPTV on GitHub). Filtered to Spanish-language entries only. Good source for pan-regional cable channels like CNN en Español, Discovery en Español, ESPN Deportes, and Disney Channel LatAm."
+    "notes": "Global free-TV playlist (Free-TV/IPTV on GitHub) filtered to Latin American country groups. Adds pan-regional cable feeds not present in the other lists."
   },
   {
-    "id": "json_teles_mexico",
-    "name": "json-teles · México",
+    "id": "json_teles",
+    "name": "json-teles · Canales en Español",
     "type": "m3u",
-    "url": "https://raw.githubusercontent.com/Alplox/json-teles/main/playlists/mx.m3u",
+    "url": "https://raw.githubusercontent.com/Alplox/json-teles/refs/heads/main/channels.m3u",
     "priority": 6,
     "is_enabled": true,
     "refresh_interval_hours": 48,
@@ -101,7 +101,7 @@
       "verify_ssl": true,
       "headers": {}
     },
-    "notes": "Community-driven directory focused on Spanish-language news, sports, kids, and music channels. Mexico-specific file generated automatically via GitHub Actions from a structured JSON database."
+    "notes": "Curated community directory of ~250 Spanish-language channels (news, music, kids, culture) generated from a structured JSON database via GitHub Actions. Country is resolved downstream by the classifier."
   },
   {
     "id": "iptvplayer_stream",
@@ -109,7 +109,7 @@
     "type": "m3u",
     "url": "https://iptvplayer.stream/public-iptv-playlist",
     "priority": 7,
-    "is_enabled": true,
+    "is_enabled": false,
     "refresh_interval_hours": 24,
     "options": {
       "timeout_seconds": 30,
@@ -118,6 +118,6 @@
       "verify_ssl": true,
       "headers": {}
     },
-    "notes": "Original source. Kept as supplementary fallback."
+    "notes": "Original placeholder source. Disabled: endpoint returns no parseable M3U entries."
   }
 ]

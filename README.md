@@ -128,9 +128,25 @@ GioRoku/
 | Phase | Scope | Status |
 |---|---|---|
 | 1 | Architecture & Design | ✅ Complete |
-| 2 | Backend Engine | Pending |
-| 3 | Administration Portal | Pending |
-| 4 | Roku Application | Pending |
-| 5 | Deployment Configuration | Pending |
-| 6 | GitHub Actions Automation | Pending |
+| 2 | Backend Engine | ✅ Complete |
+| 3 | Administration Portal | ✅ Complete |
+| 4 | Roku Application | ✅ Complete |
+| 5 | Deployment Configuration | ✅ Complete (GitHub Pages from `docs/`) |
+| 6 | GitHub Actions Automation | ✅ Complete (nightly refresh + on-demand import) |
 | 7 | Testing Strategy | Pending |
+
+---
+
+## Channel Sources
+
+Curated for Latin Spanish audio with a Mexico-first focus. Configured in `backend/config/sources.json`:
+
+| Priority | Source | Content |
+|---|---|---|
+| 1 | [iptv-org · Mexico](https://iptv-org.github.io/iptv/countries/mx.m3u) | All public channels broadcasting from Mexico |
+| 2 | [iptv-org · Spanish](https://iptv-org.github.io/iptv/languages/spa.m3u) | Every Spanish-language channel worldwide |
+| 3–4 | [CharlieII/IPTV_mexico](https://github.com/CharlieII/IPTV_mexico) | Hand-curated official Mexican streams + mirrors |
+| 5 | [Free-TV/IPTV](https://github.com/Free-TV/IPTV) | Global list filtered to Latin American groups |
+| 6 | [Alplox/json-teles](https://github.com/Alplox/json-teles) | Curated Spanish news/music/kids directory |
+
+The nightly pipeline fetches all sources, deduplicates (~3,100 raw → ~2,700 unique), classifies country/category, validates every stream (streams returning 401/403 are kept as likely geo-blocked to Mexico), and publishes the JSON API to `docs/api/v1/`.

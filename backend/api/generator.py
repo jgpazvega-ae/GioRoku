@@ -1,5 +1,6 @@
 from __future__ import annotations
 import json
+import shutil
 import sqlite3
 from datetime import datetime
 from pathlib import Path
@@ -17,6 +18,10 @@ class APIGenerator:
         self.dry_run = dry_run
 
     def write_all(self) -> dict:
+        # Drop stale channel files from previous runs (page counts and
+        # country/category sets shrink as sources change)
+        if not self.dry_run and (self.out / "channels").exists():
+            shutil.rmtree(self.out / "channels")
         self.out.mkdir(parents=True, exist_ok=True)
         channels = self._channels()
         categories = self._categories()

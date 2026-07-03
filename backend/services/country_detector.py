@@ -63,6 +63,7 @@ class CountryDetector:
         self.db_path = base_dir / "db" / "iptv.db"
         self.config_dir = base_dir / "config"
         self._kw = self._load_config()
+        self._cat_kw = self._load_categories()
 
     def _load_config(self) -> dict[str, list[str]]:
         path = self.config_dir / "countries.json"
@@ -74,6 +75,17 @@ class CountryDetector:
                     if code and item.get("keywords"):
                         merged.setdefault(code, []).extend(item["keywords"])
         return merged
+
+    def _load_categories(self) -> dict[str, list[str]]:
+        path = self.config_dir / "categories.json"
+        if not path.exists():
+            return {}
+        with open(path) as f:
+            return {
+                item["id"]: item.get("keywords", [])
+                for item in json.load(f)
+                if item.get("id") and item["id"] != "entertainment"
+            }
 
     def detect(self, tvg_id: str | None, name: str | None, group: str | None, url: str | None) -> str:
         tid = (tvg_id or "").lower()
@@ -102,21 +114,36 @@ class CountryDetector:
 
         return "INTL"
 
+    def detect_category(self, name: str | None, group: str | None) -> str:
+        n = _n(name or "")
+        g = _n(group or "")
+        for cat, kws in self._cat_kw.items():
+            for kw in kws:
+                nk = _n(kw)
+                if nk and (nk in g or nk in n):
+                    return cat
+        return "entertainment"
+
     def classify_all(self) -> int:
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
             channels = conn.execute(
-                "SELECT id,name,epg_id,stream_url FROM channels WHERE override_country IS NULL"
+                "SELECT id,name,epg_id,stream_url FROM channels"
             ).fetchall()
             for ch in channels:
                 raw = conn.execute(
                     "SELECT group_title FROM raw_channels WHERE stream_url=?", (ch["stream_url"],)
                 ).fetchone()
+                group = raw["group_title"] if raw else None
                 country = self.detect(
                     tvg_id=ch["epg_id"],
                     name=ch["name"],
-                    group=raw["group_title"] if raw else None,
+                    group=group,
                     url=ch["stream_url"],
                 )
-                conn.execute("UPDATE channels SET country=? WHERE id=?", (country, ch["id"]))
+                category = self.detect_category(ch["name"], group)
+                conn.execute(
+                    "UPDATE channels SET country=?, category=? WHERE id=?",
+                    (country, category, ch["id"]),
+                )
             return conn.execute("SELECT COUNT(*) FROM channels").fetchone()[0]

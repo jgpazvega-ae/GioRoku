@@ -1,9 +1,9 @@
 [
   {
-    "id": "iptvplayer_stream",
-    "name": "IPTV Player Stream",
+    "id": "iptv_org_mexico",
+    "name": "iptv-org · México",
     "type": "m3u",
-    "url": "https://iptvplayer.stream/public-iptv-playlist",
+    "url": "https://iptv-org.github.io/iptv/countries/mx.m3u",
     "priority": 1,
     "is_enabled": true,
     "refresh_interval_hours": 24,
@@ -12,7 +12,112 @@
       "encoding": "utf-8",
       "user_agent": "GioRoku/1.0",
       "verify_ssl": true,
+      "headers": {},
+      "filter_country": "MX"
+    },
+    "notes": "Community-maintained playlist with all publicly available channels broadcasting from Mexico. Updated daily via GitHub Actions."
+  },
+  {
+    "id": "iptv_org_spanish",
+    "name": "iptv-org · Español (idioma)",
+    "type": "m3u",
+    "url": "https://iptv-org.github.io/iptv/languages/spa.m3u",
+    "priority": 2,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": true,
       "headers": {}
-    }
+    },
+    "notes": "All channels broadcasting in Spanish from any country (pan-Latin: MX, AR, CO, CL, PE, VE, etc.). Complements the MX country list with international Spanish-language cable channels."
+  },
+  {
+    "id": "charlieii_iptv_mexico",
+    "name": "CharlieII · IPTV México",
+    "type": "m3u",
+    "url": "https://raw.githubusercontent.com/CharlieII/IPTV_mexico/refs/heads/main/lista.m3u",
+    "priority": 3,
+    "is_enabled": true,
+    "refresh_interval_hours": 48,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": true,
+      "headers": {}
+    },
+    "notes": "Manually curated list of Mexican channels from official sources (network websites, official YouTube streams). Focuses on open-air TV: Televisa, TV Azteca, Canal 11, Multimedios, Imagen, Milenio, Foro TV, Canal 22, etc."
+  },
+  {
+    "id": "charlieii_iptv_mexico_sitio2",
+    "name": "CharlieII · IPTV México (Sitio 2)",
+    "type": "m3u",
+    "url": "https://raw.githubusercontent.com/CharlieII/IPTV_mexico/refs/heads/main/mexicoSitio2.m3u",
+    "priority": 4,
+    "is_enabled": true,
+    "refresh_interval_hours": 48,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": true,
+      "headers": {}
+    },
+    "notes": "Alternate stream mirrors for the same Mexican channels, providing failover when primary sources go offline."
+  },
+  {
+    "id": "freetv_iptv",
+    "name": "Free-TV · Mundo (filtrado ES)",
+    "type": "m3u",
+    "url": "https://raw.githubusercontent.com/Free-TV/IPTV/master/playlist.m3u8",
+    "priority": 5,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": true,
+      "headers": {},
+      "filter_groups": ["mexico", "argentina", "chile", "peru", "venezuela", "paraguay", "costa rica", "dominican republic"]
+    },
+    "notes": "Global free-TV playlist (Free-TV/IPTV on GitHub) filtered to Latin American country groups. Adds pan-regional cable feeds not present in the other lists."
+  },
+  {
+    "id": "json_teles",
+    "name": "json-teles · Canales en Español",
+    "type": "m3u",
+    "url": "https://raw.githubusercontent.com/Alplox/json-teles/refs/heads/main/channels.m3u",
+    "priority": 6,
+    "is_enabled": true,
+    "refresh_interval_hours": 48,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": true,
+      "headers": {}
+    },
+    "notes": "Curated community directory of ~250 Spanish-language channels (news, music, kids, culture) generated from a structured JSON database via GitHub Actions. Country is resolved downstream by the classifier."
+  },
+  {
+    "id": "iptvplayer_stream",
+    "name": "IPTV Player Stream",
+    "type": "m3u",
+    "url": "https://iptvplayer.stream/public-iptv-playlist",
+    "priority": 7,
+    "is_enabled": false,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": true,
+      "headers": {}
+    },
+    "notes": "Original placeholder source. Disabled: endpoint returns no parseable M3U entries."
   }
 ]

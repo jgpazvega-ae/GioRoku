@@ -45,11 +45,22 @@ CREATE TABLE IF NOT EXISTS channels (
 class Deduplicator:
     def __init__(self, base_dir: Path):
         self.db_path = base_dir / "db" / "iptv.db"
+        self.config_dir = base_dir / "config"
         with sqlite3.connect(self.db_path) as conn:
             conn.executescript(CREATE_CHANNELS)
 
+    def _source_priorities(self) -> dict[str, int]:
+        path = self.config_dir / "sources.json"
+        if not path.exists():
+            return {}
+        with open(path) as f:
+            return {s["id"]: s.get("priority", 10) for s in json.load(f)}
+
     def run(self) -> int:
         raw = self._load_raw()
+        priorities = self._source_priorities()
+        for ch in raw:
+            ch["source_priority"] = priorities.get(ch.get("source_id"), 10)
         console.print(f"Deduplicating {len(raw)} raw channels...")
 
         # Pass 1: exact tvg_id grouping
@@ -107,13 +118,14 @@ class Deduplicator:
         with sqlite3.connect(self.db_path) as conn:
             conn.execute("DELETE FROM channels")
             for ch in channels:
+                name = ch.get("tvg_name") or ch.get("id", "Unknown")
                 conn.execute(
                     """INSERT OR REPLACE INTO channels
-                       (id,name,logo,stream_url,backup_urls,epg_id,language,source_id,source_priority)
-                       VALUES(?,?,?,?,?,?,?,?,?)""",
+                       (id,name,logo,stream_url,backup_urls,epg_id,language,source_id,source_priority,quality)
+                       VALUES(?,?,?,?,?,?,?,?,?,?)""",
                     (
                         ch["id"],
-                        ch.get("tvg_name") or ch.get("id", "Unknown"),
+                        name,
                         ch.get("tvg_logo"),
                         ch["stream_url"],
                         ch.get("backup_urls", "[]"),
@@ -121,8 +133,20 @@ class Deduplicator:
                         ch.get("language", "es"),
                         ch.get("source_id"),
                         ch.get("source_priority", 10),
+                        _quality(name),
                     ),
                 )
+
+
+def _quality(name: str) -> str:
+    n = name.lower()
+    if "4k" in n or "uhd" in n:
+        return "4K"
+    if "fhd" in n or "1080" in n:
+        return "FHD"
+    if "hd" in n or "720" in n:
+        return "HD"
+    return "SD"
 
 
 def _norm(s: str) -> str:

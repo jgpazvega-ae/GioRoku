@@ -28,6 +28,19 @@ class APIGenerator:
         countries = self._countries()
         epg = self._epg()
 
+        # Friendly labels for the UI (the DB stores codes/slugs only).
+        cat_label = {c["id"]: c.get("label", c["id"]) for c in categories}
+        cat_label_en = {c["id"]: c.get("labelEn", c["id"]) for c in categories}
+        ctry_label = {c["code"]: c.get("name", c["code"]) for c in countries}
+        ctry_flag = {c["code"]: c.get("flag", "") for c in countries}
+        for ch in channels:
+            ch["categoryLabel"] = cat_label.get(ch.get("category"), "")
+            ch["categoryLabelEn"] = cat_label_en.get(ch.get("category"), "")
+            ch["countryLabel"] = ctry_label.get(ch.get("country"), "")
+            ch["countryFlag"] = ctry_flag.get(ch.get("country"), "")
+
+        self._mark_featured(channels)
+
         for ch in channels:
             epg_id = ch.get("epgId") or ch["id"]
             ch["currentProgram"] = epg.get(epg_id, {}).get("current")
@@ -58,18 +71,22 @@ class APIGenerator:
             c["channelCount"] = len(country_map.get(c["code"], []))
 
         now = _now()
+        tiers = self._tier_breakdown()
         self._write("categories.json", {"generatedAt": now, "categories": categories})
         self._write("countries.json", {"generatedAt": now, "countries": countries})
         self._write("epg.json", {"generatedAt": now, "programs": epg})
         self._write("status.json", {
             "generatedAt": now,
-            "pipelineVersion": "1.0.0",
+            "pipelineVersion": "1.1.0",
             "stats": {
                 "totalChannels": len(channels),
                 "onlineChannels": sum(1 for c in channels if c.get("isOnline")),
                 "offlineChannels": sum(1 for c in channels if not c.get("isOnline")),
-                "totalCountries": len(countries),
-                "totalCategories": len(categories),
+                "premiumChannels": tiers.get("premium", 0),
+                "filteredFreeChannels": tiers.get("free", 0),
+                "filteredUnknownChannels": tiers.get("unknown", 0),
+                "totalCountries": len(country_map),
+                "totalCategories": len(cat_map),
                 "lastValidationRun": now,
             },
         })
@@ -89,13 +106,15 @@ class APIGenerator:
     def _channels(self) -> list[dict]:
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
-            rows = conn.execute("""
+            cols = {r[1] for r in conn.execute("PRAGMA table_info(channels)").fetchall()}
+            tier_sql = "tier" if "tier" in cols else "'premium' AS tier"
+            rows = conn.execute(f"""
                 SELECT id,
                     COALESCE(override_name,name) AS name,
                     COALESCE(override_logo,logo) AS logo,
                     COALESCE(override_category,category) AS category,
                     COALESCE(override_country,country) AS country,
-                    language, stream_url, backup_urls, quality,
+                    language, stream_url, backup_urls, quality, {tier_sql},
                     is_online, COALESCE(override_enabled,is_enabled) AS is_enabled,
                     is_featured, epg_id, tags, offline_count,
                     last_check, last_online, response_ms, source_id, source_priority
@@ -121,6 +140,33 @@ class APIGenerator:
             d["tags"] = json.loads(d.pop("tags") or "[]")
             result.append(d)
         return result
+
+    def _mark_featured(self, channels: list[dict]) -> None:
+        """Feature the best online channel of each category for the Home hero row."""
+        def score(c: dict) -> tuple:
+            return (
+                1 if c.get("isOnline") else 0,
+                -c.get("sourcePriority", 99),
+                -(c.get("responseMs") or 9999),
+            )
+        by_cat: dict[str, list[dict]] = {}
+        for ch in channels:
+            ch["isFeatured"] = False
+            by_cat.setdefault(ch.get("category", "entertainment"), []).append(ch)
+        for chs in by_cat.values():
+            best = max(chs, key=score)
+            if best.get("isOnline"):
+                best["isFeatured"] = True
+
+    def _tier_breakdown(self) -> dict:
+        with sqlite3.connect(self.db_path) as conn:
+            cols = {r[1] for r in conn.execute("PRAGMA table_info(channels)").fetchall()}
+            if "tier" not in cols:
+                return {}
+            return {
+                row[0]: row[1]
+                for row in conn.execute("SELECT tier, COUNT(*) FROM channels GROUP BY tier")
+            }
 
     def _categories(self) -> list[dict]:
         p = self.cfg / "categories.json"

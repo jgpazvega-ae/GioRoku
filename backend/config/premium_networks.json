@@ -1,0 +1,54 @@
+{
+  "_comment": "Autonomous pay-TV (canales de paga) classifier data. A channel is kept as 'premium' when its name matches a premium brand and does NOT match a free-to-air (TV abierta) brand. Matching is accent-insensitive substring on the normalized channel name. Edit freely; the pipeline reloads this on every run.",
+  "keep_only_premium": true,
+  "premium_brands": {
+    "sports": [
+      "espn", "espn2", "espn3", "espn4", "espn extra", "espn premium", "espn deportes",
+      "fox sports", "fox deportes", "tnt sports", "tudn", "sky sports", "sky hd",
+      "claro sports", "afizzionados", "bein", "dazn", "win sports", "gol tv", "gol caracol",
+      "directv sports", "tyc sports", "espn knockout", "espn play", "nba tv", "nfl network",
+      "golf channel", "tennis channel", "garena", "combate", "box azteca deportes",
+      "espn mexico", "fox sports premium", "tigo sports", "star+ sports"
+    ],
+    "movies": [
+      "hbo", "hbo 2", "hbo plus", "hbo family", "hbo signature", "hbo mundi", "hbo pop", "hbo xtreme", "hbo max",
+      "cinemax", "tnt", "tnt series", "space", "warner channel", "warner tv",
+      "universal cinema", "universal channel", "studio universal", "star channel", "star action", "star series",
+      "cinecanal", "de pelicula", "de pelicula clasico", "golden", "golden edge", "golden plus", "golden premier",
+      "fx", "fxm", "fxmovies", "axn", "sony movies", "amc", "paramount network", "paramount plus",
+      "cinelatino", "movie city", "the film zone", "isat", "i-sat", "el gourmet", "europa europa",
+      "tcm", "turner classic", "multipremier", "cinema dinamita"
+    ],
+    "series_entertainment": [
+      "sony channel", "universal tv", "usa network", "comedy central", "star life",
+      "lifetime", "fox life", "fox channel", "distrito comedia", "tlnovelas",
+      "canal sony", "a3series", "atreseries", "cosmopolitan", "glitz", "trutv", "syfy",
+      "wobi", "bloomberg", "cnn en espanol", "cnn internacional", "fox news"
+    ],
+    "kids": [
+      "cartoon network", "cartoonito", "boomerang", "disney channel", "disney junior", "disney xd", "disney jr",
+      "nickelodeon", "nick jr", "discovery kids", "baby tv", "babytv", "pakapaka", "tooncast",
+      "zoomoo", "nat geo kids"
+    ],
+    "documentary": [
+      "discovery", "discovery channel", "discovery science", "discovery theater", "discovery turbo",
+      "discovery world", "discovery home", "discovery familia", "id investigation", "investigation discovery",
+      "nat geo", "national geographic", "nat geo wild", "nat geo mundo", "history", "history 2", "h2",
+      "animal planet", "a&e", "ae mundo", "tlc", "dw espanol", "france 24", "curiosity", "love nature"
+    ],
+    "music": [
+      "mtv", "mtv hits", "mtv live", "mtv 00s", "mtv 80s", "vh1", "telehit", "bandamax",
+      "clase 90", "cmt", "stingray", "heart tv", "htv", "musica.uno", "much music", "vevo"
+    ]
+  },
+  "free_to_air_brands": [
+    "las estrellas", "canal de las estrellas", "canal 2", "azteca uno", "azteca 7", "azteca siete",
+    "canal 5", "canal cinco", "canal once", "once tv", "ipn", "canal 22", "canal catorce", "canal 14",
+    "imagen television", "imagen tv", "adn 40", "adn40", "a mas", "a+", "milenio television", "foro tv",
+    "el heraldo tv", "capital 21", "canal 44", "canal 28", "tv mexiquense", "mexiquense",
+    "multimedios", "telemax", "rtq", "tv unam", "tv buap", "congreso", "canal del congreso", "senado",
+    "sistema publico", "canal judicial", "univision", "unimas", "telemundo", "estrella tv", "azteca america",
+    "cadena tres", "excelsior tv", "efekto", "gala tv", "galavision open", "tvc",
+    "publica", "gobierno", "municipal", "comunitaria", "universidad", "cultural abierta"
+  ]
+}

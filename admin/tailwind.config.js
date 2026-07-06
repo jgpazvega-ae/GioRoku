@@ -7,6 +7,7 @@ export default {
       colors: {
         bg: { primary: '#0D0D0D', surface: '#1A1A1A', elevated: '#262626' },
         accent: { primary: '#E50000', secondary: '#FF6B35' },
+        brand: '#E50914',
         online: '#00C851',
         offline: '#FF4444',
         pending: '#FFBB33',

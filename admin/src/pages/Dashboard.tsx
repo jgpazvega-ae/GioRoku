@@ -1,4 +1,4 @@
-import { Tv, Wifi, WifiOff, Globe, FolderOpen, Clock } from 'lucide-react'
+import { Wifi, WifiOff, Globe, Clock, Crown, Filter } from 'lucide-react'
 import { useStatus } from '@/hooks/useStatus'
 import { StatCard } from '@/components/data-display/StatCard'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
@@ -19,6 +19,19 @@ export default function Dashboard() {
     ? ((stats.onlineChannels / stats.totalChannels) * 100).toFixed(1)
     : '—'
 
+  const premium = stats.premiumChannels ?? stats.totalChannels
+  const free = stats.filteredFreeChannels ?? 0
+  const unknown = stats.filteredUnknownChannels ?? 0
+  const evaluated = premium + free + unknown
+  const filteredOut = free + unknown
+  const pct = (n: number) => (evaluated > 0 ? (n / evaluated) * 100 : 0)
+
+  const composition = [
+    { label: 'De paga (publicados)', value: premium, color: '#E50914' },
+    { label: 'TV abierta (excluidos)', value: free, color: '#3498DB' },
+    { label: 'Sin clasificar (excluidos)', value: unknown, color: '#5A5A5A' },
+  ]
+
   return (
     <div className="space-y-6">
       <div>
@@ -26,13 +39,58 @@ export default function Dashboard() {
         <p className="text-white/40 text-sm mt-0.5">Estado del sistema en tiempo real</p>
       </div>
 
+      {/* Premium filter hero */}
+      <div className="relative overflow-hidden rounded-xl border border-brand/30 bg-gradient-to-br from-brand/15 via-bg-surface to-bg-surface p-6">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-xl bg-brand/20">
+              <Crown size={28} className="text-brand" />
+            </div>
+            <div>
+              <p className="text-white/50 text-xs uppercase tracking-widest">Filtro autónomo</p>
+              <h2 className="text-xl font-bold text-white">Solo canales de paga</h2>
+              <p className="text-white/40 text-sm mt-0.5">
+                {filteredOut.toLocaleString()} canales de TV abierta o sin clasificar se descartan
+                automáticamente en cada corrida del pipeline.
+              </p>
+            </div>
+          </div>
+          <div className="text-right">
+            <p className="text-5xl font-bold text-brand leading-none">{premium.toLocaleString()}</p>
+            <p className="text-white/50 text-xs uppercase tracking-wide mt-1">canales premium</p>
+          </div>
+        </div>
+
+        {/* Composition bar */}
+        <div className="mt-6">
+          <div className="flex h-3 w-full overflow-hidden rounded-full bg-white/5">
+            {composition.map((c) => (
+              <div
+                key={c.label}
+                style={{ width: `${pct(c.value)}%`, backgroundColor: c.color }}
+                title={`${c.label}: ${c.value.toLocaleString()}`}
+              />
+            ))}
+          </div>
+          <div className="mt-3 flex flex-wrap gap-x-6 gap-y-1">
+            {composition.map((c) => (
+              <div key={c.label} className="flex items-center gap-2 text-xs">
+                <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: c.color }} />
+                <span className="text-white/70">{c.label}</span>
+                <span className="text-white/40">{c.value.toLocaleString()} ({pct(c.value).toFixed(0)}%)</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-        <StatCard label="Total canales"    value={stats.totalChannels}   icon={Tv}       color="#E50000" />
-        <StatCard label="En línea"         value={stats.onlineChannels}  icon={Wifi}     color="#00C851" />
-        <StatCard label="Sin señal"        value={stats.offlineChannels} icon={WifiOff}  color="#FF4444" />
-        <StatCard label="Países"           value={stats.totalCountries}  icon={Globe}    color="#3498DB" />
-        <StatCard label="Categorías"       value={stats.totalCategories} icon={FolderOpen} color="#9B59B6" />
-        <StatCard label="Disponibilidad"   value={`${uptimePct}%`}       icon={Clock}    color="#F39C12" />
+        <StatCard label="Canales de paga" value={premium}              icon={Crown}      color="#E50914" />
+        <StatCard label="En línea"        value={stats.onlineChannels}  icon={Wifi}       color="#00C851" />
+        <StatCard label="Sin señal"       value={stats.offlineChannels} icon={WifiOff}    color="#FF4444" />
+        <StatCard label="Descartados"     value={filteredOut}           icon={Filter}     color="#3498DB" />
+        <StatCard label="Países"          value={stats.totalCountries}  icon={Globe}      color="#8E44AD" />
+        <StatCard label="Disponibilidad"  value={`${uptimePct}%`}       icon={Clock}      color="#F39C12" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -58,6 +116,8 @@ export default function Dashboard() {
           <dl className="space-y-3">
             {[
               ['Versión pipeline', data.pipelineVersion],
+              ['Total evaluados', evaluated.toLocaleString()],
+              ['Categorías activas', String(stats.totalCategories)],
               ['Generado', new Date(data.generatedAt).toLocaleString('es-MX')],
               ['Última validación', stats.lastValidationRun
                 ? new Date(stats.lastValidationRun).toLocaleString('es-MX')

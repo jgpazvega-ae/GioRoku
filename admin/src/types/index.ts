@@ -84,6 +84,9 @@ export interface PipelineStats {
   onlineChannels: number
   offlineChannels: number
   disabledChannels?: number
+  premiumChannels?: number
+  filteredFreeChannels?: number
+  filteredUnknownChannels?: number
   totalSources?: number
   totalCountries: number
   totalCategories: number

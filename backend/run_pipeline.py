@@ -21,6 +21,7 @@ from services.aggregator import Aggregator
 from services.validator import StreamValidator
 from services.deduplicator import Deduplicator
 from services.country_detector import CountryDetector
+from services.premium_classifier import PremiumClassifier
 from services.logo_resolver import LogoResolver
 from services.epg_manager import EPGManager
 from api.generator import APIGenerator
@@ -61,6 +62,7 @@ async def _run(stages: list[str], country: str | None, dry_run: bool):
         console.rule("3 — Classify")
         n = CountryDetector(base).classify_all()
         console.print(f"[green]{n} channels classified[/green]")
+        PremiumClassifier(base).run()
 
     if "validate" in stages:
         console.rule("4 — Validate")

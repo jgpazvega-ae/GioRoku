@@ -8,8 +8,10 @@
     <Rectangle id="bg" width="1920" height="1080" color="#0D0D0D" />
 
     <!-- ===== Header / Nav bar ===== -->
-    <Rectangle id="headerBar" width="1920" height="96" color="#161616" />
-    <Label id="brand" text="GioRoku" font="font:LargeBoldSystemFont" color="#E50000" translation="[60, 24]" />
+    <Rectangle id="headerBar" width="1920" height="96" color="#141414" />
+    <Rectangle id="headerAccent" width="1920" height="3" color="#E50914" translation="[0, 96]" />
+    <Label id="brand" text="GioRoku" font="font:LargeBoldSystemFont" color="#E50914" translation="[60, 18]" />
+    <Label id="brandSub" text="CANALES DE PAGA" font="font:SmallestSystemFont" color="#6E6E6E" translation="[62, 62]" />
 
     <Label id="tab0" text="Inicio"     font="font:MediumBoldSystemFont" color="#FFFFFF" translation="[340, 34]" />
     <Label id="tab1" text="Live TV"    font="font:MediumSystemFont"     color="#A0A0A0" translation="[500, 34]" />
@@ -22,13 +24,21 @@
     <Label id="status" text="Cargando…" font="font:SmallSystemFont" color="#808080"
            horizAlign="right" width="1780" translation="[80, 40]" />
 
-    <!-- ===== VIEW: Inicio ===== -->
-    <Group id="viewHome" translation="[0, 128]" visible="true">
-      <Label id="homeHint" text="Destacados" font="font:MediumBoldSystemFont" color="#FFFFFF" translation="[60, 0]" />
-      <PosterGrid id="homeGrid" translation="[60, 44]"
-        basePosterSize="[260, 146]" caption1NumLines="1" caption2NumLines="1"
-        numColumns="6" numRows="4" itemSpacing="[20, 30]"
-        drawFocusFeedback="true" focusFootprintBlendColor="#E50000" />
+    <!-- ===== VIEW: Inicio (filas por categoría) ===== -->
+    <Group id="viewHome" translation="[0, 118]" visible="true">
+      <RowList id="homeRows" translation="[60, 6]"
+        numRows="3"
+        rowItemSize="[[268, 188]]"
+        rowHeights="[224]"
+        rowSpacings="[8]"
+        rowItemSpacing="[[22, 0]]"
+        itemSize="[1800, 232]"
+        showRowLabel="[true]"
+        rowLabelOffset="[[4, 0]]"
+        rowLabelColor="0xFFFFFFFF"
+        focusBitmapBlendColor="#E50914"
+        vertFocusAnimationStyle="floatingFocus"
+        drawFocusFeedback="true" />
     </Group>
 
     <!-- ===== VIEW: Live TV ===== -->

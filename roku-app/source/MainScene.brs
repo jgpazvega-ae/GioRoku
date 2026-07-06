@@ -26,7 +26,7 @@ sub init()
         settings: m.top.findNode("viewSettings")
     }
 
-    m.homeGrid   = m.top.findNode("homeGrid")
+    m.homeRows   = m.top.findNode("homeRows")
     m.liveGrid   = m.top.findNode("liveGrid")
     m.favGrid    = m.top.findNode("favGrid")
     m.favEmpty   = m.top.findNode("favEmpty")
@@ -53,7 +53,7 @@ sub init()
 
     ' State
     m.channels = []
-    m.homeList = []
+    m.homeRows2D = []
     m.liveList = []
     m.favList = []
     m.searchList = []
@@ -61,12 +61,12 @@ sub init()
     m.mode = "nav"
     m.searchFocus = "kbd"
     m.ctxChannel = invalid
-    m.activeGrid = m.homeGrid
+    m.activeGrid = invalid
     m.countries = ["ALL", "MX", "AR", "CO", "CL", "PE", "UY", "VE", "EC", "BO"]
     m.countryIdx = 0
 
     ' Observers
-    m.homeGrid.observeField("itemSelected", "_onHomeSelected")
+    m.homeRows.observeField("rowItemSelected", "_onHomeSelected")
     m.liveGrid.observeField("itemSelected", "_onLiveSelected")
     m.favGrid.observeField("itemSelected", "_onFavSelected")
     m.searchGrid.observeField("itemSelected", "_onSearchSelected")
@@ -122,7 +122,7 @@ sub _load()
     m.status.text = list.count().toStr() + " canales"
 
     if list.count() = 0 then
-        m.message.text = "Aún no hay canales disponibles." + chr(10) + chr(10) + "Importa una lista M3U desde la herramienta web para llenar tu guía."
+        m.message.text = "Aún no hay canales de paga disponibles." + chr(10) + chr(10) + "El pipeline publica solo canales premium; vuelve más tarde."
         m.message.visible = true
     else
         m.message.visible = false
@@ -136,13 +136,92 @@ end sub
 ' ================= VIEW POPULATION =================
 
 sub _populateHome()
+    ' Build a "Destacados" hero row plus one row per category, in a fixed
+    ' preferred order so the premium categories lead.
+    order = ["sports", "movies", "series", "entertainment", "kids", "documentary", "music", "news"]
+    labels = {
+        sports: "Deportes", movies: "Películas", series: "Series",
+        entertainment: "Entretenimiento", kids: "Infantil",
+        documentary: "Documentales", music: "Música", news: "Noticias"
+    }
+
+    buckets = {}
     featured = []
     for each ch in m.channels
         if _bool(ch, "isFeatured") then featured.push(ch)
+        cat = _str(ch, "category")
+        if cat = "" then cat = "entertainment"
+        if buckets[cat] = invalid then buckets[cat] = []
+        buckets[cat].push(ch)
     end for
-    if featured.count() = 0 then featured = m.channels
-    m.homeList = featured
-    m.homeGrid.content = _buildPosterContent(featured)
+
+    rows = []          ' [{ title, items }]
+    if featured.count() > 0 then
+        rows.push({ title: "★ Destacados", items: featured })
+    end if
+    for each key in order
+        if buckets[key] <> invalid and buckets[key].count() > 0 then
+            title = labels[key]
+            if title = invalid then title = key
+            rows.push({ title: title, items: buckets[key] })
+            buckets.delete(key)
+        end if
+    end for
+    ' Any remaining categories not in the preferred order.
+    for each key in buckets
+        if buckets[key].count() > 0 then
+            title = labels[key]
+            if title = invalid then title = _cap(key)
+            rows.push({ title: title, items: buckets[key] })
+        end if
+    end for
+
+    m.homeRows2D = []
+    content = createObject("roSGNode", "ContentNode")
+    for each row in rows
+        rowNode = content.createChild("ContentNode")
+        rowNode.title = row.title
+        for each ch in row.items
+            _addPosterItem(rowNode, ch)
+        end for
+        m.homeRows2D.push(row.items)
+    end for
+    m.homeRows.content = content
+end sub
+
+' Badge-rich caption line for a channel: quality + PAGA + country · category.
+function _captionMeta(ch as object) as string
+    parts = []
+    q = _str(ch, "quality")
+    if q <> "" and q <> "SD" then parts.push(q)
+    if _str(ch, "tier") = "premium" then parts.push("PAGA")
+    place = _str(ch, "countryLabel")
+    cat = _str(ch, "categoryLabel")
+    tail = place
+    if cat <> "" then
+        if tail <> "" then tail = tail + " · "
+        tail = tail + cat
+    end if
+    meta = ""
+    for each p in parts
+        if meta <> "" then meta = meta + "  "
+        meta = meta + p
+    end for
+    if tail <> "" then
+        if meta <> "" then meta = meta + "   "
+        meta = meta + tail
+    end if
+    return meta
+end function
+
+sub _addPosterItem(parent as object, ch as object)
+    item = parent.createChild("ContentNode")
+    item.title = _str(ch, "name")
+    item.shortDescriptionLine1 = _str(ch, "name")
+    item.shortDescriptionLine2 = _captionMeta(ch)
+    logo = _str(ch, "logo")
+    item.hdPosterUrl = logo
+    item.hdGridPosterUrl = logo
 end sub
 
 sub _populateLive()
@@ -192,17 +271,7 @@ end sub
 function _buildPosterContent(list as object) as object
     content = createObject("roSGNode", "ContentNode")
     for each ch in list
-        item = content.createChild("ContentNode")
-        item.title = _str(ch, "name")
-        item.shortDescriptionLine1 = _str(ch, "name")
-        meta = _str(ch, "countryLabel")
-        cat = _str(ch, "categoryLabel")
-        if cat <> "" then
-            if meta <> "" then meta = meta + " · "
-            meta = meta + cat
-        end if
-        item.shortDescriptionLine2 = meta
-        item.hdPosterUrl = _str(ch, "logo")
+        _addPosterItem(content, ch)
     end for
     return content
 end function
@@ -242,9 +311,9 @@ end sub
 
 sub _enterView()
     if m.tab = 0 then
-        m.activeGrid = m.homeGrid
+        m.activeGrid = invalid
         m.mode = "view"
-        m.homeGrid.setFocus(true)
+        m.homeRows.setFocus(true)
     else if m.tab = 1 then
         m.activeGrid = m.liveGrid
         m.mode = "view"
@@ -274,8 +343,26 @@ end sub
 ' ================= SELECTION HANDLERS =================
 
 sub _onHomeSelected()
-    _chooseFromList(m.homeList, m.homeGrid.itemSelected)
+    sel = m.homeRows.rowItemSelected   ' [rowIndex, colIndex]
+    if sel = invalid or sel.count() < 2 then return
+    r = sel[0]
+    c = sel[1]
+    if r < 0 or r >= m.homeRows2D.count() then return
+    row = m.homeRows2D[r]
+    if c < 0 or c >= row.count() then return
+    _play(row[c])
 end sub
+
+function _homeFocusedChannel() as dynamic
+    sel = m.homeRows.rowItemFocused
+    if sel = invalid or sel.count() < 2 then return invalid
+    r = sel[0]
+    c = sel[1]
+    if r < 0 or r >= m.homeRows2D.count() then return invalid
+    row = m.homeRows2D[r]
+    if c < 0 or c >= row.count() then return invalid
+    return row[c]
+end function
 sub _onLiveSelected()
     _chooseFromList(m.liveList, m.liveGrid.itemSelected)
 end sub
@@ -337,8 +424,17 @@ sub _stopPlayer()
     m.viewPlayer.visible = false
     m.playerMsg.visible = false
     m.mode = "view"
-    if m.activeGrid <> invalid then
+    _focusActiveView()
+end sub
+
+' Restore focus to whatever view the current tab owns.
+sub _focusActiveView()
+    if m.tab = 0 then
+        m.homeRows.setFocus(true)
+    else if m.activeGrid <> invalid then
         m.activeGrid.setFocus(true)
+    else if m.tab = 2 then
+        m.guideList.setFocus(true)
     else
         m.top.setFocus(true)
         m.mode = "nav"
@@ -398,7 +494,7 @@ sub _closeContext()
     m.ctxBg.visible = false
     m.ctxMenu.visible = false
     m.mode = "view"
-    if m.activeGrid <> invalid then m.activeGrid.setFocus(true)
+    _focusActiveView()
 end sub
 
 sub _ctxActivate()
@@ -476,7 +572,7 @@ sub _onSettingsFocused()
     else if idx = 3 then
         m.settingsInfo.text = "Limpiar datos guardados" + chr(10) + chr(10) + "Pulsa OK para borrar favoritos y canales recientes."
     else if idx = 4 then
-        m.settingsInfo.text = "GioRoku v1.0" + chr(10) + "Tu televisión latina en Roku." + chr(10) + chr(10) + "Datos: GitHub Pages API" + chr(10) + "Los streams provienen de fuentes públicas de terceros."
+        m.settingsInfo.text = "GioRoku v1.1" + chr(10) + "Solo canales de paga · audio en español latino." + chr(10) + chr(10) + "Datos: GitHub Pages API" + chr(10) + "Los streams provienen de fuentes públicas de terceros."
     end if
 end sub
 
@@ -578,7 +674,9 @@ sub _openContextForActiveGrid()
     list = invalid
     grid = invalid
     if m.tab = 0 then
-        list = m.homeList : grid = m.homeGrid
+        ch = _homeFocusedChannel()
+        if ch <> invalid then _openContext(ch)
+        return
     else if m.tab = 1 then
         list = m.liveList : grid = m.liveGrid
     else if m.tab = 3 then
@@ -718,4 +816,9 @@ end function
 function iif(cond as boolean, a as dynamic, b as dynamic) as dynamic
     if cond then return a
     return b
+end function
+
+function _cap(s as string) as string
+    if s = "" then return s
+    return ucase(left(s, 1)) + mid(s, 2)
 end function

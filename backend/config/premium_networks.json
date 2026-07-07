@@ -8,7 +8,9 @@
       "claro sports", "afizzionados", "bein", "dazn", "win sports", "gol tv", "gol caracol",
       "directv sports", "tyc sports", "espn knockout", "espn play", "nba tv", "nfl network",
       "golf channel", "tennis channel", "garena", "combate", "box azteca deportes",
-      "espn mexico", "fox sports premium", "tigo sports", "star+ sports"
+      "espn mexico", "fox sports premium", "tigo sports", "star+ sports",
+      "movistar deportes", "dsports", "d sports", "directv sports 2", "gol classics",
+      "tycsports", "espn premium argentina", "liga 1 max", "sky sports mexico"
     ],
     "movies": [
       "hbo", "hbo 2", "hbo plus", "hbo family", "hbo signature", "hbo mundi", "hbo pop", "hbo xtreme", "hbo max",
@@ -17,18 +19,21 @@
       "cinecanal", "de pelicula", "de pelicula clasico", "golden", "golden edge", "golden plus", "golden premier",
       "fx", "fxm", "fxmovies", "axn", "sony movies", "amc", "paramount network", "paramount plus",
       "cinelatino", "movie city", "the film zone", "isat", "i-sat", "el gourmet", "europa europa",
-      "tcm", "turner classic", "multipremier", "cinema dinamita"
+      "tcm", "turner classic", "multipremier", "cinema dinamita",
+      "cine sony", "starz", "movistar plus", "movistar cine", "movistar accion", "movistar drama",
+      "canal hollywood", "film&arts", "film and arts", "sundance", "more than movies", "runtime"
     ],
     "series_entertainment": [
       "sony channel", "universal tv", "usa network", "comedy central", "star life",
       "lifetime", "fox life", "fox channel", "distrito comedia", "tlnovelas",
       "canal sony", "a3series", "atreseries", "cosmopolitan", "glitz", "trutv", "syfy",
-      "wobi", "bloomberg", "cnn en espanol", "cnn internacional", "fox news"
+      "wobi", "bloomberg", "cnn en espanol", "cnn internacional", "fox news",
+      "e! latin america", "e! entertainment", "sony novelas", "sony canal novelas", "warner channel"
     ],
     "kids": [
       "cartoon network", "cartoonito", "boomerang", "disney channel", "disney junior", "disney xd", "disney jr",
-      "nickelodeon", "nick jr", "discovery kids", "baby tv", "babytv", "pakapaka", "tooncast",
-      "zoomoo", "nat geo kids"
+      "nickelodeon", "nick jr", "nick en espanol", "nicktoons", "discovery kids", "baby tv", "babytv",
+      "pakapaka", "tooncast", "zoomoo", "nat geo kids"
     ],
     "documentary": [
       "discovery", "discovery channel", "discovery science", "discovery theater", "discovery turbo",

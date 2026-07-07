@@ -73,6 +73,8 @@ class PremiumClassifier:
         # Longer needles first so "espn deportes" wins over "espn".
         self._premium.sort(key=lambda x: len(x[0]), reverse=True)
         self._free = [_n(b) for b in cfg.get("free_to_air_brands", []) if _n(b)]
+        self.latino_only: bool = bool(cfg.get("latino_only", True))
+        self._non_latino = [_n(m) for m in cfg.get("non_latino_markers", []) if _n(m)]
         self._by_id, self._by_name = self._load_registry(base_dir)
         self._ensure_column()
 
@@ -138,6 +140,24 @@ class PremiumClassifier:
         pat = r"(?<![a-z0-9])" + re.escape(needle) + r"(?![a-z0-9])"
         return re.search(pat, hay) is not None
 
+    def _is_latino(self, tvg_id: str | None, hay: str) -> bool:
+        """False for Spain (Castilian) or non-Spanish feeds.
+
+        iptv-org encodes the feed variant in the tvg-id as name.cc@Region;
+        a region of ES marks the España feed (e.g. Rugrats.de@ES), while
+        @LatAm/@Panregional/@Mexico/@South… mark Latin-American feeds. Feeds
+        without a tvg-id fall back to explicit non-latino name markers."""
+        tid = (tvg_id or "").lower()
+        if "@" in tid:
+            region = tid.split("@", 1)[1]
+            # Spain (Castilian), Brazil and Portugal feeds are not español latino.
+            if region in ("es", "br", "pt", "spain", "brazil", "brasil", "portugal"):
+                return False
+        for marker in self._non_latino:
+            if marker in hay:
+                return False
+        return True
+
     def classify(self, name: str, group: str | None, tvg_id: str | None = None) -> tuple[str, str | None]:
         """Return (tier, implied_category).
 
@@ -161,6 +181,8 @@ class PremiumClassifier:
                 return "free", None
         for needle, bucket in self._premium:
             if self._matches(needle, hay):
+                if self.latino_only and not self._is_latino(tvg_id, hay):
+                    return "nonlatino", None
                 return "premium", BUCKET_CATEGORY.get(bucket) or reg_category
         return "unknown", reg_category
 
@@ -169,7 +191,7 @@ class PremiumClassifier:
             conn.row_factory = sqlite3.Row
             rows = conn.execute("SELECT id,name,category,epg_id FROM channels").fetchall()
 
-            counts = {"premium": 0, "free": 0, "unknown": 0}
+            counts = {"premium": 0, "free": 0, "unknown": 0, "nonlatino": 0}
             for ch in rows:
                 raw = conn.execute(
                     "SELECT group_title FROM raw_channels WHERE stream_url=("
@@ -178,7 +200,7 @@ class PremiumClassifier:
                 ).fetchone()
                 group = raw["group_title"] if raw else None
                 tier, implied = self.classify(ch["name"], group, ch["epg_id"])
-                counts[tier] += 1
+                counts[tier] = counts.get(tier, 0) + 1
 
                 new_cat = implied or ch["category"]
                 if self.keep_only_premium and tier != "premium":
@@ -195,6 +217,7 @@ class PremiumClassifier:
         mode = "keep-only-premium" if self.keep_only_premium else "tag-only"
         console.print(
             f"[green]Premium filter ({mode}): "
-            f"{counts['premium']} premium · {counts['free']} free · {counts['unknown']} unknown[/green]"
+            f"{counts['premium']} premium · {counts.get('nonlatino', 0)} no-latino · "
+            f"{counts['free']} free · {counts['unknown']} unknown[/green]"
         )
         return counts

@@ -1,6 +1,14 @@
 {
   "_comment": "Autonomous pay-TV (canales de paga) classifier data. A channel is kept as 'premium' when its name matches a premium brand and does NOT match a free-to-air (TV abierta) brand. Matching is accent-insensitive substring on the normalized channel name. Edit freely; the pipeline reloads this on every run.",
   "keep_only_premium": true,
+  "latino_only": true,
+  "_latino_comment": "When latino_only is on, premium channels that are Spain (Castilian) or non-Spanish feeds are excluded. The strongest signal is the iptv-org tvg-id region suffix (…@ES = España). non_latino_markers catches feeds without a tvg-id by name.",
+  "non_latino_markers": [
+    "bloomberg us", "bloomberg europe", "bloomberg quicktake", "quicktake",
+    "livenow", "live now from fox", "version original", "versión original",
+    "espana", "españa", "(spain)", "spain hd", "castellano",
+    "brasil", "brazil", "portugues", "portugués", "(pt)", "en portugues"
+  ],
   "premium_brands": {
     "sports": [
       "espn", "espn2", "espn3", "espn4", "espn extra", "espn premium", "espn deportes",

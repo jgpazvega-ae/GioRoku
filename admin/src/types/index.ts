@@ -87,6 +87,7 @@ export interface PipelineStats {
   premiumChannels?: number
   filteredFreeChannels?: number
   filteredUnknownChannels?: number
+  filteredNonLatinoChannels?: number
   totalSources?: number
   totalCountries: number
   totalCategories: number

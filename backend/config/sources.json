@@ -35,6 +35,23 @@
     "notes": "All channels broadcasting in Spanish from any country (pan-Latin: MX, AR, CO, CL, PE, VE, etc.). Complements the MX country list with international Spanish-language cable channels."
   },
   {
+    "id": "iptv_org_latam",
+    "name": "iptv-org · Región LatAm",
+    "type": "m3u",
+    "url": "https://iptv-org.github.io/iptv/regions/latam.m3u",
+    "priority": 3,
+    "is_enabled": true,
+    "refresh_interval_hours": 24,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": true,
+      "headers": {}
+    },
+    "notes": "Whole Latin-American region (~2.4k channels). Overlaps the Spanish list but supplies alternate stream URLs (used as backups) and extra premium feed variants. Brazil/Portugal feeds are dropped downstream by the Spanish-latino gate."
+  },
+  {
     "id": "charlieii_iptv_mexico",
     "name": "CharlieII · IPTV México",
     "type": "m3u",

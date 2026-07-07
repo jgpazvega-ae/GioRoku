@@ -22,13 +22,15 @@ export default function Dashboard() {
   const premium = stats.premiumChannels ?? stats.totalChannels
   const free = stats.filteredFreeChannels ?? 0
   const unknown = stats.filteredUnknownChannels ?? 0
-  const evaluated = premium + free + unknown
-  const filteredOut = free + unknown
+  const nonLatino = stats.filteredNonLatinoChannels ?? 0
+  const evaluated = premium + free + unknown + nonLatino
+  const filteredOut = free + unknown + nonLatino
   const pct = (n: number) => (evaluated > 0 ? (n / evaluated) * 100 : 0)
 
   const composition = [
-    { label: 'De paga (publicados)', value: premium, color: '#E50914' },
+    { label: 'De paga · español latino (publicados)', value: premium, color: '#E50914' },
     { label: 'TV abierta (excluidos)', value: free, color: '#3498DB' },
+    { label: 'No latino: España/inglés (excluidos)', value: nonLatino, color: '#F39C12' },
     { label: 'Sin clasificar (excluidos)', value: unknown, color: '#5A5A5A' },
   ]
 
@@ -48,10 +50,10 @@ export default function Dashboard() {
             </div>
             <div>
               <p className="text-white/50 text-xs uppercase tracking-widest">Filtro autónomo</p>
-              <h2 className="text-xl font-bold text-white">Solo canales de paga</h2>
+              <h2 className="text-xl font-bold text-white">Solo canales de paga · español latino</h2>
               <p className="text-white/40 text-sm mt-0.5">
-                {filteredOut.toLocaleString()} canales de TV abierta o sin clasificar se descartan
-                automáticamente en cada corrida del pipeline.
+                {filteredOut.toLocaleString()} canales de TV abierta, de España/inglés o sin clasificar
+                se descartan automáticamente en cada corrida del pipeline.
               </p>
             </div>
           </div>

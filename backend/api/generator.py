@@ -85,6 +85,7 @@ class APIGenerator:
                 "premiumChannels": tiers.get("premium", 0),
                 "filteredFreeChannels": tiers.get("free", 0),
                 "filteredUnknownChannels": tiers.get("unknown", 0),
+                "filteredNonLatinoChannels": tiers.get("nonlatino", 0),
                 "totalCountries": len(country_map),
                 "totalCategories": len(cat_map),
                 "lastValidationRun": now,

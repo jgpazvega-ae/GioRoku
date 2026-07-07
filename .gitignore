@@ -9,8 +9,9 @@ venv/
 dist/
 build/
 
-# SQLite database (recreated by pipeline on each run)
+# SQLite database + cached registry (recreated by pipeline on each run)
 backend/db/iptv.db
+backend/db/iptv_org_channels.json
 
 # Node
 node_modules/

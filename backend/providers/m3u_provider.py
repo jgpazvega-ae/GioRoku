@@ -7,8 +7,23 @@ from models.channel import RawChannel
 from models.source import Source
 from .base import BaseProvider
 
-EXTINF_RE = re.compile(r'#EXTINF:-?\d+(?:\s+(?P<attrs>[^,]*))?,(?P<name>.*)')
 ATTR_RE = re.compile(r'(?P<key>[\w-]+)="(?P<value>[^"]*)"')
+
+
+def _split_extinf(line: str) -> tuple[str, str]:
+    """Split an #EXTINF line into (attrs_blob, display_name).
+
+    The name is whatever follows the first comma that is OUTSIDE quotes — a
+    naive split on the first comma breaks on attributes whose value contains
+    one, e.g. user-agent="...AppleWebKit (KHTML, like Gecko)...".
+    """
+    in_quote = False
+    for i, ch in enumerate(line):
+        if ch == '"':
+            in_quote = not in_quote
+        elif ch == "," and not in_quote:
+            return line[:i], line[i + 1:].strip()
+    return line, ""
 
 
 class M3UProvider(BaseProvider):
@@ -62,11 +77,9 @@ class M3UProvider(BaseProvider):
             line = line.strip()
             if line.startswith("#EXTINF:"):
                 attrs, name = {}, ""
-                m = EXTINF_RE.match(line)
-                if m:
-                    name = m.group("name").strip()
-                    for am in ATTR_RE.finditer(m.group("attrs") or ""):
-                        attrs[am.group("key").lower()] = am.group("value")
+                attrs_blob, name = _split_extinf(line)
+                for am in ATTR_RE.finditer(attrs_blob):
+                    attrs[am.group("key").lower()] = am.group("value")
             elif line and not line.startswith("#"):
                 try:
                     channels.append(RawChannel(

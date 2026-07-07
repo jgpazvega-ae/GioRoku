@@ -16,7 +16,9 @@ from __future__ import annotations
 import json
 import re
 import sqlite3
+import time
 import unicodedata
+import urllib.request
 from pathlib import Path
 from rich.console import Console
 
@@ -30,6 +32,22 @@ BUCKET_CATEGORY = {
     "kids": "kids",
     "documentary": "documentary",
     "music": "music",
+}
+
+# iptv-org channel registry (id → network/owners/categories). Cross-referencing
+# by tvg-id lets us recognise pay-TV feeds whose stream name is generic but
+# whose canonical network is a premium brand.
+REGISTRY_URL = "https://iptv-org.github.io/api/channels.json"
+REGISTRY_MAX_AGE_S = 7 * 24 * 3600
+
+# iptv-org category slug → our app category.
+IPTVORG_CATEGORY = {
+    "sports": "sports", "movies": "movies", "series": "entertainment",
+    "comedy": "entertainment", "entertainment": "entertainment",
+    "kids": "kids", "animation": "kids", "family": "kids",
+    "documentary": "documentary", "science": "documentary", "culture": "documentary",
+    "music": "music", "news": "news", "business": "news",
+    "religious": "religious", "shop": "shopping",
 }
 
 
@@ -55,7 +73,52 @@ class PremiumClassifier:
         # Longer needles first so "espn deportes" wins over "espn".
         self._premium.sort(key=lambda x: len(x[0]), reverse=True)
         self._free = [_n(b) for b in cfg.get("free_to_air_brands", []) if _n(b)]
+        self._by_id, self._by_name = self._load_registry(base_dir)
         self._ensure_column()
+
+    def _load_registry(self, base_dir: Path) -> tuple[dict, dict]:
+        """Return (id→record, normname→record) from the iptv-org channel DB.
+
+        Cached on disk; re-downloaded when missing or older than a week. On any
+        network failure we fall back to the stale cache, or to empty maps (the
+        classifier still works on brand names alone)."""
+        cache = base_dir / "db" / "iptv_org_channels.json"
+        cache.parent.mkdir(parents=True, exist_ok=True)
+        fresh = cache.exists() and (time.time() - cache.stat().st_mtime) < REGISTRY_MAX_AGE_S
+        if not fresh:
+            try:
+                req = urllib.request.Request(REGISTRY_URL, headers={"User-Agent": "GioRoku/1.0"})
+                with urllib.request.urlopen(req, timeout=30) as r:
+                    cache.write_bytes(r.read())
+            except Exception as e:
+                console.print(f"[yellow]Registry download failed ({e}); using cache if present[/yellow]")
+        if not cache.exists():
+            return {}, {}
+        try:
+            data = json.loads(cache.read_text(encoding="utf-8"))
+        except Exception:
+            return {}, {}
+        by_id, by_name = {}, {}
+        for c in data:
+            rec = {
+                "network": c.get("network") or "",
+                "owners": c.get("owners") or [],
+                "categories": c.get("categories") or [],
+                "name": c.get("name") or "",
+                "alt_names": c.get("alt_names") or [],
+            }
+            if c.get("id"):
+                by_id[c["id"].lower()] = rec
+            nm = _n(rec["name"])
+            if nm and nm not in by_name:
+                by_name[nm] = rec
+        console.print(f"Registry: {len(by_id)} channels indexed")
+        return by_id, by_name
+
+    def _registry_lookup(self, tvg_id: str | None, name: str) -> dict | None:
+        if tvg_id and tvg_id.lower() in self._by_id:
+            return self._by_id[tvg_id.lower()]
+        return self._by_name.get(_n(name))
 
     def _load(self) -> dict:
         path = self.config_dir / "premium_networks.json"
@@ -75,21 +138,36 @@ class PremiumClassifier:
         pat = r"(?<![a-z0-9])" + re.escape(needle) + r"(?![a-z0-9])"
         return re.search(pat, hay) is not None
 
-    def classify(self, name: str, group: str | None) -> tuple[str, str | None]:
-        """Return (tier, implied_category)."""
+    def classify(self, name: str, group: str | None, tvg_id: str | None = None) -> tuple[str, str | None]:
+        """Return (tier, implied_category).
+
+        The haystack is enriched with the channel's canonical name, network,
+        owners and alt-names from the iptv-org registry (looked up by tvg-id,
+        then by name), so a generically-named feed of a premium network is
+        still recognised. The registry also supplies a fallback category."""
+        rec = self._registry_lookup(tvg_id, name)
         hay = _n(name) + " " + _n(group or "")
+        reg_category = None
+        if rec:
+            extra = [rec["name"], rec["network"]] + rec["owners"] + rec["alt_names"]
+            hay = hay + " " + " ".join(_n(x) for x in extra if x)
+            for cat in rec["categories"]:
+                if cat in IPTVORG_CATEGORY:
+                    reg_category = IPTVORG_CATEGORY[cat]
+                    break
+
         for needle in self._free:
             if self._matches(needle, hay):
                 return "free", None
         for needle, bucket in self._premium:
             if self._matches(needle, hay):
-                return "premium", BUCKET_CATEGORY.get(bucket)
-        return "unknown", None
+                return "premium", BUCKET_CATEGORY.get(bucket) or reg_category
+        return "unknown", reg_category
 
     def run(self) -> dict:
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
-            rows = conn.execute("SELECT id,name,category FROM channels").fetchall()
+            rows = conn.execute("SELECT id,name,category,epg_id FROM channels").fetchall()
 
             counts = {"premium": 0, "free": 0, "unknown": 0}
             for ch in rows:
@@ -99,7 +177,7 @@ class PremiumClassifier:
                     (ch["id"],),
                 ).fetchone()
                 group = raw["group_title"] if raw else None
-                tier, implied = self.classify(ch["name"], group)
+                tier, implied = self.classify(ch["name"], group, ch["epg_id"])
                 counts[tier] += 1
 
                 new_cat = implied or ch["category"]

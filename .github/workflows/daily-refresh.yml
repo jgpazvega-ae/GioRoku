@@ -31,6 +31,13 @@ jobs:
         run: pip install -r backend/requirements.txt
 
       - name: Stage — fetch
+        env:
+          # Optional: connect a pay-TV subscription the operator is LICENSED to
+          # use. Set these as repository secrets. If unset, the Xtream source is
+          # skipped automatically. Never hard-code credentials here.
+          GIOROKU_XTREAM_URL: ${{ secrets.GIOROKU_XTREAM_URL }}
+          GIOROKU_XTREAM_USER: ${{ secrets.GIOROKU_XTREAM_USER }}
+          GIOROKU_XTREAM_PASS: ${{ secrets.GIOROKU_XTREAM_PASS }}
         run: python backend/run_pipeline.py --stage fetch
 
       - name: Save DB artifact

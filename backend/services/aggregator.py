@@ -1,6 +1,8 @@
 from __future__ import annotations
 import asyncio
 import json
+import os
+import re
 import sqlite3
 from pathlib import Path
 from rich.console import Console
@@ -9,6 +11,27 @@ from models.source import Source
 from providers import create_provider
 
 console = Console()
+
+_ENV_RE = re.compile(r"\$\{([A-Z0-9_]+)\}")
+
+
+def _expand_env(obj):
+    """Recursively replace ${VAR} placeholders with environment values.
+
+    Lets Xtream (and any) credentials live in GitHub Secrets / env vars instead
+    of the committed sources.json. An unset variable expands to an empty string,
+    which the enabled-source guard below treats as "not configured"."""
+    if isinstance(obj, str):
+        return _ENV_RE.sub(lambda m: os.environ.get(m.group(1), ""), obj)
+    if isinstance(obj, dict):
+        return {k: _expand_env(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_expand_env(v) for v in obj]
+    return obj
+
+
+def _has_unresolved_secret(raw: str) -> bool:
+    return bool(_ENV_RE.search(raw))
 
 CREATE_RAW = """
 CREATE TABLE IF NOT EXISTS raw_channels (
@@ -40,9 +63,22 @@ class Aggregator:
         path = self.config_dir / "sources.json"
         if not path.exists():
             return []
-        with open(path) as f:
-            data = json.load(f)
-        sources = [Source(**s) for s in data if s.get("is_enabled", True)]
+        raw_text = path.read_text(encoding="utf-8")
+        data = json.loads(raw_text)
+        sources: list[Source] = []
+        for s in data:
+            if not s.get("is_enabled", True):
+                continue
+            expanded = _expand_env(s)
+            # A source that still references an unset secret (empty url/creds)
+            # is skipped rather than fetched with blank credentials.
+            if _has_unresolved_secret(json.dumps(s)) and (
+                not expanded.get("url") or (expanded.get("type") == "xtream"
+                and (not expanded.get("username") or not expanded.get("password")))
+            ):
+                console.print(f"[yellow]Skipping '{s.get('id')}' — credentials not set in environment[/yellow]")
+                continue
+            sources.append(Source(**expanded))
         console.print(f"Loaded {len(sources)} source(s)")
         return sources
 

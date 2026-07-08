@@ -136,5 +136,24 @@
       "headers": {}
     },
     "notes": "Original placeholder source. Disabled: endpoint returns no parseable M3U entries."
+  },
+  {
+    "id": "operator_xtream",
+    "name": "Suscripción Xtream del operador (opcional)",
+    "type": "xtream",
+    "url": "${GIOROKU_XTREAM_URL}",
+    "username": "${GIOROKU_XTREAM_USER}",
+    "password": "${GIOROKU_XTREAM_PASS}",
+    "priority": 0,
+    "is_enabled": false,
+    "refresh_interval_hours": 12,
+    "options": {
+      "timeout_seconds": 30,
+      "encoding": "utf-8",
+      "user_agent": "GioRoku/1.0",
+      "verify_ssl": true,
+      "headers": {}
+    },
+    "notes": "LEGAL USE ONLY. Enable this and set GIOROKU_XTREAM_URL/USER/PASS as environment variables or GitHub Secrets to connect a pay-TV subscription you are LICENSED to use (your own legitimate provider that exposes an Xtream API, or a self-hosted server serving content you own/license). Credentials are read from the environment and must NEVER be committed. If the secrets are unset the source is skipped automatically. Do not point this at unauthorized/pirated portals — that is the illegal part, not the protocol."
   }
 ]
